@@ -1,0 +1,58 @@
+// Birthday Celebration – Prisma Schema
+// Models defined per docs/ARCHITECTURE.md Section 8
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------- Enums ----------
+
+enum RegistrationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+// ---------- Models ----------
+
+/// Guest registration for the birthday celebration event.
+model Registration {
+  id           String             @id @default(uuid()) @db.Uuid
+  name         String             @db.VarChar(200)
+  email        String             @db.VarChar(320)
+  guestCount   Int
+  dietaryNotes String?            @db.VarChar(500)
+  status       RegistrationStatus @default(CONFIRMED)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  tokens RegistrationToken[]
+}
+
+/// Capability token for managing a registration via email link.
+/// Only the SHA-256 hash is stored; the raw token is never persisted.
+model RegistrationToken {
+  id             String       @id @default(uuid()) @db.Uuid
+  registrationId String       @db.Uuid
+  tokenHash      String       @unique
+  expiresAt      DateTime
+  isRevoked      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+}
+
+/// Admin user linked to a Supabase Auth identity.
+model AdminUser {
+  id             String   @id @default(uuid()) @db.Uuid
+  supabaseUserId String   @unique
+  email          String   @db.VarChar(320)
+  createdAt      DateTime @default(now())
+}
