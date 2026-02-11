@@ -233,12 +233,12 @@ T-001 (Init Next.js)
 - `prisma/migrations/YYYYMMDD_init/migration.sql` (auto-generated)
 
 **Acceptance criteria:**
-- [ ] `prisma/schema.prisma` contains models: `Registration`, `RegistrationToken`, `AdminUser`
-- [ ] `Registration` model has fields: `id` (UUID), `name`, `email`, `guestCount`, `dietaryNotes`, `status` (enum: CONFIRMED/CANCELLED), `createdAt`, `updatedAt`
-- [ ] `RegistrationToken` model has fields: `id` (UUID), `registrationId` (FK), `tokenHash` (unique, indexed), `expiresAt`, `isRevoked`, `createdAt`
-- [ ] `AdminUser` model has fields: `id` (UUID), `supabaseUserId` (unique), `email`, `createdAt`
-- [ ] `npx prisma validate` passes
-- [ ] `npx prisma generate` succeeds
+- [x] `prisma/schema.prisma` contains models: `Registration`, `RegistrationToken`, `AdminUser`
+- [x] `Registration` model has fields: `id` (UUID), `name`, `email`, `guestCount`, `dietaryNotes`, `status` (enum: CONFIRMED/CANCELLED), `createdAt`, `updatedAt`
+- [x] `RegistrationToken` model has fields: `id` (UUID), `registrationId` (FK), `tokenHash` (unique, indexed), `expiresAt`, `isRevoked`, `createdAt`
+- [x] `AdminUser` model has fields: `id` (UUID), `supabaseUserId` (unique), `email`, `createdAt`
+- [x] `npx prisma validate` passes
+- [x] `npx prisma generate` succeeds
 
 **Non-goals:**
 - Do not create seed data yet (T-043)
