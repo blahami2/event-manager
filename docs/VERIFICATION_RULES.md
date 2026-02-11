@@ -263,7 +263,40 @@ describe('Architecture Boundaries', () => {
 
 ---
 
-# 7. Build Verification
+# 7. Git Safety Verification
+
+## .gitignore requirements
+
+The `.gitignore` at the repo root MUST include at minimum:
+
+```
+.env
+.env.local
+.env*.local
+*.pem
+*.key
+credentials.json
+service-account*.json
+node_modules/
+.next/
+coverage/
+.vercel/
+```
+
+**Verification:** Manually inspect `.gitignore` or run:
+```bash
+for pattern in ".env" ".env.local" "*.pem" "*.key" "node_modules/" ".next/"; do
+  grep -q "$pattern" .gitignore && echo "OK: $pattern" || echo "MISSING: $pattern"
+done
+```
+
+## Secret scanning in CI
+
+The CI pipeline runs [gitleaks](https://github.com/gitleaks/gitleaks-action) on every PR to detect accidentally committed secrets (API keys, tokens, passwords) in the diff and git history.
+
+---
+
+# 8. Build Verification
 
 **Commands that must pass:**
 
@@ -277,7 +310,7 @@ npx vitest run         # All tests pass
 
 ---
 
-# 8. CI Pipeline Definition
+# 9. CI Pipeline Definition
 
 ## GitHub Actions workflow: `.github/workflows/ci.yml`
 
@@ -323,6 +356,11 @@ jobs:
       - name: Architecture checks
         run: npx vitest run tests/architecture/
 
+      - name: Secret scanning
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
       - name: Build
         run: npm run build
         env:
@@ -337,7 +375,7 @@ jobs:
 
 ---
 
-# 9. Done = Deployable
+# 10. Done = Deployable
 
 A ticket is only "done" when ALL of the following are true:
 
@@ -381,7 +419,7 @@ For each feature ticket, the following manual checks apply:
 
 ---
 
-# 10. Pre-Merge Checklist (for Agents)
+# 11. Pre-Merge Checklist (for Agents)
 
 Before marking any ticket as complete, verify:
 
@@ -396,6 +434,8 @@ Before marking any ticket as complete, verify:
 □ No business logic in UI components
 □ No direct Prisma imports outside repositories
 □ .env.example updated if new env vars added
+□ .env.example contains only placeholder values, never real credentials
+□ No .env, .pem, .key, or credential files staged
 □ Error responses follow the standard format
 ```
 
