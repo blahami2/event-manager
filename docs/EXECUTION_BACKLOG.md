@@ -1,0 +1,1433 @@
+# Execution Backlog (Layer B)
+
+> **Purpose**: Atomic, measurable tickets for agentic development.
+> Each ticket is designed to be completed in under 1 hour.
+> Agents MUST read `docs/ARCHITECTURE_RULES.md` before starting any ticket.
+
+---
+
+# Dependency Graph
+
+```
+PHASE 1: Bootstrap
+  T-001 → T-002 → T-038 (CI foundation)
+  T-002 → T-003 → T-039 (Prisma client singleton)
+  T-003 → T-004 → T-005 → T-006
+  T-006 → T-040 (shared types)
+  T-006 + T-003 → T-043 (seed data population)
+
+PHASE 2: Core Infrastructure
+  T-006 → T-007 (error types)
+  T-007 → T-041 (API response utility)
+  T-007 → T-036 (error boundaries) [moved early]
+  T-006 → T-008 (logger)
+  T-006 → T-009 (token utility)
+  T-008 + T-006 → T-010 (rate limiter)
+
+PHASE 3: Data Layer
+  T-039 + T-040 + T-007 → T-011 (registration repository)
+  T-039 + T-040 + T-009 → T-012 (token repository)
+  T-039 + T-040 → T-013 (admin repository)
+
+PHASE 4: Application Layer
+  T-011 + T-012 + T-009 → T-014 (register use case)
+  T-012 + T-011 → T-015 (manage registration use case)
+  T-012 + T-011 → T-016 (resend link use case)
+  T-013 + T-004 → T-017 (admin auth guard)
+  T-013 + T-011 → T-018 (admin actions use case)
+  T-009 → T-042 (CI coverage gates)
+
+PHASE 5: Email
+  T-014 → T-019 (email service)
+  T-019 → T-020 (email templates)
+
+PHASE 6: API Routes
+  T-014 + T-010 + T-041 → T-025 (register API route)
+  T-015 + T-010 + T-041 → T-026 (manage API route)
+  T-016 + T-010 + T-041 → T-027 (resend link API route)
+  T-017 + T-018 + T-041 → T-044 (admin mutation API routes)
+
+PHASE 7: UI – Public Pages
+  T-036 + T-025 + T-019 → T-021 (event landing page)
+  T-036 + T-025 → T-022 (registration form)
+  T-036 + T-026 → T-023 (manage page)
+  T-036 + T-027 → T-024 (resend link page)
+
+PHASE 8: Admin UI
+  T-017 → T-028 (admin layout + auth)
+  T-018 + T-028 → T-029 (admin dashboard)
+  T-044 + T-028 → T-030 (admin registration list)
+  T-018 → T-031 (admin CSV export)
+
+PHASE 9: Security Hardening
+  T-025..T-027 → T-032 (rate limiting integration)
+  T-032 → T-033 (token logging audit)
+  T-033 → T-034 (security headers)
+  T-033 → T-045 (CI security & architecture suites)
+
+PHASE 10: Observability & Polish
+  T-008 → T-035 (health endpoint)
+  T-035 → T-037 (data retention)
+  T-037 → T-046 (README)
+```
+
+**Visual dependency tree:**
+
+```
+T-001 (Init Next.js)
+  └─ T-002 (TypeScript strict, Tailwind, Vitest)
+      ├─ T-038 (CI foundation)
+      └─ T-003 (Prisma + schema)
+          ├─ T-039 (Prisma client singleton)
+          │   ├─ T-011 (Registration repo) ←[+T-040, +T-007]
+          │   ├─ T-012 (Token repo) ←[+T-040, +T-009]
+          │   └─ T-013 (Admin repo) ←[+T-040]
+          ├─ T-043 (Seed data population) ←[+T-006]
+          └─ T-004 (Supabase Auth)
+              └─ T-005 (Resend setup)
+                  └─ T-006 (Env config + folder structure)
+                      ├─ T-040 (Shared types)
+                      ├─ T-007 (Error types)
+                      │   ├─ T-041 (API response utility)
+                      │   └─ T-036 (Error boundaries) [moved early]
+                      ├─ T-008 (Logger)
+                      │   ├─ T-010 (Rate limiter) ←[+T-008]
+                      │   └─ T-035 (Health endpoint)
+                      │       └─ T-037 (Data retention)
+                      │           └─ T-046 (README)
+                      └─ T-009 (Token utility)
+                          └─ T-042 (CI coverage gates)
+
+  T-011 + T-012 + T-009 → T-014 (Register use case)
+    └─ T-019 (Email service)
+        └─ T-020 (Email templates)
+  T-012 + T-011 → T-015 (Manage use case)
+  T-012 + T-011 → T-016 (Resend use case)
+  T-013 + T-004 → T-017 (Admin auth guard)
+  T-013 + T-011 → T-018 (Admin actions)
+
+  T-014 + T-010 + T-041 → T-025 (Register API)
+  T-015 + T-010 + T-041 → T-026 (Manage API)
+  T-016 + T-010 + T-041 → T-027 (Resend API)
+  T-017 + T-018 + T-041 → T-044 (Admin mutation API)
+
+  T-036 + T-025 + T-019 → T-021 (Landing page)
+  T-036 + T-025 → T-022 (Registration form)
+  T-036 + T-026 → T-023 (Manage page)
+  T-036 + T-027 → T-024 (Resend page)
+
+  T-017 → T-028 (Admin layout)
+  T-018 + T-028 → T-029 (Admin dashboard)
+  T-044 + T-028 → T-030 (Admin reg list)
+  T-018 → T-031 (CSV export)
+
+  T-025..T-027 → T-032 (Rate limit integration)
+    └─ T-033 (Token logging audit)
+        ├─ T-034 (Security headers)
+        └─ T-045 (CI security suites)
+```
+
+---
+
+# Phase 1: Project Bootstrap
+
+## T-001: Initialize Next.js Project
+
+**Input:** Empty project directory
+**Output:**
+- `package.json` with Next.js 14+, React 18+, TypeScript 5+
+- `next.config.js` with base configuration
+- `tsconfig.json` (strict mode NOT yet configured – see T-002)
+- `src/app/layout.tsx` with minimal root layout
+- `src/app/page.tsx` with placeholder content
+
+**Files created:**
+- `package.json`
+- `next.config.js`
+- `.gitignore` (via `create-next-app`)
+- `src/app/layout.tsx`
+- `src/app/page.tsx`
+- `src/app/globals.css`
+
+**Acceptance criteria:**
+- [ ] `npm run dev` starts without errors
+- [ ] Navigating to `localhost:3000` shows the placeholder page
+- [ ] No TypeScript compilation errors
+- [ ] `.gitignore` includes: `node_modules/`, `.env.local`, `.next/`, `.vercel/`
+
+**Non-goals:**
+- Do not configure Tailwind yet (T-002)
+- Do not set up testing yet (T-002)
+- Do not create any business logic
+
+---
+
+## T-002: Configure TypeScript Strict Mode, Tailwind, and Testing
+
+**Input:** Next.js project from T-001
+**Output:**
+- `tsconfig.json` updated with strict mode settings
+- Tailwind CSS configured
+- Vitest configured with Testing Library
+- ESLint configured with custom rules
+- `package.json` scripts verified
+
+**Files created/modified:**
+- `tsconfig.json` (modified)
+- `tailwind.config.ts` (created)
+- `vitest.config.ts` (created)
+- `.eslintrc.json` (created)
+- `src/app/globals.css` (modified – add Tailwind directives)
+- `package.json` (modified – verify scripts)
+
+**Acceptance criteria:**
+- [ ] `tsconfig.json` has `"strict": true`, `"noUncheckedIndexedAccess": true`, `"noImplicitReturns": true`
+- [ ] `npx tailwindcss --help` runs without error
+- [ ] `npx vitest run` executes with 0 tests (no failures)
+- [ ] `npm run lint` passes with no errors
+- [ ] `npm run build` succeeds
+- [ ] `package.json` has scripts: `dev`, `build`, `start`, `lint`, `test` (alias for `vitest run`)
+
+**Non-goals:**
+- Do not write any tests yet
+- Do not create components
+- Do not set up CI yet (T-038)
+
+---
+
+## T-038: CI Pipeline – Foundation
+
+**Input:** T-002 (TypeScript, ESLint, Vitest configured)
+**Output:**
+- GitHub Actions workflow that runs on every push/PR
+- Runs: type check, lint, test, build
+
+**Files created:**
+- `.github/workflows/ci.yml`
+
+**Acceptance criteria:**
+- [ ] Workflow triggers on push to `main`/`master` and on PRs
+- [ ] Steps: checkout → setup Node 20 → `npm ci` → `npx tsc --noEmit` → `npm run lint` → `npx vitest run` → `npm run build`
+- [ ] Build step uses placeholder environment variables (see `docs/VERIFICATION_RULES.md` Section 8)
+- [ ] Workflow runs successfully (all steps pass with the current empty project)
+- [ ] YAML is valid (no syntax errors)
+
+**Non-goals:**
+- Do not add coverage thresholds yet (T-042)
+- Do not add security or architecture checks yet (T-045)
+- Do not configure deployment
+
+---
+
+## T-003: Configure Prisma and Database Schema
+
+**Input:** Project from T-002
+**Output:**
+- Prisma installed and configured
+- Database schema with all models from `docs/ARCHITECTURE.md` Section 8
+- Initial migration generated
+
+**Files created:**
+- `prisma/schema.prisma`
+- `prisma/migrations/YYYYMMDD_init/migration.sql` (auto-generated)
+
+**Acceptance criteria:**
+- [ ] `prisma/schema.prisma` contains models: `Registration`, `RegistrationToken`, `AdminUser`
+- [ ] `Registration` model has fields: `id` (UUID), `name`, `email`, `guestCount`, `dietaryNotes`, `status` (enum: CONFIRMED/CANCELLED), `createdAt`, `updatedAt`
+- [ ] `RegistrationToken` model has fields: `id` (UUID), `registrationId` (FK), `tokenHash` (unique, indexed), `expiresAt`, `isRevoked`, `createdAt`
+- [ ] `AdminUser` model has fields: `id` (UUID), `supabaseUserId` (unique), `email`, `createdAt`
+- [ ] `npx prisma validate` passes
+- [ ] `npx prisma generate` succeeds
+
+**Non-goals:**
+- Do not create seed data yet (T-043)
+- Do not create repositories yet (T-011)
+- Do not create the Prisma singleton yet (T-039)
+- Do not run migrations against production
+
+---
+
+## T-039: Prisma Client Singleton
+
+**Input:** T-003 (Prisma schema configured)
+**Output:**
+- Shared PrismaClient instance with Next.js dev-safe singleton pattern
+
+**Files created:**
+- `src/repositories/prisma.ts`
+
+**Acceptance criteria:**
+- [ ] Exports a singleton `prisma` instance of `PrismaClient`
+- [ ] Uses the standard Next.js pattern: stores instance on `globalThis` in development to prevent connection pool exhaustion during hot reloads
+- [ ] In production: creates a single instance
+- [ ] TypeScript compiles without errors
+- [ ] All repository files will import from `./prisma` (not `@prisma/client` directly)
+
+**Non-goals:**
+- Do not create repositories (T-011, T-012, T-013)
+- Do not add connection pooling configuration
+
+---
+
+## T-004: Integrate Supabase Auth
+
+**Input:** Project from T-003
+**Output:**
+- Supabase client libraries installed
+- Supabase client wrapper created
+
+**Files created:**
+- `src/lib/auth/supabase-client.ts` (server-side Supabase client factory)
+
+**Files modified:**
+- `package.json` (add `@supabase/supabase-js`, `@supabase/ssr`)
+
+**Acceptance criteria:**
+- [ ] `supabase-client.ts` exports `createServerClient()` function
+- [ ] Client uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from environment
+- [ ] Server client uses `SUPABASE_SERVICE_ROLE_KEY` for admin operations
+- [ ] TypeScript compiles without errors
+- [ ] No secrets are hardcoded
+
+**Non-goals:**
+- Do not create login UI
+- Do not create admin guard middleware (T-017)
+
+---
+
+## T-005: Integrate Resend
+
+**Input:** Project from T-004
+**Output:**
+- Resend SDK installed
+- Email service abstraction created
+
+**Files created:**
+- `src/lib/email/send-manage-link.ts` (stub: accepts registrationId and email, returns success/failure)
+
+**Files modified:**
+- `package.json` (add `resend`)
+
+**Acceptance criteria:**
+- [ ] `send-manage-link.ts` exports async function with signature: `(params: { to: string; manageUrl: string; guestName: string }) => Promise<{ success: boolean; error?: string }>`
+- [ ] Function uses `RESEND_API_KEY` from environment
+- [ ] TypeScript compiles without errors
+- [ ] No API key hardcoded
+
+**Non-goals:**
+- Do not create email templates (T-020)
+- Do not send actual emails in tests
+
+---
+
+## T-006: Environment Configuration and Folder Structure
+
+**Input:** Project from T-005
+**Output:**
+- `.env.example` with all required variables documented
+- Config modules created
+- Seed script skeleton
+- Full folder structure created (empty index files where needed)
+
+**Files created:**
+- `.env.example`
+- `src/config/event.ts` (event name, date, location – configurable constants)
+- `src/config/limits.ts` (rate limits, token expiry constants)
+- `prisma/seed.ts` (skeleton with fixed UUID constants, no actual data yet – see T-043)
+- `tests/fixtures/seed-data.ts` (re-exports seed constants)
+
+**Acceptance criteria:**
+- [ ] `.env.example` lists ALL variables from `docs/ARCHITECTURE.md` Section 10.3
+- [ ] `src/config/limits.ts` exports: `MAX_REGISTRATION_ATTEMPTS_PER_HOUR = 5`, `MAX_TOKEN_LOOKUPS_PER_HOUR = 10`, `MAX_RESEND_ATTEMPTS_PER_HOUR = 3`, `MAX_ADMIN_LOGIN_ATTEMPTS_PER_15MIN = 5`, `TOKEN_EXPIRY_DAYS = 90`
+- [ ] `src/config/event.ts` exports: `EVENT_NAME`, `EVENT_DATE`, `EVENT_LOCATION`, `EVENT_DESCRIPTION`
+- [ ] `prisma/seed.ts` contains fixed UUID constants
+- [ ] All directories from `docs/ARCHITECTURE.md` Section 2 exist
+- [ ] `.env.example` has comments explaining each variable
+
+**Non-goals:**
+- Do not populate seed data with actual records yet (T-043)
+
+---
+
+## T-040: Shared TypeScript Types
+
+**Input:** T-006 (folder structure exists)
+**Output:**
+- All shared type definitions used across layers
+- Types defined before repositories and use cases need them
+
+**Files created:**
+- `src/types/registration.ts`
+- `src/types/api.ts`
+
+**Acceptance criteria:**
+- [ ] `src/types/registration.ts` exports: `RegistrationInput`, `RegistrationOutput`, `RegistrationStatus` (enum), `RegistrationFilters`, `PaginatedResult<T>`, `TokenData`
+- [ ] `RegistrationInput` has: `name: string`, `email: string`, `guestCount: number`, `dietaryNotes?: string`
+- [ ] `RegistrationOutput` has: `id: string`, `name: string`, `email: string`, `guestCount: number`, `dietaryNotes: string | null`, `status: RegistrationStatus`, `createdAt: Date`, `updatedAt: Date`
+- [ ] `src/types/api.ts` exports: `ApiSuccessResponse<T>`, `ApiErrorResponse`, `ApiResponse<T>` (union)
+- [ ] `ApiSuccessResponse<T>` shape: `{ data: T; message: string }`
+- [ ] `ApiErrorResponse` shape: `{ error: { code: string; message: string; fields?: Record<string, string> } }`
+- [ ] TypeScript compiles without errors
+- [ ] No circular imports
+
+**Non-goals:**
+- Do not create Zod schemas (T-014)
+- Do not create runtime validation
+
+---
+
+## T-043: Seed Data Population
+
+**Input:** T-006 (seed skeleton), T-003 (Prisma schema)
+**Output:**
+- Fully populated seed script with test data
+- Shared fixture constants for tests
+
+**Files modified:**
+- `prisma/seed.ts` (populate with actual records)
+- `tests/fixtures/seed-data.ts` (add complete fixture data)
+
+**Files modified:**
+- `package.json` (add `prisma.seed` config)
+
+**Acceptance criteria:**
+- [ ] Seed creates 1 admin user with fixed UUID
+- [ ] Seed creates 3 test registrations: 1 confirmed, 1 confirmed with dietary notes, 1 cancelled
+- [ ] All seed records use fixed UUIDs from `tests/fixtures/seed-data.ts`
+- [ ] `npx prisma db seed` runs without errors (when DB is available)
+- [ ] `tests/fixtures/seed-data.ts` exports all fixed UUIDs and test data objects
+- [ ] Seed script is idempotent (can run multiple times without duplicates via `upsert`)
+
+**Non-goals:**
+- Do not create token records in seed (tokens are generated at runtime)
+- Do not seed against production
+
+---
+
+# Phase 2: Core Infrastructure
+
+## T-007: Implement Error Types
+
+**Input:** Project from T-006
+**Output:**
+- Custom error class hierarchy as defined in `docs/ARCHITECTURE.md` Section 5.1
+- Unit tests for error classes
+
+**Files created:**
+- `src/lib/errors/app-errors.ts`
+- `tests/unit/lib/errors/app-errors.test.ts`
+
+**Acceptance criteria:**
+- [ ] `AppError` base class with: `message`, `code`, `statusCode`, `isOperational`
+- [ ] Subclasses: `ValidationError` (400), `NotFoundError` (404), `RateLimitError` (429), `AuthenticationError` (401), `AuthorizationError` (403)
+- [ ] `ValidationError` accepts `fields: Record<string, string>`
+- [ ] All errors extend `Error` (proper prototype chain)
+- [ ] Unit tests cover all error types with correct status codes
+- [ ] `npx vitest run` passes
+
+**Non-goals:**
+- Do not create error-handling middleware
+- Do not create API error response utility (T-041)
+
+---
+
+## T-041: API Response Utility
+
+**Input:** T-007 (error types)
+**Output:**
+- Shared utility for formatting consistent API responses
+- Unit tests
+
+**Files created:**
+- `src/lib/api-response.ts`
+- `tests/unit/lib/api-response.test.ts`
+
+**Acceptance criteria:**
+- [ ] Exports `successResponse<T>(data: T, message: string, status?: number): NextResponse`
+- [ ] Exports `errorResponse(error: AppError): NextResponse`
+- [ ] Exports `handleApiError(error: unknown): NextResponse` (catches unknown errors, returns 500)
+- [ ] `successResponse` returns JSON matching `ApiSuccessResponse<T>` from `src/types/api.ts`
+- [ ] `errorResponse` returns JSON matching `ApiErrorResponse` from `src/types/api.ts`
+- [ ] `handleApiError` maps `AppError` subclasses to correct status codes
+- [ ] `handleApiError` returns generic 500 for non-`AppError` errors (no internal details leaked)
+- [ ] `ValidationError` includes `fields` in response body
+- [ ] Unit test: success response format
+- [ ] Unit test: each error type maps to correct status code and JSON shape
+- [ ] Unit test: unknown error returns 500 with generic message
+
+**Non-goals:**
+- Do not handle streaming responses
+- Do not add logging (route handlers log before calling this)
+
+---
+
+## T-036: Error Boundaries
+
+> **Moved from Phase 10 to Phase 2.** Error boundaries must exist before any UI pages are built.
+
+**Input:** T-007 (error types)
+**Output:**
+- React error boundaries for graceful error handling
+
+**Files created:**
+- `src/app/error.tsx` (root error boundary)
+- `src/app/not-found.tsx` (404 page)
+- `src/app/admin/error.tsx` (admin error boundary)
+
+**Acceptance criteria:**
+- [ ] Root error boundary shows user-friendly message: "Something went wrong. Please try again."
+- [ ] Root error boundary has "Try again" button that resets error state
+- [ ] 404 page shows "Page not found" with link to home
+- [ ] Admin error boundary shows admin-specific error message
+- [ ] No stack traces shown to users
+- [ ] Error boundary components are Client Components (`'use client'`)
+
+**Non-goals:**
+- Do not implement error reporting to external service (Sentry, etc.)
+- Do not add structured logging here (that happens in API routes)
+
+---
+
+## T-008: Implement Structured Logger
+
+**Input:** Project from T-006
+**Output:**
+- Logging utility wrapper
+- Unit tests
+
+**Files created:**
+- `src/lib/logger.ts`
+- `tests/unit/lib/logger.test.ts`
+
+**Acceptance criteria:**
+- [ ] Exports `logger` object with methods: `info()`, `warn()`, `error()`, `debug()`
+- [ ] Each method accepts `(message: string, context?: Record<string, unknown>)`
+- [ ] Output is structured JSON: `{ "level", "message", "context", "timestamp" }`
+- [ ] In development: pretty-printed to console
+- [ ] Exports `maskEmail('john@example.com')` → returns `j***@example.com`
+- [ ] Exports `hashIp('192.168.1.1')` → returns consistent SHA-256 hash
+- [ ] Unit test verifies log output structure
+- [ ] Unit test verifies email masking
+- [ ] Unit test verifies IP hashing
+
+**Non-goals:**
+- Do not integrate with external logging service
+- Do not create log rotation
+
+---
+
+## T-009: Implement Capability Token Utility
+
+**Input:** Project from T-006
+**Output:**
+- Token generation and hashing utility
+- Comprehensive unit tests
+
+**Files created:**
+- `src/lib/token/capability-token.ts`
+- `tests/unit/lib/token/capability-token.test.ts`
+
+**Acceptance criteria:**
+- [ ] `generateToken()` returns `{ raw: string; hash: string }` where `raw` is base64url-encoded 32+ bytes
+- [ ] `hashToken(raw: string)` returns SHA-256 hex digest
+- [ ] `generateToken().raw` decoded length >= 32 bytes
+- [ ] `hashToken(token)` produces same hash for same input (deterministic)
+- [ ] `hashToken(tokenA) !== hashToken(tokenB)` for different tokens
+- [ ] Raw token is URL-safe (matches `/^[A-Za-z0-9_-]+$/`)
+- [ ] Unit test: token length >= 32 bytes when decoded
+- [ ] Unit test: hash is deterministic
+- [ ] Unit test: different tokens produce different hashes
+- [ ] Unit test: raw token is URL-safe
+- [ ] `npx vitest run` passes
+
+**Non-goals:**
+- Do not create token storage (T-012)
+- Do not create token lookup logic (T-012)
+
+---
+
+## T-010: Implement Rate Limiter
+
+**Input:** T-008 (logger – for `hashIp`), T-006 (config – for limits)
+**Output:**
+- In-memory rate limiter (upgradeable to Redis/DB later)
+- Unit tests
+
+**Files created:**
+- `src/lib/rate-limit/limiter.ts`
+- `tests/unit/lib/rate-limit/limiter.test.ts`
+
+**Acceptance criteria:**
+- [ ] Exports `createRateLimiter(config: { windowMs: number; maxAttempts: number })`
+- [ ] Returns object with `check(identifier: string): { allowed: boolean; remaining: number; resetAt: Date }`
+- [ ] Correctly tracks attempts within sliding window
+- [ ] Resets counter after window expires
+- [ ] Respects `RATE_LIMIT_DISABLED` env var for development
+- [ ] Uses hashed IP as identifier (calls `hashIp` from `src/lib/logger.ts`)
+- [ ] Unit test: allows requests within limit
+- [ ] Unit test: blocks requests exceeding limit
+- [ ] Unit test: resets after window expires
+- [ ] `npx vitest run` passes
+
+**Non-goals:**
+- Do not integrate with API routes (T-032)
+- Do not implement persistent storage for rate limits
+
+---
+
+## T-042: CI Pipeline – Coverage Gates
+
+**Input:** T-038 (CI foundation), T-009 (first meaningful tests exist)
+**Output:**
+- CI pipeline updated with coverage thresholds
+
+**Files modified:**
+- `.github/workflows/ci.yml`
+- `vitest.config.ts`
+
+**Acceptance criteria:**
+- [ ] `vitest.config.ts` updated with coverage configuration from `docs/VERIFICATION_RULES.md` Section 4
+- [ ] Coverage thresholds: 80% lines, 80% functions, 75% branches, 80% statements
+- [ ] Coverage includes `src/lib/**` and `src/repositories/**`
+- [ ] Coverage excludes `src/lib/auth/supabase-client.ts` and `src/config/**`
+- [ ] CI step changed from `npx vitest run` to `npx vitest run --coverage`
+- [ ] CI fails if coverage drops below thresholds
+- [ ] `npx vitest run --coverage` passes locally
+
+**Non-goals:**
+- Do not add security or architecture test suites yet (T-045)
+
+---
+
+# Phase 3: Data Layer
+
+## T-011: Implement Registration Repository
+
+**Input:** T-039 (Prisma singleton), T-040 (shared types), T-007 (error types)
+**Output:**
+- Registration data access layer
+- Unit tests with mocked Prisma
+
+**Files created:**
+- `src/repositories/registration-repository.ts`
+- `tests/unit/repositories/registration-repository.test.ts`
+
+**Acceptance criteria:**
+- [ ] Imports `prisma` from `./prisma` (the singleton, NOT from `@prisma/client`)
+- [ ] Exports: `createRegistration(data)`, `findRegistrationById(id)`, `findRegistrationByEmail(email)`, `updateRegistration(id, data)`, `cancelRegistration(id)`, `listRegistrations(filters)`, `countRegistrations()`
+- [ ] All methods use typed input/output from `src/types/registration.ts`
+- [ ] `cancelRegistration` sets status to `CANCELLED`, does not delete
+- [ ] `listRegistrations` supports filtering by status and pagination
+- [ ] Unit tests mock Prisma client
+- [ ] Unit tests cover: create, find, update, cancel, list, not-found scenarios
+
+**Non-goals:**
+- Do not implement business logic (validation, token handling)
+- Do not call external services
+
+---
+
+## T-012: Implement Token Repository
+
+**Input:** T-039 (Prisma singleton), T-040 (shared types), T-009 (token utility)
+**Output:**
+- Token data access layer
+- Unit tests
+
+**Files created:**
+- `src/repositories/token-repository.ts`
+- `tests/unit/repositories/token-repository.test.ts`
+
+**Acceptance criteria:**
+- [ ] Imports `prisma` from `./prisma` (the singleton)
+- [ ] Exports: `createToken(registrationId, tokenHash, expiresAt)`, `findByTokenHash(hash)`, `revokeToken(tokenId)`, `revokeAllTokensForRegistration(registrationId)`, `findActiveTokenForRegistration(registrationId)`
+- [ ] `findByTokenHash` returns `null` for revoked or expired tokens
+- [ ] `revokeAllTokensForRegistration` marks all tokens as revoked (batch update)
+- [ ] All methods accept/return typed interfaces, not raw Prisma types
+- [ ] Unit tests mock Prisma client
+- [ ] Unit tests cover: create, find valid, find expired (null), find revoked (null), revoke
+
+**Non-goals:**
+- Do not implement token generation (that's in T-009)
+- Do not implement token rotation logic (that's in T-015)
+
+---
+
+## T-013: Implement Admin Repository
+
+**Input:** T-039 (Prisma singleton), T-040 (shared types)
+**Output:**
+- Admin user data access layer
+- Unit tests
+
+**Files created:**
+- `src/repositories/admin-repository.ts`
+- `tests/unit/repositories/admin-repository.test.ts`
+
+**Acceptance criteria:**
+- [ ] Imports `prisma` from `./prisma` (the singleton)
+- [ ] Exports: `findAdminBySupabaseId(supabaseUserId)`, `isAdmin(supabaseUserId)`, `listAdmins()`
+- [ ] `isAdmin` returns boolean
+- [ ] `findAdminBySupabaseId` returns `null` if not found
+- [ ] Unit tests mock Prisma client
+- [ ] Unit tests cover: found, not found, isAdmin true/false
+
+**Non-goals:**
+- Do not create admin CRUD (admins are seeded or managed via DB directly)
+- Do not implement auth logic
+
+---
+
+# Phase 4: Application Layer
+
+## T-014: Implement Register Use Case
+
+**Input:** T-011, T-012, T-009
+**Output:**
+- Registration use case orchestrator
+- Zod validation schema
+- Unit tests
+
+**Files created:**
+- `src/lib/usecases/register.ts`
+- `src/lib/validation/registration.ts` (Zod schema)
+- `tests/unit/lib/usecases/register.test.ts`
+
+**Acceptance criteria:**
+- [ ] `registerGuest(input)` validates with Zod, creates registration, generates token, stores hash, triggers email
+- [ ] Zod schema validates: `name` (1-200 chars), `email` (valid format), `guestCount` (1-10), `dietaryNotes` (optional, max 500)
+- [ ] Returns `{ registrationId: string }` on success
+- [ ] Throws `ValidationError` with field-level details on invalid input
+- [ ] Does NOT return raw token to caller (token goes only to email)
+- [ ] Unit tests mock repository and email service
+- [ ] Unit test: successful registration
+- [ ] Unit test: validation failure (each field)
+- [ ] Unit test: duplicate email handling (succeeds – allows re-registration)
+
+**Non-goals:**
+- Do not implement the API route (T-025)
+- Do not implement rate limiting (T-032)
+
+---
+
+## T-015: Implement Manage Registration Use Case
+
+**Input:** T-011, T-012
+**Output:**
+- Manage registration use case (view, edit, cancel via token)
+- Unit tests
+
+**Files created:**
+- `src/lib/usecases/manage-registration.ts`
+- `tests/unit/lib/usecases/manage-registration.test.ts`
+
+**Acceptance criteria:**
+- [ ] `getRegistrationByToken(rawToken)` → hashes token, looks up, returns registration data or throws `NotFoundError`
+- [ ] `updateRegistrationByToken(rawToken, data)` → validates, updates registration, rotates token, returns `{ newManageUrl: string }`
+- [ ] `cancelRegistrationByToken(rawToken)` → cancels registration, revokes all tokens
+- [ ] Token rotation: on update, old token is revoked, new token generated and stored, new manage URL returned
+- [ ] Failed lookup returns generic `NotFoundError` with message "Link not found or expired" (no info leakage)
+- [ ] Unit test: successful view, edit, cancel
+- [ ] Unit test: invalid token returns NotFoundError
+- [ ] Unit test: expired token returns NotFoundError
+- [ ] Unit test: token rotation occurs on edit
+
+**Non-goals:**
+- Do not implement the API route (T-026)
+- Do not implement rate limiting
+
+---
+
+## T-016: Implement Resend Link Use Case
+
+**Input:** T-011, T-012
+**Output:**
+- Resend manage link use case
+- Unit tests
+
+**Files created:**
+- `src/lib/usecases/resend-link.ts`
+- `tests/unit/lib/usecases/resend-link.test.ts`
+
+**Acceptance criteria:**
+- [ ] `resendManageLink(email: string)` looks up registration by email
+- [ ] If found: generates new token, revokes old tokens, sends email with new manage link
+- [ ] If NOT found: does nothing, returns success (no error, no info leakage)
+- [ ] Always returns `{ success: true }` regardless of email existence
+- [ ] Unit test: email exists → new token generated, email sent
+- [ ] Unit test: email does not exist → no error, no email sent, returns success
+- [ ] Unit test: cancelled registration → no token generated, returns success
+
+**Non-goals:**
+- Do not implement the API route (T-027)
+- Do not reveal email existence in any code path
+
+---
+
+## T-017: Implement Admin Auth Guard
+
+**Input:** T-004 (Supabase Auth), T-013 (Admin repository)
+**Output:**
+- Middleware/guard for admin routes
+- Unit tests
+
+**Files created:**
+- `src/lib/auth/admin-guard.ts`
+- `src/lib/auth/middleware.ts` (Next.js middleware for `/admin/*`)
+- `tests/unit/lib/auth/admin-guard.test.ts`
+
+**Acceptance criteria:**
+- [ ] `verifyAdmin(request)` extracts Supabase session, verifies against `AdminUser` table
+- [ ] Returns `{ authenticated: true, adminId: string }` or throws `AuthenticationError`/`AuthorizationError`
+- [ ] No session → `AuthenticationError` (401)
+- [ ] Session valid but not in AdminUser table → `AuthorizationError` (403)
+- [ ] Next.js middleware redirects unauthenticated users from `/admin/*` to login
+- [ ] Unit test: valid admin session → passes
+- [ ] Unit test: no session → 401
+- [ ] Unit test: non-admin user → 403
+
+**Non-goals:**
+- Do not create login UI
+- Do not create admin management CRUD
+
+---
+
+## T-018: Implement Admin Actions Use Case
+
+**Input:** T-011, T-013
+**Output:**
+- Admin registration management use case
+- Unit tests
+
+**Files created:**
+- `src/lib/usecases/admin-actions.ts`
+- `tests/unit/lib/usecases/admin-actions.test.ts`
+
+**Acceptance criteria:**
+- [ ] `listRegistrations(filters)` returns paginated list with total count
+- [ ] `getRegistrationStats()` returns `{ total, confirmed, cancelled }`
+- [ ] `adminCancelRegistration(registrationId, adminId)` cancels and logs admin action
+- [ ] `adminEditRegistration(registrationId, data, adminId)` updates and logs admin action
+- [ ] `exportRegistrationsCsv()` returns CSV string with columns: name, email, guestCount, dietaryNotes, status, createdAt
+- [ ] All admin actions log with `adminUserId`, `action`, `targetId` (structured logging)
+- [ ] Unit test: list with pagination
+- [ ] Unit test: stats calculation
+- [ ] Unit test: admin cancel
+- [ ] Unit test: CSV export format
+
+**Non-goals:**
+- Do not implement admin UI
+- Do not implement CSV file download endpoint (that's UI layer)
+
+---
+
+# Phase 5: Email
+
+## T-019: Complete Email Service
+
+**Input:** T-005 (Resend stub), T-014 (register use case)
+**Output:**
+- Full email service implementation
+- Unit tests
+
+**Files modified:**
+- `src/lib/email/send-manage-link.ts` (implement fully)
+
+**Files created:**
+- `tests/unit/lib/email/send-manage-link.test.ts`
+
+**Acceptance criteria:**
+- [ ] Sends email via Resend API with: recipient, subject, HTML body
+- [ ] Email contains manage link URL: `{BASE_URL}/manage/{raw_token}`
+- [ ] Email contains guest name and event details
+- [ ] Returns `{ success: true }` on successful send
+- [ ] Returns `{ success: false, error: string }` on failure (does not throw)
+- [ ] Logs email send with `registrationId` and `emailType` (never logs recipient email unmasked)
+- [ ] Unit test mocks Resend API
+- [ ] Unit test: successful send
+- [ ] Unit test: API failure handling
+
+**Non-goals:**
+- Do not create HTML email templates (T-020)
+- Do not handle email bounces
+
+---
+
+## T-020: Create Email Templates
+
+**Input:** T-019
+**Output:**
+- HTML email template for manage link
+- Unit tests
+
+**Files created:**
+- `src/lib/email/templates/manage-link-template.ts`
+- `tests/unit/lib/email/templates/manage-link-template.test.ts`
+
+**Acceptance criteria:**
+- [ ] Exports `renderManageLinkEmail(params: { guestName: string; eventName: string; eventDate: string; manageUrl: string }): string`
+- [ ] Returns valid HTML string
+- [ ] HTML contains: guest name, event name, event date, manage link as clickable anchor
+- [ ] HTML is responsive (inline styles, max-width container)
+- [ ] No raw tokens in template debug output or comments
+- [ ] Unit test: all parameters appear in output HTML
+- [ ] Unit test: manage URL is in an `<a href="...">`
+
+**Non-goals:**
+- Do not create email preview UI
+- Do not implement multiple email types
+
+---
+
+# Phase 6: API Routes
+
+> **Moved before UI pages.** UI pages depend on API routes existing.
+
+## T-025: Register API Route
+
+**Input:** T-014 (register use case), T-010 (rate limiter), T-041 (API response utility)
+**Output:**
+- `POST /api/register` route handler
+
+**Files created:**
+- `src/app/api/register/route.ts`
+
+**Acceptance criteria:**
+- [ ] Accepts `POST` with JSON body: `{ name, email, guestCount, dietaryNotes? }`
+- [ ] Delegates to `registerGuest()` use case
+- [ ] Uses `successResponse()` / `handleApiError()` from API response utility
+- [ ] On success: returns `201` with `{ "data": { "registrationId": "..." }, "message": "Registration successful. Check your email." }`
+- [ ] On validation failure: returns `400` with structured error response
+- [ ] On rate limit: returns `429` with `Retry-After` header
+- [ ] On server error: returns `500` with `{ "error": { "code": "INTERNAL_ERROR", "message": "An unexpected error occurred" } }`
+- [ ] Rate limiter applied: 5 attempts per IP per hour
+- [ ] No raw tokens in response body
+
+**Non-goals:**
+- Do not implement CORS headers (Next.js handles same-origin)
+- Do not add authentication (public endpoint)
+
+---
+
+## T-026: Manage API Route
+
+**Input:** T-015 (manage use case), T-010 (rate limiter), T-041 (API response utility)
+**Output:**
+- `PUT /api/manage` route handler for edits
+- `DELETE /api/manage` route handler for cancellation
+
+**Files created:**
+- `src/app/api/manage/route.ts`
+
+**Acceptance criteria:**
+- [ ] `PUT /api/manage` accepts `{ token, name, email, guestCount, dietaryNotes? }`
+- [ ] Uses `successResponse()` / `handleApiError()` from API response utility
+- [ ] On success: returns `200` with `{ "data": { "registration": {...} }, "message": "Updated successfully" }`
+- [ ] `DELETE /api/manage` accepts `{ token }`
+- [ ] On success: returns `200` with `{ "message": "Registration cancelled" }`
+- [ ] On invalid token: returns `404` with generic message "Link not found or expired"
+- [ ] Rate limiter applied: 10 lookups per IP per hour
+- [ ] Token passed in request body, NOT in URL query params for mutations
+
+**Non-goals:**
+- Do not return new raw token in API response (it's emailed)
+
+---
+
+## T-027: Resend Link API Route
+
+**Input:** T-016 (resend use case), T-010 (rate limiter), T-041 (API response utility)
+**Output:**
+- `POST /api/resend-link` route handler
+
+**Files created:**
+- `src/app/api/resend-link/route.ts`
+
+**Acceptance criteria:**
+- [ ] Accepts `POST` with `{ email: string }`
+- [ ] ALWAYS returns `200` with `{ "message": "If this email is registered, a manage link has been sent." }`
+- [ ] Response body is IDENTICAL for existing and non-existing emails
+- [ ] Response timing must not differ significantly (add artificial delay if needed for timing safety)
+- [ ] Rate limiter applied: 3 attempts per IP per hour
+- [ ] No information leakage in headers, timing, or body
+
+**Non-goals:**
+- Do not add any conditional response logic visible to client
+
+---
+
+## T-044: Admin Mutation API Routes
+
+**Input:** T-017 (admin auth guard), T-018 (admin actions), T-041 (API response utility)
+**Output:**
+- Admin API routes for registration management (list, edit, cancel)
+
+**Files created:**
+- `src/app/api/admin/registrations/route.ts`
+
+**Acceptance criteria:**
+- [ ] `GET /api/admin/registrations` returns paginated list with filters (query params: `status`, `search`, `page`, `pageSize`)
+- [ ] `PUT /api/admin/registrations` accepts `{ registrationId, name, email, guestCount, dietaryNotes? }` – admin edit
+- [ ] `DELETE /api/admin/registrations` accepts `{ registrationId }` – admin cancel
+- [ ] All endpoints verify admin auth via `verifyAdmin()` guard
+- [ ] All endpoints use `successResponse()` / `handleApiError()` from API response utility
+- [ ] Unauthenticated requests return `401`
+- [ ] Non-admin users return `403`
+- [ ] All mutation actions logged with `adminUserId`, `action`, `targetId`
+
+**Non-goals:**
+- Do not implement CSV export here (T-031 handles that separately)
+- Do not implement bulk operations
+
+---
+
+# Phase 7: UI – Public Pages
+
+> **Moved after API routes.** UI pages submit to API routes that must already exist.
+
+## T-021: Event Landing Page
+
+**Input:** T-036 (error boundaries), T-025 (register API exists), T-019 (email service)
+**Output:**
+- Public event landing page
+- Responsive design
+
+**Files created:**
+- `src/app/(public)/page.tsx`
+- `src/components/ui/Button.tsx`
+- `src/components/ui/Card.tsx`
+
+**Acceptance criteria:**
+- [ ] Page displays: event name, date, location, description (from `src/config/event.ts`)
+- [ ] "Register" CTA button links to `/register`
+- [ ] "Already registered?" link to `/resend-link`
+- [ ] Responsive layout: looks correct at 320px, 768px, 1280px widths
+- [ ] Uses Tailwind CSS; no inline styles except in email templates
+- [ ] Server Component (no `'use client'`)
+- [ ] No business logic in component
+
+**Non-goals:**
+- Do not implement registration form (T-022)
+- Do not implement theming system
+
+---
+
+## T-022: Registration Form
+
+**Input:** T-036 (error boundaries), T-025 (register API)
+**Output:**
+- Registration form page with client-side and server-side validation
+
+**Files created:**
+- `src/app/(public)/register/page.tsx`
+- `src/components/forms/RegistrationForm.tsx` (Client Component)
+- `src/components/ui/Input.tsx`
+- `src/components/ui/Textarea.tsx`
+- `src/components/ui/FormField.tsx`
+
+**Acceptance criteria:**
+- [ ] Form fields: name (required), email (required), guestCount (required, 1-10 dropdown), dietaryNotes (optional textarea)
+- [ ] Client-side validation matches Zod schema (immediate feedback)
+- [ ] Submits to `POST /api/register`
+- [ ] On success: shows confirmation message "Registration successful! Check your email for your manage link."
+- [ ] On validation error (400): shows field-level errors
+- [ ] On rate limit (429): shows "Too many attempts. Please try again later."
+- [ ] On server error (500): shows "An unexpected error occurred. Please try again."
+- [ ] Submit button shows loading state during submission
+- [ ] No business logic in component (delegates to API)
+
+**Non-goals:**
+- Do not implement CAPTCHA
+- Do not implement duplicate submission prevention (server handles idempotency)
+
+---
+
+## T-023: Manage Registration Page
+
+**Input:** T-036 (error boundaries), T-026 (manage API)
+**Output:**
+- Token-based registration management page
+
+**Files created:**
+- `src/app/(public)/manage/[token]/page.tsx`
+
+**Acceptance criteria:**
+- [ ] URL: `/manage/{token}` – token extracted from route param
+- [ ] On valid token: displays registration details with edit form and cancel button
+- [ ] Edit form pre-populated with current registration data
+- [ ] On save: calls manage API, shows success message with updated manage link notice
+- [ ] On cancel: confirmation dialog → calls cancel API → shows "Registration cancelled" message
+- [ ] On invalid/expired token: shows "This link is not valid or has expired." (generic message)
+- [ ] On rate limit: shows rate limit message
+- [ ] No token logged anywhere in client-side code
+
+**Non-goals:**
+- Do not implement undo for cancellation
+- Do not show token in UI
+
+---
+
+## T-024: Resend Link Page
+
+**Input:** T-036 (error boundaries), T-027 (resend API)
+**Output:**
+- Email submission form to resend manage link
+
+**Files created:**
+- `src/app/(public)/resend-link/page.tsx`
+- `src/components/forms/ResendLinkForm.tsx`
+
+**Acceptance criteria:**
+- [ ] Form with single field: email
+- [ ] Submits to `POST /api/resend-link`
+- [ ] On ANY response (200): shows "If this email is registered, a manage link has been sent."
+- [ ] Response message is IDENTICAL regardless of email existence (matches API contract)
+- [ ] No loading state difference between found/not-found (timing-safe)
+- [ ] Submit button shows loading state
+- [ ] Client-side email format validation
+
+**Non-goals:**
+- Do not reveal whether email exists
+- Do not implement multiple resend protection on client side
+
+---
+
+# Phase 8: Admin UI
+
+## T-028: Admin Layout and Auth
+
+**Input:** T-017 (admin guard)
+**Output:**
+- Admin layout with authentication wrapper
+- Login page
+
+**Files created:**
+- `src/app/admin/layout.tsx`
+- `src/app/admin/login/page.tsx`
+- `src/components/admin/AdminNav.tsx`
+
+**Acceptance criteria:**
+- [ ] Admin layout checks auth on every request; redirects to `/admin/login` if unauthenticated
+- [ ] Login page with email + password form
+- [ ] Login delegates to Supabase Auth `signInWithPassword`
+- [ ] On success: redirect to `/admin`
+- [ ] On failure: show "Invalid credentials" (generic message)
+- [ ] Admin nav shows: Dashboard, Registrations, Logout
+- [ ] Logout clears Supabase session and redirects to `/admin/login`
+
+**Non-goals:**
+- Do not implement password reset
+- Do not implement admin registration (seeded)
+
+---
+
+## T-029: Admin Dashboard
+
+**Input:** T-018 (admin actions), T-028 (admin layout)
+**Output:**
+- Admin dashboard with aggregate statistics
+
+**Files created:**
+- `src/app/admin/page.tsx`
+- `src/components/admin/StatsCard.tsx`
+
+**Acceptance criteria:**
+- [ ] Shows: total registrations, confirmed count, cancelled count, total guests
+- [ ] Data fetched via admin actions use case
+- [ ] Quick links to registration list and CSV export
+- [ ] Server Component with data fetching
+- [ ] Auth check (guard) applied
+
+**Non-goals:**
+- Do not implement charts or graphs
+- Do not implement real-time updates
+
+---
+
+## T-030: Admin Registration List
+
+**Input:** T-044 (admin API routes), T-028 (admin layout)
+**Output:**
+- Filterable, paginated registration list
+
+**Files created:**
+- `src/app/admin/registrations/page.tsx`
+- `src/components/admin/RegistrationTable.tsx`
+- `src/components/admin/RegistrationFilters.tsx`
+
+**Acceptance criteria:**
+- [ ] Table columns: name, email, guestCount, status, createdAt, actions
+- [ ] Filter by status: All, Confirmed, Cancelled
+- [ ] Search by name or email (server-side filtering via admin API)
+- [ ] Pagination: 20 items per page with page navigation
+- [ ] Actions per row: Edit, Cancel (with confirmation dialog)
+- [ ] Cancel action calls `DELETE /api/admin/registrations` and refreshes list
+- [ ] Edit action calls `PUT /api/admin/registrations` and refreshes list
+- [ ] All admin actions logged with structured logging
+
+**Non-goals:**
+- Do not implement inline editing (use separate edit form/modal)
+- Do not implement bulk actions
+
+---
+
+## T-031: Admin CSV Export
+
+**Input:** T-018 (admin actions)
+**Output:**
+- CSV export endpoint and download button
+
+**Files created:**
+- `src/app/api/admin/registrations/export/route.ts`
+
+**Acceptance criteria:**
+- [ ] `GET /api/admin/registrations/export` returns CSV file
+- [ ] Response headers: `Content-Type: text/csv`, `Content-Disposition: attachment; filename=registrations-{date}.csv`
+- [ ] CSV columns: name, email, guestCount, dietaryNotes, status, createdAt
+- [ ] Auth guard applied (admin only)
+- [ ] CSV properly escapes commas and quotes in field values
+- [ ] Download button added to admin registration list page
+
+**Non-goals:**
+- Do not implement filtered export
+- Do not implement Excel format
+
+---
+
+# Phase 9: Security Hardening
+
+## T-032: Rate Limiting Integration
+
+**Input:** T-010 (rate limiter), T-025..T-027 (API routes)
+**Output:**
+- Rate limiters connected to all public API routes
+- Integration tests
+
+**Files modified:**
+- `src/app/api/register/route.ts`
+- `src/app/api/manage/route.ts`
+- `src/app/api/resend-link/route.ts`
+
+**Files created:**
+- `tests/integration/rate-limiting.test.ts`
+
+**Acceptance criteria:**
+- [ ] Registration: 5 attempts/IP/hour
+- [ ] Manage lookup: 10 attempts/IP/hour
+- [ ] Resend link: 3 attempts/IP/hour
+- [ ] Admin login: 5 attempts/IP/15min
+- [ ] All rate-limited responses include `Retry-After` header
+- [ ] Rate limit trigger logged as `warn` with hashed IP
+- [ ] Integration test: exceed limit → 429
+
+**Non-goals:**
+- Do not implement distributed rate limiting (in-memory is acceptable for V1)
+
+---
+
+## T-033: Token Logging Audit
+
+**Input:** T-009 (token utility), all route handlers
+**Output:**
+- Audit all code paths to ensure no raw tokens are logged
+- Add automated check
+
+**Files created:**
+- `tests/security/no-token-logging.test.ts`
+
+**Acceptance criteria:**
+- [ ] Grep-based test: no `console.log` calls in production code that could log tokens
+- [ ] No `req.url` logging on manage routes
+- [ ] No `token` variable logged anywhere
+- [ ] Test scans `src/` directory for forbidden patterns (from `docs/ARCHITECTURE_RULES.md` F1-F3)
+- [ ] Test passes
+
+**Non-goals:**
+- Do not implement runtime token leak detection
+
+---
+
+## T-034: Security Headers
+
+**Input:** T-032
+**Output:**
+- Security headers configured via Next.js
+
+**Files modified:**
+- `next.config.js`
+
+**Acceptance criteria:**
+- [ ] Headers set: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- [ ] `Strict-Transport-Security` set for production
+- [ ] Content-Security-Policy configured (allow self, Supabase, Resend)
+- [ ] Headers verified via curl or test
+
+**Non-goals:**
+- Do not implement CSP report-uri
+- Do not implement subresource integrity
+
+---
+
+## T-045: CI Pipeline – Security & Architecture Suites
+
+**Input:** T-038 (CI foundation), T-033 (token logging audit, which creates security tests)
+**Output:**
+- CI pipeline extended with security and architecture test suites
+
+**Files modified:**
+- `.github/workflows/ci.yml`
+
+**Files created:**
+- `tests/security/forbidden-patterns.test.ts` (from `docs/VERIFICATION_RULES.md` Section 5)
+- `tests/architecture/boundaries.test.ts` (from `docs/VERIFICATION_RULES.md` Section 6)
+
+**Acceptance criteria:**
+- [ ] CI installs ripgrep (`sudo apt-get install -y ripgrep`) before running security tests
+- [ ] CI step added: `npx vitest run tests/security/`
+- [ ] CI step added: `npx vitest run tests/architecture/`
+- [ ] Forbidden pattern tests cover: F1 (token logging), F2 (URL logging), F3 (env secret logging), F6 (any type), F8 (empty catch), F9 (hardcoded secrets)
+- [ ] Architecture boundary tests cover: L1 (UI→repo), L4 (usecase→component), L5 (repo→usecase), L6 (PrismaClient imports)
+- [ ] All tests pass locally
+- [ ] CI passes with new steps
+
+**Non-goals:**
+- Do not add runtime monitoring
+- Do not implement pre-commit hooks (future enhancement)
+
+---
+
+# Phase 10: Observability & Polish
+
+## T-035: Health Endpoint
+
+**Input:** T-008 (logger)
+**Output:**
+- Health check API endpoint
+
+**Files created:**
+- `src/app/api/health/route.ts`
+- `tests/unit/api/health.test.ts`
+
+**Acceptance criteria:**
+- [ ] `GET /api/health` returns `200` with `{ "status": "ok", "timestamp": "...", "version": "1.0.0" }`
+- [ ] Verifies database connectivity via `prisma.$queryRaw`
+- [ ] Returns `503` with `{ "status": "error", "timestamp": "..." }` if DB unreachable
+- [ ] No authentication required
+- [ ] Unit test: healthy response
+- [ ] Unit test: DB failure response
+
+**Non-goals:**
+- Do not implement detailed component health checks
+- Do not expose internal metrics
+
+---
+
+## T-037: Data Retention Implementation
+
+**Input:** All repositories
+**Output:**
+- Data retention policy implementation
+- Documentation
+
+**Files created:**
+- `src/lib/usecases/data-retention.ts`
+- `tests/unit/lib/usecases/data-retention.test.ts`
+
+**Acceptance criteria:**
+- [ ] `purgeExpiredTokens()` removes tokens where `expiresAt < now` and `isRevoked = true`
+- [ ] `purgeCancelledRegistrations(olderThan: Date)` removes cancelled registrations older than specified date
+- [ ] Default retention: cancelled registrations purged after 180 days
+- [ ] Functions are idempotent and safe to run repeatedly
+- [ ] Admin-callable via admin actions (manual trigger)
+- [ ] Unit test: correct records purged
+- [ ] Unit test: active records not affected
+
+**Non-goals:**
+- Do not implement scheduled/cron execution (manual or Vercel cron added later)
+- Do not implement GDPR export (future extension)
+
+---
+
+## T-046: README
+
+**Input:** All prior tickets completed
+**Output:**
+- Comprehensive project README
+
+**Files created:**
+- `README.md`
+
+**Acceptance criteria:**
+- [ ] Project title and description
+- [ ] Tech stack summary
+- [ ] Prerequisites (Node 20+, Supabase account, Resend account)
+- [ ] Setup instructions: clone, `npm install`, copy `.env.example` → `.env.local`, configure variables, `npx prisma migrate dev`, `npx prisma db seed`, `npm run dev`
+- [ ] Available scripts: `dev`, `build`, `start`, `lint`, `test`
+- [ ] Folder structure overview (link to `docs/ARCHITECTURE.md`)
+- [ ] Environment variables table (link to `docs/ARCHITECTURE.md` Section 10.3)
+- [ ] Data retention policy summary
+- [ ] Links to all `docs/` files
+- [ ] No secrets or credentials in README
+
+**Non-goals:**
+- Do not duplicate full architecture docs (link to them)
+- Do not write user-facing documentation (this is developer-facing)
+
+---
+
+# Ticket Index
+
+| ID    | Title                              | Phase | Dependencies                  |
+|-------|------------------------------------|-------|-------------------------------|
+| T-001 | Initialize Next.js Project         | 1     | None                          |
+| T-002 | TypeScript, Tailwind, Testing      | 1     | T-001                         |
+| T-038 | CI Pipeline – Foundation           | 1     | T-002                         |
+| T-003 | Prisma and Database Schema         | 1     | T-002                         |
+| T-039 | Prisma Client Singleton            | 1     | T-003                         |
+| T-004 | Supabase Auth Integration          | 1     | T-003                         |
+| T-005 | Resend Integration                 | 1     | T-004                         |
+| T-006 | Env Config and Folder Structure    | 1     | T-005                         |
+| T-040 | Shared TypeScript Types            | 1     | T-006                         |
+| T-043 | Seed Data Population               | 1     | T-006, T-003                  |
+| T-007 | Error Types                        | 2     | T-006                         |
+| T-041 | API Response Utility               | 2     | T-007                         |
+| T-036 | Error Boundaries                   | 2     | T-007                         |
+| T-008 | Structured Logger                  | 2     | T-006                         |
+| T-009 | Capability Token Utility           | 2     | T-006                         |
+| T-010 | Rate Limiter                       | 2     | T-008, T-006                  |
+| T-042 | CI Pipeline – Coverage Gates       | 2     | T-038, T-009                  |
+| T-011 | Registration Repository            | 3     | T-039, T-040, T-007           |
+| T-012 | Token Repository                   | 3     | T-039, T-040, T-009           |
+| T-013 | Admin Repository                   | 3     | T-039, T-040                  |
+| T-014 | Register Use Case                  | 4     | T-011, T-012, T-009           |
+| T-015 | Manage Registration Use Case       | 4     | T-012, T-011                  |
+| T-016 | Resend Link Use Case               | 4     | T-012, T-011                  |
+| T-017 | Admin Auth Guard                   | 4     | T-004, T-013                  |
+| T-018 | Admin Actions Use Case             | 4     | T-013, T-011                  |
+| T-019 | Email Service                      | 5     | T-014                         |
+| T-020 | Email Templates                    | 5     | T-019                         |
+| T-025 | Register API Route                 | 6     | T-014, T-010, T-041           |
+| T-026 | Manage API Route                   | 6     | T-015, T-010, T-041           |
+| T-027 | Resend Link API Route              | 6     | T-016, T-010, T-041           |
+| T-044 | Admin Mutation API Routes          | 6     | T-017, T-018, T-041           |
+| T-021 | Event Landing Page                 | 7     | T-036, T-025, T-019           |
+| T-022 | Registration Form                  | 7     | T-036, T-025                  |
+| T-023 | Manage Page                        | 7     | T-036, T-026                  |
+| T-024 | Resend Link Page                   | 7     | T-036, T-027                  |
+| T-028 | Admin Layout and Auth              | 8     | T-017                         |
+| T-029 | Admin Dashboard                    | 8     | T-018, T-028                  |
+| T-030 | Admin Registration List            | 8     | T-044, T-028                  |
+| T-031 | Admin CSV Export                   | 8     | T-018                         |
+| T-032 | Rate Limiting Integration          | 9     | T-025, T-026, T-027           |
+| T-033 | Token Logging Audit                | 9     | T-032                         |
+| T-034 | Security Headers                   | 9     | T-033                         |
+| T-045 | CI Pipeline – Security Suites      | 9     | T-038, T-033                  |
+| T-035 | Health Endpoint                    | 10    | T-008                         |
+| T-037 | Data Retention                     | 10    | T-035                         |
+| T-046 | README                             | 10    | T-037                         |
+
+**Total tickets: 45** (37 original + 8 new)
+
+---
+
+End of Execution Backlog.
