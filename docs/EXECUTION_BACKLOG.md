@@ -310,10 +310,10 @@ T-001 (Init Next.js)
 - `package.json` (add `resend`)
 
 **Acceptance criteria:**
-- [ ] `send-manage-link.ts` exports async function with signature: `(params: { to: string; manageUrl: string; guestName: string }) => Promise<{ success: boolean; error?: string }>`
-- [ ] Function uses `RESEND_API_KEY` from environment
-- [ ] TypeScript compiles without errors
-- [ ] No API key hardcoded
+- [x] `send-manage-link.ts` exports async function with signature: `(params: { to: string; manageUrl: string; guestName: string }) => Promise<{ success: boolean; error?: string }>`
+- [x] Function uses `RESEND_API_KEY` from environment
+- [x] TypeScript compiles without errors
+- [x] No API key hardcoded
 
 **Non-goals:**
 - Do not create email templates (T-020)
