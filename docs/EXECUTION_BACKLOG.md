@@ -258,11 +258,11 @@ T-001 (Init Next.js)
 - `src/repositories/prisma.ts`
 
 **Acceptance criteria:**
-- [ ] Exports a singleton `prisma` instance of `PrismaClient`
-- [ ] Uses the standard Next.js pattern: stores instance on `globalThis` in development to prevent connection pool exhaustion during hot reloads
-- [ ] In production: creates a single instance
-- [ ] TypeScript compiles without errors
-- [ ] All repository files will import from `./prisma` (not `@prisma/client` directly)
+- [x] Exports a singleton `prisma` instance of `PrismaClient`
+- [x] Uses the standard Next.js pattern: stores instance on `globalThis` in development to prevent connection pool exhaustion during hot reloads
+- [x] In production: creates a single instance
+- [x] TypeScript compiles without errors
+- [x] All repository files will import from `./prisma` (not `@prisma/client` directly)
 
 **Non-goals:**
 - Do not create repositories (T-011, T-012, T-013)
