@@ -150,10 +150,10 @@ T-001 (Init Next.js)
 - `src/app/globals.css`
 
 **Acceptance criteria:**
-- [ ] `npm run dev` starts without errors
-- [ ] Navigating to `localhost:3000` shows the placeholder page
-- [ ] No TypeScript compilation errors
-- [ ] `.gitignore` includes: `node_modules/`, `.env.local`, `.next/`, `.vercel/`
+- [x] `npm run dev` starts without errors
+- [x] Navigating to `localhost:3000` shows the placeholder page
+- [x] No TypeScript compilation errors
+- [x] `.gitignore` includes: `node_modules/`, `.env.local`, `.next/`, `.vercel/`
 
 **Non-goals:**
 - Do not configure Tailwind yet (T-002)
@@ -181,12 +181,12 @@ T-001 (Init Next.js)
 - `package.json` (modified – verify scripts)
 
 **Acceptance criteria:**
-- [ ] `tsconfig.json` has `"strict": true`, `"noUncheckedIndexedAccess": true`, `"noImplicitReturns": true`
-- [ ] `npx tailwindcss --help` runs without error
-- [ ] `npx vitest run` executes with 0 tests (no failures)
-- [ ] `npm run lint` passes with no errors
-- [ ] `npm run build` succeeds
-- [ ] `package.json` has scripts: `dev`, `build`, `start`, `lint`, `test` (alias for `vitest run`)
+- [x] `tsconfig.json` has `"strict": true`, `"noUncheckedIndexedAccess": true`, `"noImplicitReturns": true`
+- [x] `npx tailwindcss --help` runs without error
+- [x] `npx vitest run` executes with 0 tests (no failures)
+- [x] `npm run lint` passes with no errors
+- [x] `npm run build` succeeds
+- [x] `package.json` has scripts: `dev`, `build`, `start`, `lint`, `test` (alias for `vitest run`)
 
 **Non-goals:**
 - Do not write any tests yet
