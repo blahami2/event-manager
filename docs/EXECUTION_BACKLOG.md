@@ -206,12 +206,12 @@ T-001 (Init Next.js)
 - `.github/workflows/ci.yml`
 
 **Acceptance criteria:**
-- [ ] Workflow triggers on push to `main`/`master` and on PRs
-- [ ] Steps: checkout → setup Node 20 → `npm ci` → `npx tsc --noEmit` → `npm run lint` → `npx vitest run` → gitleaks secret scan → `npm run build`
-- [ ] Gitleaks step uses `gitleaks/gitleaks-action@v2`
-- [ ] Build step uses placeholder environment variables (see `docs/VERIFICATION_RULES.md` Section 9)
-- [ ] Workflow runs successfully (all steps pass with the current empty project)
-- [ ] YAML is valid (no syntax errors)
+- [x] Workflow triggers on push to `main`/`master` and on PRs
+- [x] Steps: checkout → setup Node 20 → `npm ci` → `npx tsc --noEmit` → `npm run lint` → `npx vitest run` → gitleaks secret scan → `npm run build`
+- [x] Gitleaks step uses `gitleaks/gitleaks-action@v2`
+- [x] Build step uses placeholder environment variables (see `docs/VERIFICATION_RULES.md` Section 9)
+- [x] Workflow runs successfully (all steps pass with the current empty project)
+- [x] YAML is valid (no syntax errors)
 
 **Non-goals:**
 - Do not add coverage thresholds yet (T-042)
