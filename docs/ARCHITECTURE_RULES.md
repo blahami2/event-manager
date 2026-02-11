@@ -133,6 +133,27 @@ These patterns MUST NOT appear in the codebase:
 
 ---
 
+## Git Safety Rules
+
+| Rule | Description |
+|------|-------------|
+| GIT1 | `.gitignore` MUST exist at the repo root before any code is written |
+| GIT2 | NEVER commit `.env`, `.env.local`, or any `.env*.local` file |
+| GIT3 | NEVER commit `*.pem`, `*.key`, `credentials.json`, or service account files |
+| GIT4 | `.env.example` MUST contain only placeholder values (e.g., `your-key-here`), never real credentials |
+| GIT5 | If a secret is accidentally committed, it MUST be considered compromised and rotated immediately – removing it from git history is not sufficient |
+| GIT6 | CI MUST run a secret scanning step (gitleaks) on every PR |
+| GIT7 | Seed data MUST NOT contain real user data, real emails, or real API keys |
+
+**Files that MUST NEVER be committed (enforced by `.gitignore`):**
+- `.env`, `.env.local`, `.env.*.local` – environment secrets
+- `*.pem`, `*.key` – private keys
+- `credentials.json`, `service-account*.json` – service credentials
+- `node_modules/` – dependencies
+- `.next/`, `coverage/` – build artifacts
+
+---
+
 ## API Contract Rules
 
 | Rule | Description |

@@ -200,15 +200,16 @@ T-001 (Init Next.js)
 **Input:** T-002 (TypeScript, ESLint, Vitest configured)
 **Output:**
 - GitHub Actions workflow that runs on every push/PR
-- Runs: type check, lint, test, build
+- Runs: type check, lint, test, secret scan, build
 
 **Files created:**
 - `.github/workflows/ci.yml`
 
 **Acceptance criteria:**
 - [ ] Workflow triggers on push to `main`/`master` and on PRs
-- [ ] Steps: checkout → setup Node 20 → `npm ci` → `npx tsc --noEmit` → `npm run lint` → `npx vitest run` → `npm run build`
-- [ ] Build step uses placeholder environment variables (see `docs/VERIFICATION_RULES.md` Section 8)
+- [ ] Steps: checkout → setup Node 20 → `npm ci` → `npx tsc --noEmit` → `npm run lint` → `npx vitest run` → gitleaks secret scan → `npm run build`
+- [ ] Gitleaks step uses `gitleaks/gitleaks-action@v2`
+- [ ] Build step uses placeholder environment variables (see `docs/VERIFICATION_RULES.md` Section 9)
 - [ ] Workflow runs successfully (all steps pass with the current empty project)
 - [ ] YAML is valid (no syntax errors)
 
