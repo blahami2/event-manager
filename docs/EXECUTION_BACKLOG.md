@@ -284,11 +284,11 @@ T-001 (Init Next.js)
 - `package.json` (add `@supabase/supabase-js`, `@supabase/ssr`)
 
 **Acceptance criteria:**
-- [ ] `supabase-client.ts` exports `createServerClient()` function
-- [ ] Client uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from environment
-- [ ] Server client uses `SUPABASE_SERVICE_ROLE_KEY` for admin operations
-- [ ] TypeScript compiles without errors
-- [ ] No secrets are hardcoded
+- [x] `supabase-client.ts` exports `createServerClient()` function
+- [x] Client uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from environment
+- [x] Server client uses `SUPABASE_SERVICE_ROLE_KEY` for admin operations
+- [x] TypeScript compiles without errors
+- [x] No secrets are hardcoded
 
 **Non-goals:**
 - Do not create login UI
