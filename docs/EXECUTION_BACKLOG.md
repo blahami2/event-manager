@@ -501,15 +501,15 @@ T-001 (Init Next.js)
 - `tests/unit/lib/logger.test.ts`
 
 **Acceptance criteria:**
-- [ ] Exports `logger` object with methods: `info()`, `warn()`, `error()`, `debug()`
-- [ ] Each method accepts `(message: string, context?: Record<string, unknown>)`
-- [ ] Output is structured JSON: `{ "level", "message", "context", "timestamp" }`
-- [ ] In development: pretty-printed to console
-- [ ] Exports `maskEmail('john@example.com')` → returns `j***@example.com`
-- [ ] Exports `hashIp('192.168.1.1')` → returns consistent SHA-256 hash
-- [ ] Unit test verifies log output structure
-- [ ] Unit test verifies email masking
-- [ ] Unit test verifies IP hashing
+- [x] Exports `logger` object with methods: `info()`, `warn()`, `error()`, `debug()`
+- [x] Each method accepts `(message: string, context?: Record<string, unknown>)`
+- [x] Output is structured JSON: `{ "level", "message", "context", "timestamp" }`
+- [x] In development: pretty-printed to console
+- [x] Exports `maskEmail('john@example.com')` → returns `j***@example.com`
+- [x] Exports `hashIp('192.168.1.1')` → returns consistent SHA-256 hash
+- [x] Unit test verifies log output structure
+- [x] Unit test verifies email masking
+- [x] Unit test verifies IP hashing
 
 **Non-goals:**
 - Do not integrate with external logging service
