@@ -338,12 +338,12 @@ T-001 (Init Next.js)
 - `tests/fixtures/seed-data.ts` (re-exports seed constants)
 
 **Acceptance criteria:**
-- [ ] `.env.example` lists ALL variables from `docs/ARCHITECTURE.md` Section 10.3
-- [ ] `src/config/limits.ts` exports: `MAX_REGISTRATION_ATTEMPTS_PER_HOUR = 5`, `MAX_TOKEN_LOOKUPS_PER_HOUR = 10`, `MAX_RESEND_ATTEMPTS_PER_HOUR = 3`, `MAX_ADMIN_LOGIN_ATTEMPTS_PER_15MIN = 5`, `TOKEN_EXPIRY_DAYS = 90`
-- [ ] `src/config/event.ts` exports: `EVENT_NAME`, `EVENT_DATE`, `EVENT_LOCATION`, `EVENT_DESCRIPTION`
-- [ ] `prisma/seed.ts` contains fixed UUID constants
-- [ ] All directories from `docs/ARCHITECTURE.md` Section 2 exist
-- [ ] `.env.example` has comments explaining each variable
+- [x] `.env.example` lists ALL variables from `docs/ARCHITECTURE.md` Section 10.3
+- [x] `src/config/limits.ts` exports: `MAX_REGISTRATION_ATTEMPTS_PER_HOUR = 5`, `MAX_TOKEN_LOOKUPS_PER_HOUR = 10`, `MAX_RESEND_ATTEMPTS_PER_HOUR = 3`, `MAX_ADMIN_LOGIN_ATTEMPTS_PER_15MIN = 5`, `TOKEN_EXPIRY_DAYS = 90`
+- [x] `src/config/event.ts` exports: `EVENT_NAME`, `EVENT_DATE`, `EVENT_LOCATION`, `EVENT_DESCRIPTION`
+- [x] `prisma/seed.ts` contains fixed UUID constants
+- [x] All directories from `docs/ARCHITECTURE.md` Section 2 exist
+- [x] `.env.example` has comments explaining each variable
 
 **Non-goals:**
 - Do not populate seed data with actual records yet (T-043)
