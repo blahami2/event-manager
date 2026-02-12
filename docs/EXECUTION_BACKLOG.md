@@ -362,14 +362,14 @@ T-001 (Init Next.js)
 - `src/types/api.ts`
 
 **Acceptance criteria:**
-- [ ] `src/types/registration.ts` exports: `RegistrationInput`, `RegistrationOutput`, `RegistrationStatus` (enum), `RegistrationFilters`, `PaginatedResult<T>`, `TokenData`
-- [ ] `RegistrationInput` has: `name: string`, `email: string`, `guestCount: number`, `dietaryNotes?: string`
-- [ ] `RegistrationOutput` has: `id: string`, `name: string`, `email: string`, `guestCount: number`, `dietaryNotes: string | null`, `status: RegistrationStatus`, `createdAt: Date`, `updatedAt: Date`
-- [ ] `src/types/api.ts` exports: `ApiSuccessResponse<T>`, `ApiErrorResponse`, `ApiResponse<T>` (union)
-- [ ] `ApiSuccessResponse<T>` shape: `{ data: T; message: string }`
-- [ ] `ApiErrorResponse` shape: `{ error: { code: string; message: string; fields?: Record<string, string> } }`
-- [ ] TypeScript compiles without errors
-- [ ] No circular imports
+- [x] `src/types/registration.ts` exports: `RegistrationInput`, `RegistrationOutput`, `RegistrationStatus` (enum), `RegistrationFilters`, `PaginatedResult<T>`, `TokenData`
+- [x] `RegistrationInput` has: `name: string`, `email: string`, `guestCount: number`, `dietaryNotes?: string`
+- [x] `RegistrationOutput` has: `id: string`, `name: string`, `email: string`, `guestCount: number`, `dietaryNotes: string | null`, `status: RegistrationStatus`, `createdAt: Date`, `updatedAt: Date`
+- [x] `src/types/api.ts` exports: `ApiSuccessResponse<T>`, `ApiErrorResponse`, `ApiResponse<T>` (union)
+- [x] `ApiSuccessResponse<T>` shape: `{ data: T; message: string }`
+- [x] `ApiErrorResponse` shape: `{ error: { code: string; message: string; fields?: Record<string, string> } }`
+- [x] TypeScript compiles without errors
+- [x] No circular imports
 
 **Non-goals:**
 - Do not create Zod schemas (T-014)
