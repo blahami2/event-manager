@@ -559,16 +559,16 @@ T-001 (Init Next.js)
 - `tests/unit/lib/rate-limit/limiter.test.ts`
 
 **Acceptance criteria:**
-- [ ] Exports `createRateLimiter(config: { windowMs: number; maxAttempts: number })`
-- [ ] Returns object with `check(identifier: string): { allowed: boolean; remaining: number; resetAt: Date }`
-- [ ] Correctly tracks attempts within sliding window
-- [ ] Resets counter after window expires
-- [ ] Respects `RATE_LIMIT_DISABLED` env var for development
-- [ ] Uses hashed IP as identifier (calls `hashIp` from `src/lib/logger.ts`)
-- [ ] Unit test: allows requests within limit
-- [ ] Unit test: blocks requests exceeding limit
-- [ ] Unit test: resets after window expires
-- [ ] `npx vitest run` passes
+- [x] Exports `createRateLimiter(config: { windowMs: number; maxAttempts: number })`
+- [x] Returns object with `check(identifier: string): { allowed: boolean; remaining: number; resetAt: Date }`
+- [x] Correctly tracks attempts within sliding window
+- [x] Resets counter after window expires
+- [x] Respects `RATE_LIMIT_DISABLED` env var for development
+- [x] Uses hashed IP as identifier (calls `hashIp` from `src/lib/logger.ts`)
+- [x] Unit test: allows requests within limit
+- [x] Unit test: blocks requests exceeding limit
+- [x] Unit test: resets after window expires
+- [x] `npx vitest run` passes
 
 **Non-goals:**
 - Do not integrate with API routes (T-032)
