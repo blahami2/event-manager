@@ -476,12 +476,12 @@ T-001 (Init Next.js)
 - `src/app/admin/error.tsx` (admin error boundary)
 
 **Acceptance criteria:**
-- [ ] Root error boundary shows user-friendly message: "Something went wrong. Please try again."
-- [ ] Root error boundary has "Try again" button that resets error state
-- [ ] 404 page shows "Page not found" with link to home
-- [ ] Admin error boundary shows admin-specific error message
-- [ ] No stack traces shown to users
-- [ ] Error boundary components are Client Components (`'use client'`)
+- [x] Root error boundary shows user-friendly message: "Something went wrong. Please try again."
+- [x] Root error boundary has "Try again" button that resets error state
+- [x] 404 page shows "Page not found" with link to home
+- [x] Admin error boundary shows admin-specific error message
+- [x] No stack traces shown to users
+- [x] Error boundary components are Client Components (`'use client'`)
 
 **Non-goals:**
 - Do not implement error reporting to external service (Sentry, etc.)
