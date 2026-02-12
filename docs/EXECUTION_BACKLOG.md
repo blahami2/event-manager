@@ -444,17 +444,17 @@ T-001 (Init Next.js)
 - `tests/unit/lib/api-response.test.ts`
 
 **Acceptance criteria:**
-- [ ] Exports `successResponse<T>(data: T, message: string, status?: number): NextResponse`
-- [ ] Exports `errorResponse(error: AppError): NextResponse`
-- [ ] Exports `handleApiError(error: unknown): NextResponse` (catches unknown errors, returns 500)
-- [ ] `successResponse` returns JSON matching `ApiSuccessResponse<T>` from `src/types/api.ts`
-- [ ] `errorResponse` returns JSON matching `ApiErrorResponse` from `src/types/api.ts`
-- [ ] `handleApiError` maps `AppError` subclasses to correct status codes
-- [ ] `handleApiError` returns generic 500 for non-`AppError` errors (no internal details leaked)
-- [ ] `ValidationError` includes `fields` in response body
-- [ ] Unit test: success response format
-- [ ] Unit test: each error type maps to correct status code and JSON shape
-- [ ] Unit test: unknown error returns 500 with generic message
+- [x] Exports `successResponse<T>(data: T, message: string, status?: number): NextResponse`
+- [x] Exports `errorResponse(error: AppError): NextResponse`
+- [x] Exports `handleApiError(error: unknown): NextResponse` (catches unknown errors, returns 500)
+- [x] `successResponse` returns JSON matching `ApiSuccessResponse<T>` from `src/types/api.ts`
+- [x] `errorResponse` returns JSON matching `ApiErrorResponse` from `src/types/api.ts`
+- [x] `handleApiError` maps `AppError` subclasses to correct status codes
+- [x] `handleApiError` returns generic 500 for non-`AppError` errors (no internal details leaked)
+- [x] `ValidationError` includes `fields` in response body
+- [x] Unit test: success response format
+- [x] Unit test: each error type maps to correct status code and JSON shape
+- [x] Unit test: unknown error returns 500 with generic message
 
 **Non-goals:**
 - Do not handle streaming responses
