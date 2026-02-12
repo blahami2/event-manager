@@ -419,12 +419,12 @@ T-001 (Init Next.js)
 - `tests/unit/lib/errors/app-errors.test.ts`
 
 **Acceptance criteria:**
-- [ ] `AppError` base class with: `message`, `code`, `statusCode`, `isOperational`
-- [ ] Subclasses: `ValidationError` (400), `NotFoundError` (404), `RateLimitError` (429), `AuthenticationError` (401), `AuthorizationError` (403)
-- [ ] `ValidationError` accepts `fields: Record<string, string>`
-- [ ] All errors extend `Error` (proper prototype chain)
-- [ ] Unit tests cover all error types with correct status codes
-- [ ] `npx vitest run` passes
+- [x] `AppError` base class with: `message`, `code`, `statusCode`, `isOperational`
+- [x] Subclasses: `ValidationError` (400), `NotFoundError` (404), `RateLimitError` (429), `AuthenticationError` (401), `AuthorizationError` (403)
+- [x] `ValidationError` accepts `fields: Record<string, string>`
+- [x] All errors extend `Error` (proper prototype chain)
+- [x] Unit tests cover all error types with correct status codes
+- [x] `npx vitest run` passes
 
 **Non-goals:**
 - Do not create error-handling middleware
