@@ -132,10 +132,10 @@ const projectRulesConfig = defineConfig([
       ],
     },
   },
-  // Override: Allow PrismaClient imports in repositories
+  // Override: Allow PrismaClient imports in repositories and seed script
   {
     name: "project/repositories-override",
-    files: ["src/repositories/**/*.ts"],
+    files: ["src/repositories/**/*.ts", "prisma/**/*.ts"],
     rules: {
       "no-restricted-imports": "off",
     },

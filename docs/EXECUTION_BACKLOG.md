@@ -392,12 +392,12 @@ T-001 (Init Next.js)
 - `package.json` (add `prisma.seed` config)
 
 **Acceptance criteria:**
-- [ ] Seed creates 1 admin user with fixed UUID
-- [ ] Seed creates 3 test registrations: 1 confirmed, 1 confirmed with dietary notes, 1 cancelled
-- [ ] All seed records use fixed UUIDs from `tests/fixtures/seed-data.ts`
+- [x] Seed creates 1 admin user with fixed UUID
+- [x] Seed creates 3 test registrations: 1 confirmed, 1 confirmed with dietary notes, 1 cancelled
+- [x] All seed records use fixed UUIDs from `tests/fixtures/seed-data.ts`
 - [ ] `npx prisma db seed` runs without errors (when DB is available)
-- [ ] `tests/fixtures/seed-data.ts` exports all fixed UUIDs and test data objects
-- [ ] Seed script is idempotent (can run multiple times without duplicates via `upsert`)
+- [x] `tests/fixtures/seed-data.ts` exports all fixed UUIDs and test data objects
+- [x] Seed script is idempotent (can run multiple times without duplicates via `upsert`)
 
 **Non-goals:**
 - Do not create token records in seed (tokens are generated at runtime)
