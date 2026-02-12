@@ -666,12 +666,12 @@ T-001 (Init Next.js)
 - `tests/unit/repositories/admin-repository.test.ts`
 
 **Acceptance criteria:**
-- [ ] Imports `prisma` from `./prisma` (the singleton)
-- [ ] Exports: `findAdminBySupabaseId(supabaseUserId)`, `isAdmin(supabaseUserId)`, `listAdmins()`
-- [ ] `isAdmin` returns boolean
-- [ ] `findAdminBySupabaseId` returns `null` if not found
-- [ ] Unit tests mock Prisma client
-- [ ] Unit tests cover: found, not found, isAdmin true/false
+- [x] Imports `prisma` from `./prisma` (the singleton)
+- [x] Exports: `findAdminBySupabaseId(supabaseUserId)`, `isAdmin(supabaseUserId)`, `listAdmins()`
+- [x] `isAdmin` returns boolean
+- [x] `findAdminBySupabaseId` returns `null` if not found
+- [x] Unit tests mock Prisma client
+- [x] Unit tests cover: found, not found, isAdmin true/false
 
 **Non-goals:**
 - Do not create admin CRUD (admins are seeded or managed via DB directly)
