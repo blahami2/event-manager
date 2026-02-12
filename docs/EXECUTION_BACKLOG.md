@@ -640,13 +640,13 @@ T-001 (Init Next.js)
 - `tests/unit/repositories/token-repository.test.ts`
 
 **Acceptance criteria:**
-- [ ] Imports `prisma` from `./prisma` (the singleton)
-- [ ] Exports: `createToken(registrationId, tokenHash, expiresAt)`, `findByTokenHash(hash)`, `revokeToken(tokenId)`, `revokeAllTokensForRegistration(registrationId)`, `findActiveTokenForRegistration(registrationId)`
-- [ ] `findByTokenHash` returns `null` for revoked or expired tokens
-- [ ] `revokeAllTokensForRegistration` marks all tokens as revoked (batch update)
-- [ ] All methods accept/return typed interfaces, not raw Prisma types
-- [ ] Unit tests mock Prisma client
-- [ ] Unit tests cover: create, find valid, find expired (null), find revoked (null), revoke
+- [x] Imports `prisma` from `./prisma` (the singleton)
+- [x] Exports: `createToken(registrationId, tokenHash, expiresAt)`, `findByTokenHash(hash)`, `revokeToken(tokenId)`, `revokeAllTokensForRegistration(registrationId)`, `findActiveTokenForRegistration(registrationId)`
+- [x] `findByTokenHash` returns `null` for revoked or expired tokens
+- [x] `revokeAllTokensForRegistration` marks all tokens as revoked (batch update)
+- [x] All methods accept/return typed interfaces, not raw Prisma types
+- [x] Unit tests mock Prisma client
+- [x] Unit tests cover: create, find valid, find expired (null), find revoked (null), revoke
 
 **Non-goals:**
 - Do not implement token generation (that's in T-009)
