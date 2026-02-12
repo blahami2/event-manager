@@ -529,17 +529,17 @@ T-001 (Init Next.js)
 - `tests/unit/lib/token/capability-token.test.ts`
 
 **Acceptance criteria:**
-- [ ] `generateToken()` returns `{ raw: string; hash: string }` where `raw` is base64url-encoded 32+ bytes
-- [ ] `hashToken(raw: string)` returns SHA-256 hex digest
-- [ ] `generateToken().raw` decoded length >= 32 bytes
-- [ ] `hashToken(token)` produces same hash for same input (deterministic)
-- [ ] `hashToken(tokenA) !== hashToken(tokenB)` for different tokens
-- [ ] Raw token is URL-safe (matches `/^[A-Za-z0-9_-]+$/`)
-- [ ] Unit test: token length >= 32 bytes when decoded
-- [ ] Unit test: hash is deterministic
-- [ ] Unit test: different tokens produce different hashes
-- [ ] Unit test: raw token is URL-safe
-- [ ] `npx vitest run` passes
+- [x] `generateToken()` returns `{ raw: string; hash: string }` where `raw` is base64url-encoded 32+ bytes
+- [x] `hashToken(raw: string)` returns SHA-256 hex digest
+- [x] `generateToken().raw` decoded length >= 32 bytes
+- [x] `hashToken(token)` produces same hash for same input (deterministic)
+- [x] `hashToken(tokenA) !== hashToken(tokenB)` for different tokens
+- [x] Raw token is URL-safe (matches `/^[A-Za-z0-9_-]+$/`)
+- [x] Unit test: token length >= 32 bytes when decoded
+- [x] Unit test: hash is deterministic
+- [x] Unit test: different tokens produce different hashes
+- [x] Unit test: raw token is URL-safe
+- [x] `npx vitest run` passes
 
 **Non-goals:**
 - Do not create token storage (T-012)
