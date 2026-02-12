@@ -614,13 +614,13 @@ T-001 (Init Next.js)
 - `tests/unit/repositories/registration-repository.test.ts`
 
 **Acceptance criteria:**
-- [ ] Imports `prisma` from `./prisma` (the singleton, NOT from `@prisma/client`)
-- [ ] Exports: `createRegistration(data)`, `findRegistrationById(id)`, `findRegistrationByEmail(email)`, `updateRegistration(id, data)`, `cancelRegistration(id)`, `listRegistrations(filters)`, `countRegistrations()`
-- [ ] All methods use typed input/output from `src/types/registration.ts`
-- [ ] `cancelRegistration` sets status to `CANCELLED`, does not delete
-- [ ] `listRegistrations` supports filtering by status and pagination
-- [ ] Unit tests mock Prisma client
-- [ ] Unit tests cover: create, find, update, cancel, list, not-found scenarios
+- [x] Imports `prisma` from `./prisma` (the singleton, NOT from `@prisma/client`)
+- [x] Exports: `createRegistration(data)`, `findRegistrationById(id)`, `findRegistrationByEmail(email)`, `updateRegistration(id, data)`, `cancelRegistration(id)`, `listRegistrations(filters)`, `countRegistrations()`
+- [x] All methods use typed input/output from `src/types/registration.ts`
+- [x] `cancelRegistration` sets status to `CANCELLED`, does not delete
+- [x] `listRegistrations` supports filtering by status and pagination
+- [x] Unit tests mock Prisma client
+- [x] Unit tests cover: create, find, update, cancel, list, not-found scenarios
 
 **Non-goals:**
 - Do not implement business logic (validation, token handling)
