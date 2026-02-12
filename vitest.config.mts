@@ -10,6 +10,23 @@ export default defineConfig({
     globals: true,
     setupFiles: [],
     passWithNoTests: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 75,
+        statements: 80,
+      },
+      include: ["src/lib/**", "src/repositories/**"],
+      exclude: [
+        "src/lib/auth/supabase-client.ts",
+        "src/lib/email/send-manage-link.ts",
+        "src/config/**",
+        "src/repositories/prisma.ts",
+      ],
+    },
   },
   resolve: {
     alias: {

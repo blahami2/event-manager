@@ -587,13 +587,13 @@ T-001 (Init Next.js)
 - `vitest.config.ts`
 
 **Acceptance criteria:**
-- [ ] `vitest.config.ts` updated with coverage configuration from `docs/VERIFICATION_RULES.md` Section 4
-- [ ] Coverage thresholds: 80% lines, 80% functions, 75% branches, 80% statements
-- [ ] Coverage includes `src/lib/**` and `src/repositories/**`
-- [ ] Coverage excludes `src/lib/auth/supabase-client.ts` and `src/config/**`
-- [ ] CI step changed from `npx vitest run` to `npx vitest run --coverage`
-- [ ] CI fails if coverage drops below thresholds
-- [ ] `npx vitest run --coverage` passes locally
+- [x] `vitest.config.ts` updated with coverage configuration from `docs/VERIFICATION_RULES.md` Section 4
+- [x] Coverage thresholds: 80% lines, 80% functions, 75% branches, 80% statements
+- [x] Coverage includes `src/lib/**` and `src/repositories/**`
+- [x] Coverage excludes `src/lib/auth/supabase-client.ts` and `src/config/**`
+- [x] CI step changed from `npx vitest run` to `npx vitest run --coverage`
+- [x] CI fails if coverage drops below thresholds
+- [x] `npx vitest run --coverage` passes locally
 
 **Non-goals:**
 - Do not add security or architecture test suites yet (T-045)
