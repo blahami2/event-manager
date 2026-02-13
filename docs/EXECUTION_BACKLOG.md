@@ -1108,13 +1108,13 @@ T-001 (Init Next.js)
 - `src/components/admin/AdminNav.tsx`
 
 **Acceptance criteria:**
-- [ ] Admin layout checks auth on every request; redirects to `/admin/login` if unauthenticated
-- [ ] Login page with email + password form
-- [ ] Login delegates to Supabase Auth `signInWithPassword`
-- [ ] On success: redirect to `/admin`
-- [ ] On failure: show "Invalid credentials" (generic message)
-- [ ] Admin nav shows: Dashboard, Registrations, Logout
-- [ ] Logout clears Supabase session and redirects to `/admin/login`
+- [x] Admin layout checks auth on every request; redirects to `/admin/login` if unauthenticated
+- [x] Login page with email + password form
+- [x] Login delegates to Supabase Auth `signInWithPassword`
+- [x] On success: redirect to `/admin`
+- [x] On failure: show "Invalid credentials" (generic message)
+- [x] Admin nav shows: Dashboard, Registrations, Logout
+- [x] Logout clears Supabase session and redirects to `/admin/login`
 
 **Non-goals:**
 - Do not implement password reset
