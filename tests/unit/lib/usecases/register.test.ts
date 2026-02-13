@@ -118,11 +118,17 @@ describe("registerGuest", () => {
     );
 
     expect(mockSendManageLink).toHaveBeenCalledOnce();
-    expect(mockSendManageLink).toHaveBeenCalledWith({
-      to: "alice@example.com",
-      manageUrl: "https://example.com/manage/raw-token-abc123",
-      guestName: "Alice Johnson",
-    });
+    expect(mockSendManageLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "alice@example.com",
+        manageUrl: "https://example.com/manage/raw-token-abc123",
+        guestName: "Alice Johnson",
+        registrationId: "reg-1",
+        emailType: "manage-link",
+        eventName: "Birthday Celebration",
+        eventDate: "Saturday, March 28, 2026",
+      }),
+    );
 
     expect(result).toEqual({ registrationId: "reg-1" });
   });
