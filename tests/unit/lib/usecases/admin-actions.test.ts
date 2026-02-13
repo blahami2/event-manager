@@ -107,7 +107,7 @@ describe("listRegistrationsPaginated", () => {
 
     // then
     expect(result.items).toHaveLength(1);
-    expect(result.items[0].status).toBe(RegistrationStatus.CANCELLED);
+    expect(result.items[0]?.status).toBe(RegistrationStatus.CANCELLED);
   });
 
   it("should return empty list when no registrations match", async () => {
@@ -327,7 +327,7 @@ describe("exportRegistrationsCsv", () => {
     // then
     const lines = csv.split("\n");
     // null dietaryNotes should be empty string in CSV
-    const fields = lines[1].split(",");
-    expect(fields[3]).toBe("");
+    const fields = lines[1]?.split(",");
+    expect(fields?.[3]).toBe("");
   });
 });
