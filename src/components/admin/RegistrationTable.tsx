@@ -1,0 +1,134 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import { RegistrationStatus } from "@/types/registration";
+import type { RegistrationOutput } from "@/types/registration";
+
+export interface RegistrationTableProps {
+  readonly registrations: ReadonlyArray<RegistrationOutput>;
+  readonly onEdit: (registration: RegistrationOutput) => void;
+  readonly onCancel: (registrationId: string) => void;
+}
+
+function formatDate(date: Date): string {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function StatusBadge({ status }: { readonly status: RegistrationStatus }): React.ReactElement {
+  const styles =
+    status === RegistrationStatus.CONFIRMED
+      ? "bg-green-100 text-green-800"
+      : "bg-red-100 text-red-800";
+
+  return (
+    <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${styles}`}>
+      {status}
+    </span>
+  );
+}
+
+export function RegistrationTable({
+  registrations,
+  onEdit,
+  onCancel,
+}: RegistrationTableProps): React.ReactElement {
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+
+  const handleCancelClick = useCallback((id: string) => {
+    setConfirmingId(id);
+  }, []);
+
+  const handleConfirmCancel = useCallback(
+    (id: string) => {
+      onCancel(id);
+      setConfirmingId(null);
+    },
+    [onCancel],
+  );
+
+  const handleDismissConfirm = useCallback(() => {
+    setConfirmingId(null);
+  }, []);
+
+  if (registrations.length === 0) {
+    return (
+      <div className="rounded-md bg-gray-50 py-12 text-center text-sm text-gray-500">
+        No registrations found.
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Name</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Guests</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Created</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200 bg-white">
+          {registrations.map((reg) => (
+            <tr key={reg.id}>
+              <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{reg.name}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{reg.email}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{reg.guestCount}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm">
+                <StatusBadge status={reg.status} />
+              </td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{formatDate(reg.createdAt)}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm">
+                {confirmingId === reg.id ? (
+                  <span className="flex items-center gap-2">
+                    <span className="text-red-600">Cancel this registration?</span>
+                    <button
+                      type="button"
+                      onClick={() => handleConfirmCancel(reg.id)}
+                      className="rounded bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDismissConfirm}
+                      className="rounded bg-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-300"
+                    >
+                      No
+                    </button>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(reg)}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
+                      Edit
+                    </button>
+                    {reg.status !== RegistrationStatus.CANCELLED && (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelClick(reg.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
