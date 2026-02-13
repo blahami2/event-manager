@@ -183,7 +183,7 @@ describe("RegistrationForm", () => {
     render(<RegistrationForm />);
     const select = screen.getByLabelText("Number of Guests") as HTMLSelectElement;
     expect(select.options.length).toBe(10);
-    expect(select.options[0].value).toBe("1");
-    expect(select.options[9].value).toBe("10");
+    expect(select.options[0]?.value).toBe("1");
+    expect(select.options[9]?.value).toBe("10");
   });
 });
