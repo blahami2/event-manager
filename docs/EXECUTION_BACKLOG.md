@@ -967,14 +967,14 @@ T-001 (Init Next.js)
 - `src/app/api/admin/registrations/route.ts`
 
 **Acceptance criteria:**
-- [ ] `GET /api/admin/registrations` returns paginated list with filters (query params: `status`, `search`, `page`, `pageSize`)
-- [ ] `PUT /api/admin/registrations` accepts `{ registrationId, name, email, guestCount, dietaryNotes? }` – admin edit
-- [ ] `DELETE /api/admin/registrations` accepts `{ registrationId }` – admin cancel
-- [ ] All endpoints verify admin auth via `verifyAdmin()` guard
-- [ ] All endpoints use `successResponse()` / `handleApiError()` from API response utility
-- [ ] Unauthenticated requests return `401`
-- [ ] Non-admin users return `403`
-- [ ] All mutation actions logged with `adminUserId`, `action`, `targetId`
+- [x] `GET /api/admin/registrations` returns paginated list with filters (query params: `status`, `search`, `page`, `pageSize`)
+- [x] `PUT /api/admin/registrations` accepts `{ registrationId, name, email, guestCount, dietaryNotes? }` – admin edit
+- [x] `DELETE /api/admin/registrations` accepts `{ registrationId }` – admin cancel
+- [x] All endpoints verify admin auth via `verifyAdmin()` guard
+- [x] All endpoints use `successResponse()` / `handleApiError()` from API response utility
+- [x] Unauthenticated requests return `401`
+- [x] Non-admin users return `403`
+- [x] All mutation actions logged with `adminUserId`, `action`, `targetId`
 
 **Non-goals:**
 - Do not implement CSV export here (T-031 handles that separately)
@@ -999,13 +999,13 @@ T-001 (Init Next.js)
 - `src/components/ui/Card.tsx`
 
 **Acceptance criteria:**
-- [ ] Page displays: event name, date, location, description (from `src/config/event.ts`)
-- [ ] "Register" CTA button links to `/register`
-- [ ] "Already registered?" link to `/resend-link`
-- [ ] Responsive layout: looks correct at 320px, 768px, 1280px widths
-- [ ] Uses Tailwind CSS; no inline styles except in email templates
-- [ ] Server Component (no `'use client'`)
-- [ ] No business logic in component
+- [x] Page displays: event name, date, location, description (from `src/config/event.ts`)
+- [x] "Register" CTA button links to `/register`
+- [x] "Already registered?" link to `/resend-link`
+- [x] Responsive layout: looks correct at 320px, 768px, 1280px widths
+- [x] Uses Tailwind CSS; no inline styles except in email templates
+- [x] Server Component (no `'use client'`)
+- [x] No business logic in component
 
 **Non-goals:**
 - Do not implement registration form (T-022)
