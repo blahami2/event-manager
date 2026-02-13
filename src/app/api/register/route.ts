@@ -46,7 +46,7 @@ export async function POST(
 
     return successResponse(
       { registrationId: result.registrationId },
-      "Registration successful",
+      "Registration successful. Check your email.",
       201,
     );
   } catch (error: unknown) {

@@ -76,7 +76,7 @@ describe("POST /api/register", () => {
     expect(res.status).toBe(201);
     expect(body).toEqual({
       data: { registrationId: "reg-123" },
-      message: "Registration successful",
+      message: "Registration successful. Check your email.",
     });
     expect(mockRegisterGuest).toHaveBeenCalledWith(validBody);
   });

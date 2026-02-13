@@ -894,15 +894,15 @@ T-001 (Init Next.js)
 - `src/app/api/register/route.ts`
 
 **Acceptance criteria:**
-- [ ] Accepts `POST` with JSON body: `{ name, email, guestCount, dietaryNotes? }`
-- [ ] Delegates to `registerGuest()` use case
-- [ ] Uses `successResponse()` / `handleApiError()` from API response utility
-- [ ] On success: returns `201` with `{ "data": { "registrationId": "..." }, "message": "Registration successful. Check your email." }`
-- [ ] On validation failure: returns `400` with structured error response
-- [ ] On rate limit: returns `429` with `Retry-After` header
-- [ ] On server error: returns `500` with `{ "error": { "code": "INTERNAL_ERROR", "message": "An unexpected error occurred" } }`
-- [ ] Rate limiter applied: 5 attempts per IP per hour
-- [ ] No raw tokens in response body
+- [x] Accepts `POST` with JSON body: `{ name, email, guestCount, dietaryNotes? }`
+- [x] Delegates to `registerGuest()` use case
+- [x] Uses `successResponse()` / `handleApiError()` from API response utility
+- [x] On success: returns `201` with `{ "data": { "registrationId": "..." }, "message": "Registration successful. Check your email." }`
+- [x] On validation failure: returns `400` with structured error response
+- [x] On rate limit: returns `429` with `Retry-After` header
+- [x] On server error: returns `500` with `{ "error": { "code": "INTERNAL_ERROR", "message": "An unexpected error occurred" } }`
+- [x] Rate limiter applied: 5 attempts per IP per hour
+- [x] No raw tokens in response body
 
 **Non-goals:**
 - Do not implement CORS headers (Next.js handles same-origin)
