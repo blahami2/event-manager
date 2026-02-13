@@ -999,13 +999,13 @@ T-001 (Init Next.js)
 - `src/components/ui/Card.tsx`
 
 **Acceptance criteria:**
-- [ ] Page displays: event name, date, location, description (from `src/config/event.ts`)
-- [ ] "Register" CTA button links to `/register`
-- [ ] "Already registered?" link to `/resend-link`
-- [ ] Responsive layout: looks correct at 320px, 768px, 1280px widths
-- [ ] Uses Tailwind CSS; no inline styles except in email templates
-- [ ] Server Component (no `'use client'`)
-- [ ] No business logic in component
+- [x] Page displays: event name, date, location, description (from `src/config/event.ts`)
+- [x] "Register" CTA button links to `/register`
+- [x] "Already registered?" link to `/resend-link`
+- [x] Responsive layout: looks correct at 320px, 768px, 1280px widths
+- [x] Uses Tailwind CSS; no inline styles except in email templates
+- [x] Server Component (no `'use client'`)
+- [x] No business logic in component
 
 **Non-goals:**
 - Do not implement registration form (T-022)
