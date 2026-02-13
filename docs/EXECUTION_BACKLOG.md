@@ -945,12 +945,12 @@ T-001 (Init Next.js)
 - `src/app/api/resend-link/route.ts`
 
 **Acceptance criteria:**
-- [ ] Accepts `POST` with `{ email: string }`
-- [ ] ALWAYS returns `200` with `{ "message": "If this email is registered, a manage link has been sent." }`
-- [ ] Response body is IDENTICAL for existing and non-existing emails
-- [ ] Response timing must not differ significantly (add artificial delay if needed for timing safety)
-- [ ] Rate limiter applied: 3 attempts per IP per hour
-- [ ] No information leakage in headers, timing, or body
+- [x] Accepts `POST` with `{ email: string }`
+- [x] ALWAYS returns `200` with `{ "message": "If this email is registered, a manage link has been sent." }`
+- [x] Response body is IDENTICAL for existing and non-existing emails
+- [x] Response timing must not differ significantly (add artificial delay if needed for timing safety)
+- [x] Rate limiter applied: 3 attempts per IP per hour
+- [x] No information leakage in headers, timing, or body
 
 **Non-goals:**
 - Do not add any conditional response logic visible to client
