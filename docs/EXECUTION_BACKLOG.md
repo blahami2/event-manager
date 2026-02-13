@@ -838,15 +838,15 @@ T-001 (Init Next.js)
 - `tests/unit/lib/email/send-manage-link.test.ts`
 
 **Acceptance criteria:**
-- [ ] Sends email via Resend API with: recipient, subject, HTML body
-- [ ] Email contains manage link URL: `{BASE_URL}/manage/{raw_token}`
-- [ ] Email contains guest name and event details
-- [ ] Returns `{ success: true }` on successful send
-- [ ] Returns `{ success: false, error: string }` on failure (does not throw)
-- [ ] Logs email send with `registrationId` and `emailType` (never logs recipient email unmasked)
-- [ ] Unit test mocks Resend API
-- [ ] Unit test: successful send
-- [ ] Unit test: API failure handling
+- [x] Sends email via Resend API with: recipient, subject, HTML body
+- [x] Email contains manage link URL: `{BASE_URL}/manage/{raw_token}`
+- [x] Email contains guest name and event details
+- [x] Returns `{ success: true }` on successful send
+- [x] Returns `{ success: false, error: string }` on failure (does not throw)
+- [x] Logs email send with `registrationId` and `emailType` (never logs recipient email unmasked)
+- [x] Unit test mocks Resend API
+- [x] Unit test: successful send
+- [x] Unit test: API failure handling
 
 **Non-goals:**
 - Do not create HTML email templates (T-020)
