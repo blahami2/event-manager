@@ -1133,11 +1133,11 @@ T-001 (Init Next.js)
 - `src/components/admin/StatsCard.tsx`
 
 **Acceptance criteria:**
-- [ ] Shows: total registrations, confirmed count, cancelled count, total guests
-- [ ] Data fetched via admin actions use case
-- [ ] Quick links to registration list and CSV export
-- [ ] Server Component with data fetching
-- [ ] Auth check (guard) applied
+- [x] Shows: total registrations, confirmed count, cancelled count, total guests
+- [x] Data fetched via admin actions use case
+- [x] Quick links to registration list and CSV export
+- [x] Server Component with data fetching
+- [x] Auth check (guard) applied
 
 **Non-goals:**
 - Do not implement charts or graphs
