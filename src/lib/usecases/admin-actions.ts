@@ -19,6 +19,7 @@ export interface RegistrationStats {
   readonly total: number;
   readonly confirmed: number;
   readonly cancelled: number;
+  readonly totalGuests: number;
 }
 
 /**
@@ -42,10 +43,13 @@ export async function getRegistrationStats(): Promise<RegistrationStats> {
   const confirmed = items.filter((r) => r.status === RegistrationStatus.CONFIRMED).length;
   const cancelled = items.filter((r) => r.status === RegistrationStatus.CANCELLED).length;
 
+  const totalGuests = items.reduce((sum, r) => sum + r.guestCount, 0);
+
   return {
     total: items.length,
     confirmed,
     cancelled,
+    totalGuests,
   };
 }
 
