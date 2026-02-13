@@ -149,6 +149,7 @@ describe("getRegistrationStats", () => {
       total: 3,
       confirmed: 2,
       cancelled: 1,
+      totalGuests: 7,
     });
   });
 
@@ -166,7 +167,7 @@ describe("getRegistrationStats", () => {
     const stats = await getRegistrationStats();
 
     // then
-    expect(stats).toEqual({ total: 0, confirmed: 0, cancelled: 0 });
+    expect(stats).toEqual({ total: 0, confirmed: 0, cancelled: 0, totalGuests: 0 });
   });
 });
 
