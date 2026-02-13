@@ -866,13 +866,13 @@ T-001 (Init Next.js)
 - `tests/unit/lib/email/templates/manage-link-template.test.ts`
 
 **Acceptance criteria:**
-- [ ] Exports `renderManageLinkEmail(params: { guestName: string; eventName: string; eventDate: string; manageUrl: string }): string`
-- [ ] Returns valid HTML string
-- [ ] HTML contains: guest name, event name, event date, manage link as clickable anchor
-- [ ] HTML is responsive (inline styles, max-width container)
-- [ ] No raw tokens in template debug output or comments
-- [ ] Unit test: all parameters appear in output HTML
-- [ ] Unit test: manage URL is in an `<a href="...">`
+- [x] Exports `renderManageLinkEmail(params: { guestName: string; eventName: string; eventDate: string; manageUrl: string }): string`
+- [x] Returns valid HTML string
+- [x] HTML contains: guest name, event name, event date, manage link as clickable anchor
+- [x] HTML is responsive (inline styles, max-width container)
+- [x] No raw tokens in template debug output or comments
+- [x] Unit test: all parameters appear in output HTML
+- [x] Unit test: manage URL is in an `<a href="...">`
 
 **Non-goals:**
 - Do not create email preview UI
