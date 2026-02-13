@@ -3,9 +3,8 @@ import { NextRequest } from "next/server";
 import { registerGuest } from "@/lib/usecases/register";
 import { createRateLimiter } from "@/lib/rate-limit/limiter";
 import { successResponse, handleApiError } from "@/lib/api-response";
+import { RateLimitError } from "@/lib/errors/app-errors";
 import { logger, hashIp } from "@/lib/logger";
-import { NextResponse } from "next/server";
-import type { ApiErrorResponse } from "@/types/api";
 
 const rateLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -14,7 +13,7 @@ const rateLimiter = createRateLimiter({
 
 export async function POST(
   request: NextRequest,
-): Promise<NextResponse> {
+): Promise<Response> {
   try {
     // Extract IP
     const forwarded = request.headers.get("x-forwarded-for");
@@ -28,16 +27,7 @@ export async function POST(
         (limit.resetAt.getTime() - Date.now()) / 1000,
       );
       logger.warn("Rate limit exceeded", { endpoint: "/api/register", ip: hashedIp });
-      const body: ApiErrorResponse = {
-        error: {
-          code: "RATE_LIMITED",
-          message: "Too many requests",
-        },
-      };
-      return NextResponse.json(body, {
-        status: 429,
-        headers: { "Retry-After": String(retryAfter) },
-      });
+      throw new RateLimitError(retryAfter);
     }
 
     // Parse body and delegate to use case

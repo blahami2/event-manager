@@ -40,9 +40,13 @@ export class NotFoundError extends AppError {
 }
 
 export class RateLimitError extends AppError {
-  constructor() {
+  /** Seconds until the rate limit window resets. */
+  public readonly retryAfterSeconds: number;
+
+  constructor(retryAfterSeconds: number = 60) {
     super("Too many requests", "RATE_LIMITED", 429);
     this.name = "RateLimitError";
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 

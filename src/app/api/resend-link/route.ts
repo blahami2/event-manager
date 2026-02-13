@@ -48,7 +48,11 @@ export async function POST(
   // Rate limit check (before any processing)
   const limitResult = rateLimiter.check(hashedIp);
   if (!limitResult.allowed) {
-    return handleApiError(new RateLimitError());
+    const retryAfter = Math.ceil(
+      (limitResult.resetAt.getTime() - Date.now()) / 1000,
+    );
+    logger.warn("Rate limit exceeded", { endpoint: "/api/resend-link", ip: hashedIp });
+    return handleApiError(new RateLimitError(retryAfter));
   }
 
   // Parse and validate body
