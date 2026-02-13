@@ -1053,14 +1053,14 @@ T-001 (Init Next.js)
 - `src/app/(public)/manage/[token]/page.tsx`
 
 **Acceptance criteria:**
-- [ ] URL: `/manage/{token}` – token extracted from route param
-- [ ] On valid token: displays registration details with edit form and cancel button
-- [ ] Edit form pre-populated with current registration data
-- [ ] On save: calls manage API, shows success message with updated manage link notice
-- [ ] On cancel: confirmation dialog → calls cancel API → shows "Registration cancelled" message
-- [ ] On invalid/expired token: shows "This link is not valid or has expired." (generic message)
-- [ ] On rate limit: shows rate limit message
-- [ ] No token logged anywhere in client-side code
+- [x] URL: `/manage/{token}` – token extracted from route param
+- [x] On valid token: displays registration details with edit form and cancel button
+- [x] Edit form pre-populated with current registration data
+- [x] On save: calls manage API, shows success message with updated manage link notice
+- [x] On cancel: confirmation dialog → calls cancel API → shows "Registration cancelled" message
+- [x] On invalid/expired token: shows "This link is not valid or has expired." (generic message)
+- [x] On rate limit: shows rate limit message
+- [x] No token logged anywhere in client-side code
 
 **Non-goals:**
 - Do not implement undo for cancellation
