@@ -334,11 +334,15 @@ describe("updateRegistrationByToken", () => {
 
     // then
     expect(mockSendManageLink).toHaveBeenCalledOnce();
-    expect(mockSendManageLink).toHaveBeenCalledWith({
-      to: "alice@example.com",
-      manageUrl: "https://example.com/manage/new-raw-token-xyz789",
-      guestName: "Alice Updated",
-    });
+    expect(mockSendManageLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "alice@example.com",
+        manageUrl: "https://example.com/manage/new-raw-token-xyz789",
+        guestName: "Alice Updated",
+        registrationId: "reg-1",
+        emailType: "manage-link",
+      }),
+    );
   });
 
   it("should build new manage URL with BASE_URL and new raw token", async () => {

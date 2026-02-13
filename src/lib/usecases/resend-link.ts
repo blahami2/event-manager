@@ -4,6 +4,7 @@ import { generateToken } from "@/lib/token/capability-token";
 import { sendManageLink } from "@/lib/email/send-manage-link";
 import { logger, maskEmail } from "@/lib/logger";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
+import { EVENT_NAME, EVENT_DATE } from "@/config/event";
 import { RegistrationStatus } from "@/types/registration";
 
 /**
@@ -64,6 +65,10 @@ export async function resendManageLink(
     to: registration.email,
     manageUrl,
     guestName: registration.name,
+    registrationId: registration.id,
+    emailType: "manage-link",
+    eventName: EVENT_NAME,
+    eventDate: EVENT_DATE,
   });
 
   // Log with masked email (never expose full email – LOG3, LOG4)

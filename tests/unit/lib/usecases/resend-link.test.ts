@@ -118,11 +118,15 @@ describe("resendManageLink", () => {
       "new-hashed-token-abc123",
       expect.any(Date),
     );
-    expect(mockSendManageLink).toHaveBeenCalledWith({
-      to: "alice@example.com",
-      manageUrl: "https://example.com/manage/new-raw-token-abc123",
-      guestName: "Alice Johnson",
-    });
+    expect(mockSendManageLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "alice@example.com",
+        manageUrl: "https://example.com/manage/new-raw-token-abc123",
+        guestName: "Alice Johnson",
+        registrationId: "reg-1",
+        emailType: "manage-link",
+      }),
+    );
     expect(result).toEqual({ success: true });
   });
 
