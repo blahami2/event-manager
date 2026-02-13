@@ -1079,13 +1079,13 @@ T-001 (Init Next.js)
 - `src/components/forms/ResendLinkForm.tsx`
 
 **Acceptance criteria:**
-- [ ] Form with single field: email
-- [ ] Submits to `POST /api/resend-link`
-- [ ] On ANY response (200): shows "If this email is registered, a manage link has been sent."
-- [ ] Response message is IDENTICAL regardless of email existence (matches API contract)
-- [ ] No loading state difference between found/not-found (timing-safe)
-- [ ] Submit button shows loading state
-- [ ] Client-side email format validation
+- [x] Form with single field: email
+- [x] Submits to `POST /api/resend-link`
+- [x] On ANY response (200): shows "If this email is registered, a manage link has been sent."
+- [x] Response message is IDENTICAL regardless of email existence (matches API contract)
+- [x] No loading state difference between found/not-found (timing-safe)
+- [x] Submit button shows loading state
+- [x] Client-side email format validation
 
 **Non-goals:**
 - Do not reveal whether email exists
