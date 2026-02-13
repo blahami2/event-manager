@@ -1157,14 +1157,14 @@ T-001 (Init Next.js)
 - `src/components/admin/RegistrationFilters.tsx`
 
 **Acceptance criteria:**
-- [ ] Table columns: name, email, guestCount, status, createdAt, actions
-- [ ] Filter by status: All, Confirmed, Cancelled
-- [ ] Search by name or email (server-side filtering via admin API)
-- [ ] Pagination: 20 items per page with page navigation
-- [ ] Actions per row: Edit, Cancel (with confirmation dialog)
-- [ ] Cancel action calls `DELETE /api/admin/registrations` and refreshes list
-- [ ] Edit action calls `PUT /api/admin/registrations` and refreshes list
-- [ ] All admin actions logged with structured logging
+- [x] Table columns: name, email, guestCount, status, createdAt, actions
+- [x] Filter by status: All, Confirmed, Cancelled
+- [x] Search by name or email (server-side filtering via admin API)
+- [x] Pagination: 20 items per page with page navigation
+- [x] Actions per row: Edit, Cancel (with confirmation dialog)
+- [x] Cancel action calls `DELETE /api/admin/registrations` and refreshes list
+- [x] Edit action calls `PUT /api/admin/registrations` and refreshes list
+- [x] All admin actions logged with structured logging
 
 **Non-goals:**
 - Do not implement inline editing (use separate edit form/modal)
