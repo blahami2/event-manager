@@ -805,16 +805,16 @@ T-001 (Init Next.js)
 - `tests/unit/lib/usecases/admin-actions.test.ts`
 
 **Acceptance criteria:**
-- [ ] `listRegistrations(filters)` returns paginated list with total count
-- [ ] `getRegistrationStats()` returns `{ total, confirmed, cancelled }`
-- [ ] `adminCancelRegistration(registrationId, adminId)` cancels and logs admin action
-- [ ] `adminEditRegistration(registrationId, data, adminId)` updates and logs admin action
-- [ ] `exportRegistrationsCsv()` returns CSV string with columns: name, email, guestCount, dietaryNotes, status, createdAt
-- [ ] All admin actions log with `adminUserId`, `action`, `targetId` (structured logging)
-- [ ] Unit test: list with pagination
-- [ ] Unit test: stats calculation
-- [ ] Unit test: admin cancel
-- [ ] Unit test: CSV export format
+- [x] `listRegistrations(filters)` returns paginated list with total count
+- [x] `getRegistrationStats()` returns `{ total, confirmed, cancelled }`
+- [x] `adminCancelRegistration(registrationId, adminId)` cancels and logs admin action
+- [x] `adminEditRegistration(registrationId, data, adminId)` updates and logs admin action
+- [x] `exportRegistrationsCsv()` returns CSV string with columns: name, email, guestCount, dietaryNotes, status, createdAt
+- [x] All admin actions log with `adminUserId`, `action`, `targetId` (structured logging)
+- [x] Unit test: list with pagination
+- [x] Unit test: stats calculation
+- [x] Unit test: admin cancel
+- [x] Unit test: CSV export format
 
 **Non-goals:**
 - Do not implement admin UI
