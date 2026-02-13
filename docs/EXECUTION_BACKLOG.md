@@ -778,14 +778,14 @@ T-001 (Init Next.js)
 - `tests/unit/lib/auth/admin-guard.test.ts`
 
 **Acceptance criteria:**
-- [ ] `verifyAdmin(request)` extracts Supabase session, verifies against `AdminUser` table
-- [ ] Returns `{ authenticated: true, adminId: string }` or throws `AuthenticationError`/`AuthorizationError`
-- [ ] No session → `AuthenticationError` (401)
-- [ ] Session valid but not in AdminUser table → `AuthorizationError` (403)
-- [ ] Next.js middleware redirects unauthenticated users from `/admin/*` to login
-- [ ] Unit test: valid admin session → passes
-- [ ] Unit test: no session → 401
-- [ ] Unit test: non-admin user → 403
+- [x] `verifyAdmin(request)` extracts Supabase session, verifies against `AdminUser` table
+- [x] Returns `{ authenticated: true, adminId: string }` or throws `AuthenticationError`/`AuthorizationError`
+- [x] No session → `AuthenticationError` (401)
+- [x] Session valid but not in AdminUser table → `AuthorizationError` (403)
+- [x] Next.js middleware redirects unauthenticated users from `/admin/*` to login
+- [x] Unit test: valid admin session → passes
+- [x] Unit test: no session → 401
+- [x] Unit test: non-admin user → 403
 
 **Non-goals:**
 - Do not create login UI
