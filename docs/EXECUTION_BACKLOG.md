@@ -1182,12 +1182,12 @@ T-001 (Init Next.js)
 - `src/app/api/admin/registrations/export/route.ts`
 
 **Acceptance criteria:**
-- [ ] `GET /api/admin/registrations/export` returns CSV file
-- [ ] Response headers: `Content-Type: text/csv`, `Content-Disposition: attachment; filename=registrations-{date}.csv`
-- [ ] CSV columns: name, email, guestCount, dietaryNotes, status, createdAt
-- [ ] Auth guard applied (admin only)
-- [ ] CSV properly escapes commas and quotes in field values
-- [ ] Download button added to admin registration list page
+- [x] `GET /api/admin/registrations/export` returns CSV file
+- [x] Response headers: `Content-Type: text/csv`, `Content-Disposition: attachment; filename=registrations-{date}.csv`
+- [x] CSV columns: name, email, guestCount, dietaryNotes, status, createdAt
+- [x] Auth guard applied (admin only)
+- [x] CSV properly escapes commas and quotes in field values
+- [x] Download button added to admin registration list page
 
 **Non-goals:**
 - Do not implement filtered export
