@@ -695,15 +695,15 @@ T-001 (Init Next.js)
 - `tests/unit/lib/usecases/register.test.ts`
 
 **Acceptance criteria:**
-- [ ] `registerGuest(input)` validates with Zod, creates registration, generates token, stores hash, triggers email
-- [ ] Zod schema validates: `name` (1-200 chars), `email` (valid format), `guestCount` (1-10), `dietaryNotes` (optional, max 500)
-- [ ] Returns `{ registrationId: string }` on success
-- [ ] Throws `ValidationError` with field-level details on invalid input
-- [ ] Does NOT return raw token to caller (token goes only to email)
-- [ ] Unit tests mock repository and email service
-- [ ] Unit test: successful registration
-- [ ] Unit test: validation failure (each field)
-- [ ] Unit test: duplicate email handling (succeeds – allows re-registration)
+- [x] `registerGuest(input)` validates with Zod, creates registration, generates token, stores hash, triggers email
+- [x] Zod schema validates: `name` (1-200 chars), `email` (valid format), `guestCount` (1-10), `dietaryNotes` (optional, max 500)
+- [x] Returns `{ registrationId: string }` on success
+- [x] Throws `ValidationError` with field-level details on invalid input
+- [x] Does NOT return raw token to caller (token goes only to email)
+- [x] Unit tests mock repository and email service
+- [x] Unit test: successful registration
+- [x] Unit test: validation failure (each field)
+- [x] Unit test: duplicate email handling (succeeds – allows re-registration)
 
 **Non-goals:**
 - Do not implement the API route (T-025)
