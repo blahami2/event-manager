@@ -1027,15 +1027,15 @@ T-001 (Init Next.js)
 - `src/components/ui/FormField.tsx`
 
 **Acceptance criteria:**
-- [ ] Form fields: name (required), email (required), guestCount (required, 1-10 dropdown), dietaryNotes (optional textarea)
-- [ ] Client-side validation matches Zod schema (immediate feedback)
-- [ ] Submits to `POST /api/register`
-- [ ] On success: shows confirmation message "Registration successful! Check your email for your manage link."
-- [ ] On validation error (400): shows field-level errors
-- [ ] On rate limit (429): shows "Too many attempts. Please try again later."
-- [ ] On server error (500): shows "An unexpected error occurred. Please try again."
-- [ ] Submit button shows loading state during submission
-- [ ] No business logic in component (delegates to API)
+- [x] Form fields: name (required), email (required), guestCount (required, 1-10 dropdown), dietaryNotes (optional textarea)
+- [x] Client-side validation matches Zod schema (immediate feedback)
+- [x] Submits to `POST /api/register`
+- [x] On success: shows confirmation message "Registration successful! Check your email for your manage link."
+- [x] On validation error (400): shows field-level errors
+- [x] On rate limit (429): shows "Too many attempts. Please try again later."
+- [x] On server error (500): shows "An unexpected error occurred. Please try again."
+- [x] Submit button shows loading state during submission
+- [x] No business logic in component (delegates to API)
 
 **Non-goals:**
 - Do not implement CAPTCHA
