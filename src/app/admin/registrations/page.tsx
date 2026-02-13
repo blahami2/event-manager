@@ -113,7 +113,16 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Registrations</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Registrations</h1>
+        <a
+          href="/api/admin/registrations/export"
+          download
+          className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+        >
+          Download CSV
+        </a>
+      </div>
 
       <div className="mt-6">
         <RegistrationFilters
