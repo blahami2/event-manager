@@ -751,13 +751,13 @@ T-001 (Init Next.js)
 - `tests/unit/lib/usecases/resend-link.test.ts`
 
 **Acceptance criteria:**
-- [ ] `resendManageLink(email: string)` looks up registration by email
-- [ ] If found: generates new token, revokes old tokens, sends email with new manage link
-- [ ] If NOT found: does nothing, returns success (no error, no info leakage)
-- [ ] Always returns `{ success: true }` regardless of email existence
-- [ ] Unit test: email exists → new token generated, email sent
-- [ ] Unit test: email does not exist → no error, no email sent, returns success
-- [ ] Unit test: cancelled registration → no token generated, returns success
+- [x] `resendManageLink(email: string)` looks up registration by email
+- [x] If found: generates new token, revokes old tokens, sends email with new manage link
+- [x] If NOT found: does nothing, returns success (no error, no info leakage)
+- [x] Always returns `{ success: true }` regardless of email existence
+- [x] Unit test: email exists → new token generated, email sent
+- [x] Unit test: email does not exist → no error, no email sent, returns success
+- [x] Unit test: cancelled registration → no token generated, returns success
 
 **Non-goals:**
 - Do not implement the API route (T-027)
