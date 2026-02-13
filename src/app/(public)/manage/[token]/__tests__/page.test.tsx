@@ -14,7 +14,7 @@ import { RegistrationStatus } from "@/types/registration";
 
 const fetchMock = vi.fn();
 
-const VALID_TOKEN = "abc123def456";
+const VALID_TOKEN = "test-token-12345678";
 
 const mockRegistration: RegistrationOutput = {
   id: "reg-001",
