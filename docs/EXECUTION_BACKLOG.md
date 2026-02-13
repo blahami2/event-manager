@@ -723,15 +723,15 @@ T-001 (Init Next.js)
 - `tests/unit/lib/usecases/manage-registration.test.ts`
 
 **Acceptance criteria:**
-- [ ] `getRegistrationByToken(rawToken)` → hashes token, looks up, returns registration data or throws `NotFoundError`
-- [ ] `updateRegistrationByToken(rawToken, data)` → validates, updates registration, rotates token, returns `{ newManageUrl: string }`
-- [ ] `cancelRegistrationByToken(rawToken)` → cancels registration, revokes all tokens
-- [ ] Token rotation: on update, old token is revoked, new token generated and stored, new manage URL returned
-- [ ] Failed lookup returns generic `NotFoundError` with message "Link not found or expired" (no info leakage)
-- [ ] Unit test: successful view, edit, cancel
-- [ ] Unit test: invalid token returns NotFoundError
-- [ ] Unit test: expired token returns NotFoundError
-- [ ] Unit test: token rotation occurs on edit
+- [x] `getRegistrationByToken(rawToken)` → hashes token, looks up, returns registration data or throws `NotFoundError`
+- [x] `updateRegistrationByToken(rawToken, data)` → validates, updates registration, rotates token, returns `{ newManageUrl: string }`
+- [x] `cancelRegistrationByToken(rawToken)` → cancels registration, revokes all tokens
+- [x] Token rotation: on update, old token is revoked, new token generated and stored, new manage URL returned
+- [x] Failed lookup returns generic `NotFoundError` with message "Link not found or expired" (no info leakage)
+- [x] Unit test: successful view, edit, cancel
+- [x] Unit test: invalid token returns NotFoundError
+- [x] Unit test: expired token returns NotFoundError
+- [x] Unit test: token rotation occurs on edit
 
 **Non-goals:**
 - Do not implement the API route (T-026)
