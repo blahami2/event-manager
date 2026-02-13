@@ -921,14 +921,14 @@ T-001 (Init Next.js)
 - `src/app/api/manage/route.ts`
 
 **Acceptance criteria:**
-- [ ] `PUT /api/manage` accepts `{ token, name, email, guestCount, dietaryNotes? }`
-- [ ] Uses `successResponse()` / `handleApiError()` from API response utility
-- [ ] On success: returns `200` with `{ "data": { "registration": {...} }, "message": "Updated successfully" }`
-- [ ] `DELETE /api/manage` accepts `{ token }`
-- [ ] On success: returns `200` with `{ "message": "Registration cancelled" }`
-- [ ] On invalid token: returns `404` with generic message "Link not found or expired"
-- [ ] Rate limiter applied: 10 lookups per IP per hour
-- [ ] Token passed in request body, NOT in URL query params for mutations
+- [x] `PUT /api/manage` accepts `{ token, name, email, guestCount, dietaryNotes? }`
+- [x] Uses `successResponse()` / `handleApiError()` from API response utility
+- [x] On success: returns `200` with `{ "data": { "registration": {...} }, "message": "Updated successfully" }`
+- [x] `DELETE /api/manage` accepts `{ token }`
+- [x] On success: returns `200` with `{ "message": "Registration cancelled" }`
+- [x] On invalid token: returns `404` with generic message "Link not found or expired"
+- [x] Rate limiter applied: 10 lookups per IP per hour
+- [x] Token passed in request body, NOT in URL query params for mutations
 
 **Non-goals:**
 - Do not return new raw token in API response (it's emailed)
