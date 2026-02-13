@@ -1,6 +1,25 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 /**
+ * Creates a Supabase client for browser-side use with the anon key.
+ *
+ * Uses NEXT_PUBLIC_* env vars which are available in the browser bundle.
+ * Persists session in browser storage for cookie-based auth.
+ */
+export function createBrowserClient(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !anonKey) {
+    throw new Error(
+      "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.",
+    );
+  }
+
+  return createClient(url, anonKey);
+}
+
+/**
  * Creates a Supabase client for server-side use with the anon key.
  *
  * Suitable for operations on behalf of the current user
