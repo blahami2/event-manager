@@ -1755,6 +1755,84 @@ The registration form is changing from `{ name, email, guestCount, dietaryNotes?
 
 ---
 
+## T-055: Visual Redesign – Apply Design System from v1 Reference
+
+**Input:** T-021 (landing page), T-022 (registration form), T-023 (manage page), T-024 (resend link page), T-036 (error boundaries)
+**Output:**
+- Complete visual redesign of all public pages following the design reference in `docs/designs/v1/`
+- Tailwind CSS theme configuration matching the design's color palette, typography, and spacing
+- Reusable React UI components implementing the design patterns
+- Hero background image integration
+
+**Design reference:** `docs/designs/v1/index.html` and `docs/designs/v1/main.jpg`
+
+**Design language summary:**
+- **Color palette:** Black primary (`#0a0a0a`), dark secondary (`#141414`), blood-red accent (`#c71f1f`), white text (`#ffffff`), gray text (`#a1a1a1`)
+- **Typography:** Anton (headings – massive, uppercase, letter-spaced) + Montserrat (body – weights 400/700/900)
+- **Visual style:** Dark/dramatic, concert/rock aesthetic, red accent borders and dividers, dark textured backgrounds
+- **Hero section:** Full-viewport with background image + dark gradient overlay, huge responsive heading (`clamp(4rem, 10vw, 8rem)`), red subtitle, bold CTA button
+- **Cards/sections:** Dark backgrounds, `2px solid #333` borders, red bottom-border accents on cards, grayscale-to-color hover effect on images
+- **Buttons:** Red background, uppercase Anton font, 3px red border, transparent on hover with red text
+- **Forms:** Dark input backgrounds (`#222`), `#333` borders, red border on focus, uppercase labels, contained in red-bordered card
+- **Layout:** Responsive grid/flex, 90% width with 1200px max, 80px section padding
+- **Footer:** Black with red top border
+
+**Files modified:**
+- `tailwind.config.ts` (extend theme: custom colors, fonts, spacing)
+- `src/app/globals.css` (Google Fonts import for Anton + Montserrat, base styles)
+- `src/app/(public)/page.tsx` (hero section with background image, event details grid, CTA)
+- `src/app/(public)/register/page.tsx` (styled registration form page)
+- `src/app/(public)/manage/[token]/page.tsx` (styled manage page)
+- `src/app/(public)/manage/[token]/ManageForm.tsx`
+- `src/app/(public)/resend-link/page.tsx` (styled resend page)
+- `src/components/forms/RegistrationForm.tsx`
+- `src/components/forms/ResendLinkForm.tsx`
+- `src/app/error.tsx` (styled error boundary)
+- `src/app/not-found.tsx` (styled 404 page)
+
+**Files created/modified (UI components):**
+- `src/components/ui/Button.tsx` – Red accent button with hover-to-outline transition, Anton font, uppercase. Variants: `primary` (filled red), `outline` (transparent with red border). Full-width option for forms.
+- `src/components/ui/Card.tsx` – Dark card (`#141414` bg) with `#333` border and optional red bottom-accent border.
+- `src/components/ui/Input.tsx` – Dark input (`#222` bg), `#333` border, red focus ring, Montserrat font. Variants for text input, select dropdown, and textarea.
+- `src/components/ui/FormField.tsx` – Label (uppercase, bold, Montserrat 700) + input wrapper with error message slot.
+- `src/components/ui/Hero.tsx` – Full-viewport section with background image slot, gradient overlay (`rgba(0,0,0,0.6)` to `rgba(0,0,0,0.8)`), centered content, red bottom border. Responsive heading using `clamp()`.
+- `src/components/ui/SectionHeading.tsx` – Anton uppercase heading with letter-spacing, optional red accent text.
+- `src/components/ui/DetailBox.tsx` – Info box with label (gray, uppercase, small) + value (white, bold, large), used for event details grid.
+- `src/components/ui/Footer.tsx` – Black footer with red top border, centered content.
+- `src/components/layout/PublicLayout.tsx` – Shared layout wrapper for all public pages (includes footer, consistent spacing).
+
+**Acceptance criteria:**
+- [ ] Tailwind config extends theme with design tokens: `colors.accent` (`#c71f1f`), `colors.bg.main` (`#0a0a0a`), `colors.bg.secondary` (`#141414`), `colors.text.gray` (`#a1a1a1`)
+- [ ] Google Fonts (Anton + Montserrat) loaded via `next/font/google` or `globals.css` `@import`
+- [ ] Font families configured in Tailwind: `fontFamily.heading` (Anton), `fontFamily.body` (Montserrat)
+- [ ] Landing page has full-viewport hero with `main.jpg` background image, gradient overlay, event title in Anton, red subtitle, and CTA button
+- [ ] Hero heading uses responsive sizing: `clamp(4rem, 10vw, 8rem)` or equivalent Tailwind classes
+- [ ] Event details section uses flex/grid layout with dark bordered boxes, label/value pairs
+- [ ] Registration form is contained in a dark card with red border, dark inputs, red focus states
+- [ ] All buttons use Anton font, uppercase, red background with hover-to-outline transition
+- [ ] All form inputs use dark background, gray border, red focus border
+- [ ] Manage page and resend-link page follow the same visual language
+- [ ] Error boundary and 404 pages styled consistently with dark theme
+- [ ] Footer on all public pages with red top border
+- [ ] Responsive: all pages look correct at 320px, 768px, and 1280px widths
+- [ ] No inline styles in React components – all styling via Tailwind utility classes
+- [ ] All UI components are properly typed with TypeScript props interfaces
+- [ ] Components accept `className` prop for composition (using `clsx` or `cn` utility)
+- [ ] Background image (`main.jpg`) served from `public/images/` directory (copied from design reference)
+- [ ] No external CDN image dependencies (unlike the HTML reference which uses Unsplash URLs)
+- [ ] Dark theme applied globally – no white/light backgrounds on any public page
+- [ ] `npm run build` succeeds
+- [ ] Existing functionality unchanged – form submissions, validation, error handling all still work
+
+**Non-goals:**
+- Do not implement the "headliners" photo grid section from the design reference (that's specific to the design example, not the registration app)
+- Do not implement a concrete wall texture background (keep solid dark colors for performance)
+- Do not style admin pages (admin keeps its own visual style)
+- Do not add animations beyond the button hover transition
+- Do not add a dark/light mode toggle (app is dark-only)
+
+---
+
 # Phase 11 Dependency Graph
 
 ```
@@ -1773,6 +1851,9 @@ PHASE 11: Enhancements
 
   Registration Form Redesign:
     T-003 + T-040 + T-014 + T-022 → T-054 (registration field migration)
+
+  Visual Redesign:
+    T-021..T-024 + T-036 → T-055 (apply v1 design system)
 ```
 
 ```
@@ -1786,6 +1867,8 @@ T-049 (i18n infrastructure)
   └─ T-053 (translate admin UI) ←[+T-028..T-031]
 
 T-054 (Registration field migration) ←[T-003, T-040, T-014, T-022]
+
+T-055 (Visual redesign) ←[T-021..T-024, T-036]
 ```
 
 ---
@@ -1802,8 +1885,9 @@ T-054 (Registration field migration) ←[T-003, T-040, T-014, T-022]
 | T-052 | Language Switcher Component        | 11    | T-049                         |
 | T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031           |
 | T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022    |
+| T-055 | Visual Redesign – v1 Design System | 11    | T-021..T-024, T-036           |
 
-**Total tickets: 53** (37 original + 8 Phase 1-10 additions + 8 Phase 11)
+**Total tickets: 54** (37 original + 8 Phase 1-10 additions + 9 Phase 11)
 
 ---
 
