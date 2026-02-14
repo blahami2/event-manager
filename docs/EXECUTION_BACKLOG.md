@@ -1359,16 +1359,16 @@ T-001 (Init Next.js)
 - `README.md`
 
 **Acceptance criteria:**
-- [ ] Project title and description
-- [ ] Tech stack summary
-- [ ] Prerequisites (Node 20+, Supabase account, Resend account)
-- [ ] Setup instructions: clone, `npm install`, copy `.env.example` → `.env.local`, configure variables, `npx prisma migrate dev`, `npx prisma db seed`, `npm run dev`
-- [ ] Available scripts: `dev`, `build`, `start`, `lint`, `test`
-- [ ] Folder structure overview (link to `docs/ARCHITECTURE.md`)
-- [ ] Environment variables table (link to `docs/ARCHITECTURE.md` Section 10.3)
-- [ ] Data retention policy summary
-- [ ] Links to all `docs/` files
-- [ ] No secrets or credentials in README
+- [x] Project title and description
+- [x] Tech stack summary
+- [x] Prerequisites (Node 20+, Supabase account, Resend account)
+- [x] Setup instructions: clone, `npm install`, copy `.env.example` → `.env.local`, configure variables, `npx prisma migrate dev`, `npx prisma db seed`, `npm run dev`
+- [x] Available scripts: `dev`, `build`, `start`, `lint`, `test`
+- [x] Folder structure overview (link to `docs/ARCHITECTURE.md`)
+- [x] Environment variables table (link to `docs/ARCHITECTURE.md` Section 10.3)
+- [x] Data retention policy summary
+- [x] Links to all `docs/` files
+- [x] No secrets or credentials in README
 
 **Non-goals:**
 - Do not duplicate full architecture docs (link to them)
