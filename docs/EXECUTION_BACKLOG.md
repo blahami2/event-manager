@@ -1310,12 +1310,12 @@ T-001 (Init Next.js)
 - `tests/unit/api/health.test.ts`
 
 **Acceptance criteria:**
-- [ ] `GET /api/health` returns `200` with `{ "status": "ok", "timestamp": "...", "version": "1.0.0" }`
-- [ ] Verifies database connectivity via `prisma.$queryRaw`
-- [ ] Returns `503` with `{ "status": "error", "timestamp": "..." }` if DB unreachable
-- [ ] No authentication required
-- [ ] Unit test: healthy response
-- [ ] Unit test: DB failure response
+- [x] `GET /api/health` returns `200` with `{ "status": "ok", "timestamp": "...", "version": "1.0.0" }`
+- [x] Verifies database connectivity via `prisma.$queryRaw`
+- [x] Returns `503` with `{ "status": "error", "timestamp": "..." }` if DB unreachable
+- [x] No authentication required
+- [x] Unit test: healthy response
+- [x] Unit test: DB failure response
 
 **Non-goals:**
 - Do not implement detailed component health checks
