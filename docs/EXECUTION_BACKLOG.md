@@ -1283,12 +1283,12 @@ T-001 (Init Next.js)
 - `tests/architecture/boundaries.test.ts` (from `docs/VERIFICATION_RULES.md` Section 6)
 
 **Acceptance criteria:**
-- [ ] CI installs ripgrep (`sudo apt-get install -y ripgrep`) before running security tests
-- [ ] CI step added: `npx vitest run tests/security/`
-- [ ] CI step added: `npx vitest run tests/architecture/`
-- [ ] Forbidden pattern tests cover: F1 (token logging), F2 (URL logging), F3 (env secret logging), F6 (any type), F8 (empty catch), F9 (hardcoded secrets)
-- [ ] Architecture boundary tests cover: L1 (UI→repo), L4 (usecase→component), L5 (repo→usecase), L6 (PrismaClient imports)
-- [ ] All tests pass locally
+- [x] CI installs ripgrep (`sudo apt-get install -y ripgrep`) before running security tests
+- [x] CI step added: `npx vitest run tests/security/`
+- [x] CI step added: `npx vitest run tests/architecture/`
+- [x] Forbidden pattern tests cover: F1 (token logging), F2 (URL logging), F3 (env secret logging), F6 (any type), F8 (empty catch), F9 (hardcoded secrets)
+- [x] Architecture boundary tests cover: L1 (UI→repo), L4 (usecase→component), L5 (repo→usecase), L6 (PrismaClient imports)
+- [x] All tests pass locally
 - [ ] CI passes with new steps
 
 **Non-goals:**

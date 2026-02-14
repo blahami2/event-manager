@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install ripgrep
+        run: sudo apt-get install -y ripgrep
+
       - name: Prisma generate
         run: npx prisma generate
         env:
@@ -33,6 +36,12 @@ jobs:
 
       - name: Unit tests with coverage
         run: npx vitest run --coverage
+
+      - name: Security checks
+        run: npx vitest run tests/security/
+
+      - name: Architecture checks
+        run: npx vitest run tests/architecture/
 
       - name: Secret scanning
         uses: gitleaks/gitleaks-action@v2
