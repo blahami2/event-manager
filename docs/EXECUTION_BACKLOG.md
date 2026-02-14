@@ -1258,10 +1258,10 @@ T-001 (Init Next.js)
 - `next.config.js`
 
 **Acceptance criteria:**
-- [ ] Headers set: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`
-- [ ] `Strict-Transport-Security` set for production
-- [ ] Content-Security-Policy configured (allow self, Supabase, Resend)
-- [ ] Headers verified via curl or test
+- [x] Headers set: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- [x] `Strict-Transport-Security` set for production
+- [x] Content-Security-Policy configured (allow self, Supabase, Resend)
+- [x] Headers verified via curl or test
 
 **Non-goals:**
 - Do not implement CSP report-uri
