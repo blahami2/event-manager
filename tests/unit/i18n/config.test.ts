@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { locales, defaultLocale, isValidLocale, type Locale } from "@/i18n/config";
+import { locales, defaultLocale, isValidLocale } from "@/i18n/config";
 
 describe("i18n config", () => {
   test("should export en, cs, sk as supported locales", () => {
