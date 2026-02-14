@@ -69,6 +69,15 @@ PHASE 10: Observability & Polish
   T-008 → T-035 (health endpoint)
   T-035 → T-037 (data retention)
   T-037 → T-046 (README)
+
+PHASE 11: Enhancements
+  T-006 → T-047 (ICS calendar invite generator)
+  T-047 + T-019 + T-020 → T-048 (attach ICS to email)
+  T-006 → T-049 (i18n infrastructure)
+  T-049 + T-021..T-024 → T-050 (translate public UI)
+  T-049 + T-020 → T-051 (translate email templates)
+  T-049 → T-052 (language switcher component)
+  T-049 + T-028..T-031 → T-053 (translate admin UI)
 ```
 
 **Visual dependency tree:**
@@ -125,6 +134,15 @@ T-001 (Init Next.js)
     └─ T-033 (Token logging audit)
         ├─ T-034 (Security headers)
         └─ T-045 (CI security suites)
+
+  T-047 (ICS generator)
+    └─ T-048 (Attach ICS to email) ←[+T-019, +T-020]
+
+  T-049 (i18n infrastructure)
+    ├─ T-050 (Translate public UI) ←[+T-021..T-024]
+    ├─ T-051 (Translate email templates) ←[+T-020]
+    ├─ T-052 (Language switcher)
+    └─ T-053 (Translate admin UI) ←[+T-028..T-031]
 ```
 
 ---
@@ -1426,8 +1444,290 @@ T-001 (Init Next.js)
 | T-035 | Health Endpoint                    | 10    | T-008                         |
 | T-037 | Data Retention                     | 10    | T-035                         |
 | T-046 | README                             | 10    | T-037                         |
+| T-047 | ICS Calendar Invite Utility        | 11    | T-006                         |
+| T-048 | Attach Calendar Invite to Email    | 11    | T-047, T-019, T-020           |
+| T-049 | i18n Infrastructure Setup          | 11    | T-006                         |
+| T-050 | Translate Public UI Pages          | 11    | T-049, T-021..T-024           |
+| T-051 | Translate Email Templates          | 11    | T-049, T-020                  |
+| T-052 | Language Switcher Component        | 11    | T-049                         |
+| T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031           |
 
-**Total tickets: 45** (37 original + 8 new)
+**Total tickets: 52** (37 original + 8 Phase 1-10 additions + 7 Phase 11)
+
+---
+
+# Phase 11: Enhancements
+
+## T-047: ICS Calendar Invite Utility
+
+**Input:** T-006 (event config)
+**Output:**
+- Utility to generate iCalendar (.ics) files per RFC 5545
+- Unit tests
+
+**Files created:**
+- `src/lib/email/ics-generator.ts`
+- `tests/unit/lib/email/ics-generator.test.ts`
+
+**Context:**
+The iCalendar format (.ics, RFC 5545) is the universal standard for calendar events. When an .ics file is attached to an email, all major clients (Gmail, Outlook, Apple Mail, Thunderbird) recognize it as a calendar event and offer to add it to the user's calendar. The MIME type is `text/calendar; method=REQUEST`.
+
+**Acceptance criteria:**
+- [ ] Exports `generateIcsEvent(params: { eventName: string; eventDate: Date; eventEndDate: Date; eventLocation: string; eventDescription: string; organizerEmail: string }): string`
+- [ ] Output is a valid iCalendar string (starts with `BEGIN:VCALENDAR`, ends with `END:VCALENDAR`)
+- [ ] Includes `VTIMEZONE` component or uses UTC
+- [ ] Contains required fields: `DTSTART`, `DTEND`, `SUMMARY`, `LOCATION`, `DESCRIPTION`, `UID`, `DTSTAMP`
+- [ ] `UID` is unique per generation (use UUID + domain)
+- [ ] `METHOD:REQUEST` is set so email clients treat it as an event invitation
+- [ ] Line folding follows RFC 5545 (max 75 octets per line)
+- [ ] Special characters in text fields are properly escaped
+- [ ] Unit test: output is valid iCalendar format
+- [ ] Unit test: all event details appear in output
+- [ ] Unit test: UID is unique across invocations
+
+**Non-goals:**
+- Do not handle recurring events
+- Do not implement RSVP/attendee tracking via calendar protocol
+- Do not add external library dependency (iCalendar format is simple enough to generate directly)
+
+---
+
+## T-048: Attach Calendar Invite to Registration Email
+
+**Input:** T-047 (ICS generator), T-019 (email service), T-020 (email templates)
+**Output:**
+- Registration confirmation email includes .ics calendar invite as attachment
+- Unit tests
+
+**Files modified:**
+- `src/lib/email/send-manage-link.ts` (add ICS attachment)
+- `src/lib/email/templates/manage-link-template.ts` (add calendar note to email body)
+
+**Files created:**
+- `tests/unit/lib/email/ics-attachment.test.ts`
+
+**Acceptance criteria:**
+- [ ] Registration confirmation email includes .ics file as attachment
+- [ ] Attachment MIME type: `text/calendar; method=REQUEST`
+- [ ] Attachment filename: `event.ics`
+- [ ] ICS content uses event details from `src/config/event.ts`
+- [ ] Email HTML body includes a note: "A calendar invite is attached to this email."
+- [ ] Resend API call includes attachment in correct format
+- [ ] Unit test: email service passes ICS attachment to Resend
+- [ ] Unit test: ICS content matches event configuration
+- [ ] Existing email tests still pass
+
+**Non-goals:**
+- Do not send calendar updates on registration edit/cancel (future enhancement)
+- Do not add ICS to resend-link emails (only initial registration)
+
+---
+
+## T-049: i18n Infrastructure Setup
+
+**Input:** T-006 (folder structure)
+**Output:**
+- i18n library installed and configured
+- Translation files for English, Czech, and Slovak
+- Middleware for automatic locale detection from `Accept-Language` header
+- Locale persisted in cookie for subsequent requests
+
+**Files created:**
+- `src/i18n/config.ts` (supported locales, default locale)
+- `src/i18n/messages/en.json` (English translations)
+- `src/i18n/messages/cs.json` (Czech translations)
+- `src/i18n/messages/sk.json` (Slovak translations)
+- `src/i18n/get-locale.ts` (locale detection logic)
+
+**Files modified:**
+- `package.json` (add `next-intl` or chosen i18n library)
+- `src/lib/auth/middleware.ts` (extend with locale detection)
+
+**Acceptance criteria:**
+- [ ] i18n library installed (recommended: `next-intl` for App Router compatibility)
+- [ ] Three locale files created: `en.json`, `cs.json`, `sk.json` with initial keys for common UI strings (nav, buttons, form labels, error messages)
+- [ ] Locale detection middleware reads `Accept-Language` header and maps to closest supported locale
+- [ ] Fallback chain: exact match → language match (e.g., `cs-CZ` → `cs`) → default (`en`)
+- [ ] Selected locale stored in cookie (`NEXT_LOCALE`) for subsequent requests
+- [ ] Manual locale override (via cookie or URL parameter) takes precedence over auto-detection
+- [ ] TypeScript types for translation keys (type-safe translations)
+- [ ] `npm run build` succeeds with i18n configured
+
+**Non-goals:**
+- Do not translate all pages yet (T-050, T-051, T-053)
+- Do not create the language switcher UI component yet (T-052)
+- Do not implement URL-based locale routing (e.g., `/en/register`) — use cookie-based approach
+
+---
+
+## T-050: Translate Public UI Pages
+
+**Input:** T-049 (i18n infrastructure), T-021 (landing page), T-022 (registration form), T-023 (manage page), T-024 (resend link page)
+**Output:**
+- All public-facing pages use translation strings
+- All three languages fully translated
+
+**Files modified:**
+- `src/app/(public)/page.tsx`
+- `src/app/(public)/register/page.tsx`
+- `src/components/forms/RegistrationForm.tsx`
+- `src/app/(public)/manage/[token]/page.tsx`
+- `src/app/(public)/resend-link/page.tsx`
+- `src/components/forms/ResendLinkForm.tsx`
+- `src/i18n/messages/en.json` (add page-specific keys)
+- `src/i18n/messages/cs.json` (add page-specific keys)
+- `src/i18n/messages/sk.json` (add page-specific keys)
+
+**Acceptance criteria:**
+- [ ] All user-visible text on public pages comes from translation files (no hardcoded strings)
+- [ ] Landing page: event name, description, CTA buttons translated
+- [ ] Registration form: labels, placeholders, validation messages, success/error messages translated
+- [ ] Manage page: all labels, buttons, confirmation dialogs translated
+- [ ] Resend link page: all text translated
+- [ ] Error boundary messages translated
+- [ ] All three languages (EN, CS, SK) have complete translations for public pages
+- [ ] Switching locale (via cookie) correctly renders the page in the selected language
+
+**Non-goals:**
+- Do not translate admin pages (T-053)
+- Do not translate email templates (T-051)
+
+---
+
+## T-051: Translate Email Templates
+
+**Input:** T-049 (i18n infrastructure), T-020 (email templates)
+**Output:**
+- Email templates rendered in the recipient's preferred language
+- All three languages fully translated
+
+**Files modified:**
+- `src/lib/email/templates/manage-link-template.ts`
+- `src/lib/email/send-manage-link.ts` (accept locale parameter)
+- `src/i18n/messages/en.json` (add email-specific keys)
+- `src/i18n/messages/cs.json` (add email-specific keys)
+- `src/i18n/messages/sk.json` (add email-specific keys)
+
+**Acceptance criteria:**
+- [ ] `renderManageLinkEmail` accepts a `locale` parameter
+- [ ] Email subject line is translated
+- [ ] Email body text is translated (greeting, instructions, event details labels)
+- [ ] The manage link itself is language-independent (URL doesn't change)
+- [ ] Calendar invite note text is translated (if T-048 is completed)
+- [ ] Locale is determined from the user's session/cookie at the time of registration
+- [ ] Fallback to English if locale is not available
+- [ ] Unit test: email rendered in each of the three languages contains correct translated strings
+
+**Non-goals:**
+- Do not create separate HTML templates per language (use translation keys within single template)
+
+---
+
+## T-052: Language Switcher Component
+
+**Input:** T-049 (i18n infrastructure)
+**Output:**
+- UI component for manually switching between languages
+- Persists selection
+
+**Files created:**
+- `src/components/ui/LanguageSwitcher.tsx`
+- `tests/unit/components/LanguageSwitcher.test.ts`
+
+**Acceptance criteria:**
+- [ ] Dropdown or button group showing: English, Čeština, Slovenčina
+- [ ] Displays current language with flag emoji or language code
+- [ ] On selection: updates the `NEXT_LOCALE` cookie and reloads/refreshes the page
+- [ ] Integrated into the public page layout (header/nav area)
+- [ ] Responsive: works on mobile and desktop
+- [ ] Accessible: keyboard navigable, proper ARIA labels
+- [ ] Unit test: renders all three language options
+- [ ] Unit test: selecting a language triggers locale change
+
+**Non-goals:**
+- Do not implement per-page language memory (global setting only)
+- Do not add language selection to the registration flow itself
+
+---
+
+## T-053: Translate Admin UI
+
+**Input:** T-049 (i18n infrastructure), T-028 (admin layout), T-029 (admin dashboard), T-030 (admin reg list), T-031 (CSV export)
+**Output:**
+- All admin pages use translation strings
+- All three languages fully translated
+
+**Files modified:**
+- `src/app/admin/layout.tsx`
+- `src/app/admin/page.tsx`
+- `src/app/admin/login/page.tsx`
+- `src/app/admin/registrations/page.tsx`
+- `src/components/admin/AdminNav.tsx`
+- `src/components/admin/StatsCard.tsx`
+- `src/components/admin/RegistrationTable.tsx`
+- `src/components/admin/RegistrationFilters.tsx`
+- `src/i18n/messages/en.json` (add admin-specific keys)
+- `src/i18n/messages/cs.json` (add admin-specific keys)
+- `src/i18n/messages/sk.json` (add admin-specific keys)
+
+**Acceptance criteria:**
+- [ ] All user-visible text on admin pages comes from translation files
+- [ ] Login page: labels, buttons, error messages translated
+- [ ] Dashboard: stats labels, navigation translated
+- [ ] Registration list: table headers, filter labels, action buttons, confirmation dialogs translated
+- [ ] CSV export: button label translated (CSV content stays in original language)
+- [ ] Language switcher present in admin layout
+- [ ] All three languages have complete translations for admin pages
+
+**Non-goals:**
+- Do not translate CSV export data content (data stays as entered by users)
+- Do not translate log messages (logs stay in English)
+
+---
+
+# Phase 11 Dependency Graph
+
+```
+PHASE 11: Enhancements
+
+  Calendar Invite:
+    T-006 → T-047 (ICS generator)
+    T-047 + T-019 + T-020 → T-048 (attach ICS to email)
+
+  Multilingual (i18n):
+    T-006 → T-049 (i18n infrastructure)
+    T-049 + T-021..T-024 → T-050 (translate public UI)
+    T-049 + T-020 → T-051 (translate email templates)
+    T-049 → T-052 (language switcher component)
+    T-049 + T-028..T-031 → T-053 (translate admin UI)
+```
+
+```
+T-047 (ICS generator)
+  └─ T-048 (attach ICS to email) ←[+T-019, +T-020]
+
+T-049 (i18n infrastructure)
+  ├─ T-050 (translate public UI) ←[+T-021..T-024]
+  ├─ T-051 (translate email templates) ←[+T-020]
+  ├─ T-052 (language switcher)
+  └─ T-053 (translate admin UI) ←[+T-028..T-031]
+```
+
+---
+
+# Updated Ticket Index (Phase 11)
+
+| ID    | Title                              | Phase | Dependencies                  |
+|-------|------------------------------------|-------|-------------------------------|
+| T-047 | ICS Calendar Invite Utility        | 11    | T-006                         |
+| T-048 | Attach Calendar Invite to Email    | 11    | T-047, T-019, T-020           |
+| T-049 | i18n Infrastructure Setup          | 11    | T-006                         |
+| T-050 | Translate Public UI Pages          | 11    | T-049, T-021..T-024           |
+| T-051 | Translate Email Templates          | 11    | T-049, T-020                  |
+| T-052 | Language Switcher Component        | 11    | T-049                         |
+| T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031           |
+
+**Total tickets: 52** (37 original + 8 Phase 1-10 additions + 7 Phase 11)
 
 ---
 
