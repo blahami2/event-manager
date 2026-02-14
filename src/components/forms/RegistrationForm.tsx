@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { registrationSchema } from "@/lib/validation/registration";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
@@ -15,6 +16,10 @@ interface FieldErrors {
 }
 
 export function RegistrationForm(): React.ReactElement {
+  const t = useTranslations("registration");
+  const tForm = useTranslations("form");
+  const tErrors = useTranslations("errors");
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [guestCount, setGuestCount] = useState("1");
@@ -60,14 +65,12 @@ export function RegistrationForm(): React.ReactElement {
       });
 
       if (response.ok) {
-        setSuccessMessage(
-          "Registration successful! Check your email for your manage link.",
-        );
+        setSuccessMessage(t("success"));
         return;
       }
 
       if (response.status === 429) {
-        setSubmitError("Too many attempts. Please try again later.");
+        setSubmitError(tErrors("tooManyAttempts"));
         return;
       }
 
@@ -81,9 +84,9 @@ export function RegistrationForm(): React.ReactElement {
         return;
       }
 
-      setSubmitError("An unexpected error occurred. Please try again.");
+      setSubmitError(tErrors("unexpectedRetry"));
     } catch {
-      setSubmitError("An unexpected error occurred. Please try again.");
+      setSubmitError(tErrors("unexpectedRetry"));
     } finally {
       setIsSubmitting(false);
     }
@@ -99,7 +102,7 @@ export function RegistrationForm(): React.ReactElement {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-      <FormField label="Name" htmlFor="name" error={fieldErrors.name}>
+      <FormField label={tForm("name")} htmlFor="name" error={fieldErrors.name}>
         <Input
           id="name"
           type="text"
@@ -110,7 +113,11 @@ export function RegistrationForm(): React.ReactElement {
         />
       </FormField>
 
-      <FormField label="Email" htmlFor="email" error={fieldErrors.email}>
+      <FormField
+        label={tForm("email")}
+        htmlFor="email"
+        error={fieldErrors.email}
+      >
         <Input
           id="email"
           type="email"
@@ -122,7 +129,7 @@ export function RegistrationForm(): React.ReactElement {
       </FormField>
 
       <FormField
-        label="Number of Guests"
+        label={tForm("guestCount")}
         htmlFor="guestCount"
         error={fieldErrors.guestCount}
       >
@@ -141,7 +148,7 @@ export function RegistrationForm(): React.ReactElement {
       </FormField>
 
       <FormField
-        label="Dietary Notes (optional)"
+        label={tForm("dietaryNotes")}
         htmlFor="dietaryNotes"
         error={fieldErrors.dietaryNotes}
       >
@@ -165,7 +172,7 @@ export function RegistrationForm(): React.ReactElement {
         disabled={isSubmitting}
         className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isSubmitting ? "Submitting…" : "Register"}
+        {isSubmitting ? t("submitting") : t("register")}
       </button>
     </form>
   );

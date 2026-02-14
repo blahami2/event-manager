@@ -22,25 +22,55 @@
     "required": "Toto pole je povinné",
     "invalidEmail": "Zadajte prosím platnú e-mailovú adresu",
     "unexpected": "Došlo k neočakávanej chybe",
+    "unexpectedRetry": "Došlo k neočakávanej chybe. Skúste to prosím znova.",
     "notFound": "Stránka nenájdená",
-    "forbidden": "Prístup zamietnutý"
+    "notFoundCode": "404",
+    "forbidden": "Prístup zamietnutý",
+    "somethingWentWrong": "Niečo sa pokazilo",
+    "tryAgain": "Skúsiť znova",
+    "goHome": "Na úvodnú stránku",
+    "tooManyAttempts": "Príliš veľa pokusov. Skúste to prosím neskôr."
   },
   "form": {
     "email": "E-mail",
     "name": "Meno",
     "guestCount": "Počet hostí",
-    "dietaryNotes": "Poznámky k stravovaniu",
+    "dietaryNotes": "Poznámky k stravovaniu (nepovinné)",
     "submit": "Odoslať registráciu"
   },
+  "landing": {
+    "date": "Dátum",
+    "location": "Miesto",
+    "register": "Registrovať sa",
+    "alreadyRegistered": "Už zaregistrovaní?"
+  },
   "registration": {
-    "title": "Registrácia na akciu",
-    "success": "Registrácia bola úspešne odoslaná",
+    "title": "Registrácia",
+    "submitting": "Odosielanie…",
+    "register": "Registrovať",
+    "success": "Registrácia prebehla úspešne! Na váš e-mail sme odoslali odkaz na správu.",
     "alreadyRegistered": "Už ste zaregistrovaní"
   },
   "manage": {
     "title": "Správa registrácie",
     "cancel": "Zrušiť registráciu",
+    "cancelling": "Rušenie…",
     "update": "Aktualizovať registráciu",
-    "cancelled": "Registrácia bola zrušená"
+    "saving": "Ukladanie…",
+    "saveChanges": "Uložiť zmeny",
+    "cancelled": "Registrácia zrušená",
+    "cancelledDescription": "Vaša registrácia bola úspešne zrušená.",
+    "updateSuccess": "Registrácia bola úspešne aktualizovaná! Na váš e-mail bol odoslaný nový odkaz na správu.",
+    "confirmCancel": "Naozaj chcete zrušiť svoju registráciu? Túto akciu nie je možné vrátiť späť.",
+    "invalidLink": "Tento odkaz je neplatný alebo vypršal.",
+    "tooManyRequests": "Príliš veľa požiadaviek. Skúste to prosím neskôr."
+  },
+  "resend": {
+    "title": "Znovu odoslať odkaz na správu",
+    "description": "Zadajte e-mail, s ktorým ste sa registrovali, a my vám pošleme nový odkaz na správu.",
+    "sending": "Odosielanie…",
+    "sendButton": "Odoslať odkaz na správu",
+    "success": "Ak je tento e-mail zaregistrovaný, odkaz na správu bol odoslaný.",
+    "backToEvent": "Späť na akciu"
   }
 }

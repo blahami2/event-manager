@@ -4,6 +4,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { IntlWrapper } from "@/test/intl-wrapper";
 import { RegistrationForm } from "../RegistrationForm";
 
 const fetchMock = vi.fn();
@@ -21,7 +22,7 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void>
 
 describe("RegistrationForm", () => {
   it("renders all form fields", () => {
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     expect(screen.getByLabelText("Name")).toBeDefined();
     expect(screen.getByLabelText("Email")).toBeDefined();
     expect(screen.getByLabelText("Number of Guests")).toBeDefined();
@@ -31,7 +32,7 @@ describe("RegistrationForm", () => {
 
   it("shows client-side validation errors for empty fields", async () => {
     const user = userEvent.setup();
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     await user.click(screen.getByRole("button", { name: "Register" }));
 
     expect(screen.getByText("Name is required")).toBeDefined();
@@ -50,7 +51,7 @@ describe("RegistrationForm", () => {
       }),
     });
 
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "Register" }));
 
@@ -82,7 +83,7 @@ describe("RegistrationForm", () => {
       }),
     );
 
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "Register" }));
 
@@ -105,7 +106,7 @@ describe("RegistrationForm", () => {
       }),
     });
 
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "Register" }));
 
@@ -130,7 +131,7 @@ describe("RegistrationForm", () => {
       }),
     });
 
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "Register" }));
 
@@ -149,7 +150,7 @@ describe("RegistrationForm", () => {
       }),
     });
 
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "Register" }));
 
@@ -166,7 +167,7 @@ describe("RegistrationForm", () => {
     const user = userEvent.setup();
     fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
     await user.click(screen.getByRole("button", { name: "Register" }));
 
@@ -180,7 +181,7 @@ describe("RegistrationForm", () => {
   });
 
   it("guest count dropdown has options 1-10", () => {
-    render(<RegistrationForm />);
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
     const select = screen.getByLabelText("Number of Guests") as HTMLSelectElement;
     expect(select.options.length).toBe(10);
     expect(select.options[0]?.value).toBe("1");

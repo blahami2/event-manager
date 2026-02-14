@@ -6,8 +6,11 @@ import {
 } from "@/config/event";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useTranslations } from "next-intl";
 
 export default function HomePage(): React.ReactElement {
+  const t = useTranslations("landing");
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
       <Card className="mx-auto w-full max-w-xl text-center">
@@ -21,19 +24,19 @@ export default function HomePage(): React.ReactElement {
 
         <dl className="mb-8 space-y-3 text-left text-gray-700">
           <div className="flex items-start gap-3">
-            <dt className="font-semibold">📅 Date</dt>
+            <dt className="font-semibold">📅 {t("date")}</dt>
             <dd>{EVENT_DATE}</dd>
           </div>
           <div className="flex items-start gap-3">
-            <dt className="font-semibold">📍 Location</dt>
+            <dt className="font-semibold">📍 {t("location")}</dt>
             <dd>{EVENT_LOCATION}</dd>
           </div>
         </dl>
 
         <div className="flex flex-col items-center gap-4">
-          <Button href="/register">Register</Button>
+          <Button href="/register">{t("register")}</Button>
           <Button href="/resend-link" variant="secondary">
-            Already registered?
+            {t("alreadyRegistered")}
           </Button>
         </div>
       </Card>

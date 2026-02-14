@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { registrationSchema } from "@/lib/validation/registration";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
@@ -24,6 +25,10 @@ export function ManageForm({
   registration,
   token,
 }: ManageFormProps): React.ReactElement {
+  const t = useTranslations("manage");
+  const tForm = useTranslations("form");
+  const tErrors = useTranslations("errors");
+
   const [name, setName] = useState(registration.name);
   const [email, setEmail] = useState(registration.email);
   const [guestCount, setGuestCount] = useState(
@@ -75,14 +80,12 @@ export function ManageForm({
       });
 
       if (response.ok) {
-        setSuccessMessage(
-          "Registration updated successfully! A new manage link has been sent to your email.",
-        );
+        setSuccessMessage(t("updateSuccess"));
         return;
       }
 
       if (response.status === 429) {
-        setSubmitError("Too many attempts. Please try again later.");
+        setSubmitError(tErrors("tooManyAttempts"));
         return;
       }
 
@@ -96,18 +99,16 @@ export function ManageForm({
         return;
       }
 
-      setSubmitError("An unexpected error occurred. Please try again.");
+      setSubmitError(tErrors("unexpectedRetry"));
     } catch {
-      setSubmitError("An unexpected error occurred. Please try again.");
+      setSubmitError(tErrors("unexpectedRetry"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
   async function handleCancel(): Promise<void> {
-    const confirmed = window.confirm(
-      "Are you sure you want to cancel your registration? This cannot be undone.",
-    );
+    const confirmed = window.confirm(t("confirmCancel"));
     if (!confirmed) return;
 
     setSubmitError("");
@@ -125,13 +126,13 @@ export function ManageForm({
       }
 
       if (response.status === 429) {
-        setSubmitError("Too many attempts. Please try again later.");
+        setSubmitError(tErrors("tooManyAttempts"));
         return;
       }
 
-      setSubmitError("An unexpected error occurred. Please try again.");
+      setSubmitError(tErrors("unexpectedRetry"));
     } catch {
-      setSubmitError("An unexpected error occurred. Please try again.");
+      setSubmitError(tErrors("unexpectedRetry"));
     } finally {
       setIsCancelling(false);
     }
@@ -141,10 +142,10 @@ export function ManageForm({
     return (
       <div role="status" className="text-center">
         <p className="text-lg font-medium text-red-700">
-          Registration cancelled
+          {t("cancelled")}
         </p>
         <p className="mt-2 text-sm text-gray-600">
-          Your registration has been cancelled successfully.
+          {t("cancelledDescription")}
         </p>
       </div>
     );
@@ -161,7 +162,7 @@ export function ManageForm({
   return (
     <div>
       <form onSubmit={handleSave} className="space-y-5" noValidate>
-        <FormField label="Name" htmlFor="name" error={fieldErrors.name}>
+        <FormField label={tForm("name")} htmlFor="name" error={fieldErrors.name}>
           <Input
             id="name"
             type="text"
@@ -172,7 +173,7 @@ export function ManageForm({
           />
         </FormField>
 
-        <FormField label="Email" htmlFor="email" error={fieldErrors.email}>
+        <FormField label={tForm("email")} htmlFor="email" error={fieldErrors.email}>
           <Input
             id="email"
             type="email"
@@ -184,7 +185,7 @@ export function ManageForm({
         </FormField>
 
         <FormField
-          label="Number of Guests"
+          label={tForm("guestCount")}
           htmlFor="guestCount"
           error={fieldErrors.guestCount}
         >
@@ -203,7 +204,7 @@ export function ManageForm({
         </FormField>
 
         <FormField
-          label="Dietary Notes (optional)"
+          label={tForm("dietaryNotes")}
           htmlFor="dietaryNotes"
           error={fieldErrors.dietaryNotes}
         >
@@ -227,7 +228,7 @@ export function ManageForm({
           disabled={isSubmitting}
           className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting ? "Saving…" : "Save Changes"}
+          {isSubmitting ? t("saving") : t("saveChanges")}
         </button>
       </form>
 
@@ -238,7 +239,7 @@ export function ManageForm({
           disabled={isCancelling}
           className="w-full rounded-lg border border-red-300 px-4 py-3 font-semibold text-red-600 transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isCancelling ? "Cancelling…" : "Cancel Registration"}
+          {isCancelling ? t("cancelling") : t("cancel")}
         </button>
       </div>
     </div>

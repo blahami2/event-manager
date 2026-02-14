@@ -1581,14 +1581,14 @@ The iCalendar format (.ics, RFC 5545) is the universal standard for calendar eve
 - `src/i18n/messages/sk.json` (add page-specific keys)
 
 **Acceptance criteria:**
-- [ ] All user-visible text on public pages comes from translation files (no hardcoded strings)
-- [ ] Landing page: event name, description, CTA buttons translated
-- [ ] Registration form: labels, placeholders, validation messages, success/error messages translated
-- [ ] Manage page: all labels, buttons, confirmation dialogs translated
-- [ ] Resend link page: all text translated
-- [ ] Error boundary messages translated
-- [ ] All three languages (EN, CS, SK) have complete translations for public pages
-- [ ] Switching locale (via cookie) correctly renders the page in the selected language
+- [x] All user-visible text on public pages comes from translation files (no hardcoded strings)
+- [x] Landing page: event name, description, CTA buttons translated
+- [x] Registration form: labels, placeholders, validation messages, success/error messages translated
+- [x] Manage page: all labels, buttons, confirmation dialogs translated
+- [x] Resend link page: all text translated
+- [x] Error boundary messages translated
+- [x] All three languages (EN, CS, SK) have complete translations for public pages
+- [x] Switching locale (via cookie) correctly renders the page in the selected language
 
 **Non-goals:**
 - Do not translate admin pages (T-053)

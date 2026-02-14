@@ -4,6 +4,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { IntlWrapper } from "@/test/intl-wrapper";
 import { ResendLinkForm } from "../ResendLinkForm";
 
 const fetchMock = vi.fn();
@@ -15,7 +16,7 @@ beforeEach(() => {
 
 describe("ResendLinkForm", () => {
   it("renders email field and submit button", () => {
-    render(<ResendLinkForm />);
+    render(<ResendLinkForm />, { wrapper: IntlWrapper });
     expect(screen.getByLabelText("Email")).toBeDefined();
     expect(
       screen.getByRole("button", { name: "Send Manage Link" }),
@@ -24,7 +25,7 @@ describe("ResendLinkForm", () => {
 
   it("shows validation error for empty email", async () => {
     const user = userEvent.setup();
-    render(<ResendLinkForm />);
+    render(<ResendLinkForm />, { wrapper: IntlWrapper });
     await user.click(
       screen.getByRole("button", { name: "Send Manage Link" }),
     );
@@ -35,7 +36,7 @@ describe("ResendLinkForm", () => {
 
   it("shows validation error for invalid email format", async () => {
     const user = userEvent.setup();
-    render(<ResendLinkForm />);
+    render(<ResendLinkForm />, { wrapper: IntlWrapper });
     await user.type(screen.getByLabelText("Email"), "not-an-email");
     await user.click(
       screen.getByRole("button", { name: "Send Manage Link" }),
@@ -57,7 +58,7 @@ describe("ResendLinkForm", () => {
       }),
     });
 
-    render(<ResendLinkForm />);
+    render(<ResendLinkForm />, { wrapper: IntlWrapper });
     await user.type(screen.getByLabelText("Email"), "alice@example.com");
     await user.click(
       screen.getByRole("button", { name: "Send Manage Link" }),
@@ -91,7 +92,7 @@ describe("ResendLinkForm", () => {
       }),
     });
 
-    render(<ResendLinkForm />);
+    render(<ResendLinkForm />, { wrapper: IntlWrapper });
     await user.type(
       screen.getByLabelText("Email"),
       "nonexistent@example.com",
@@ -118,7 +119,7 @@ describe("ResendLinkForm", () => {
       }),
     );
 
-    render(<ResendLinkForm />);
+    render(<ResendLinkForm />, { wrapper: IntlWrapper });
     await user.type(screen.getByLabelText("Email"), "alice@example.com");
     await user.click(
       screen.getByRole("button", { name: "Send Manage Link" }),
@@ -154,7 +155,7 @@ describe("ResendLinkForm", () => {
       status: 429,
     });
 
-    render(<ResendLinkForm />);
+    render(<ResendLinkForm />, { wrapper: IntlWrapper });
     await user.type(screen.getByLabelText("Email"), "alice@example.com");
     await user.click(
       screen.getByRole("button", { name: "Send Manage Link" }),
@@ -171,7 +172,7 @@ describe("ResendLinkForm", () => {
     const user = userEvent.setup();
     fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
-    render(<ResendLinkForm />);
+    render(<ResendLinkForm />, { wrapper: IntlWrapper });
     await user.type(screen.getByLabelText("Email"), "alice@example.com");
     await user.click(
       screen.getByRole("button", { name: "Send Manage Link" }),

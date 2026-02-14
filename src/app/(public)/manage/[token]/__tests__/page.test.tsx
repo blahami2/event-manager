@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // We test the ManageForm client component which receives registration data as props
 // The server component (page.tsx) handles data fetching and is tested indirectly via integration
 
+import { IntlWrapper } from "@/test/intl-wrapper";
 import { ManageForm } from "../ManageForm";
 import type { RegistrationOutput } from "@/types/registration";
 import { RegistrationStatus } from "@/types/registration";
@@ -30,6 +31,7 @@ const mockRegistration: RegistrationOutput = {
 function renderForm(): ReturnType<typeof render> {
   return render(
     <ManageForm registration={mockRegistration} token={VALID_TOKEN} />,
+    { wrapper: IntlWrapper },
   );
 }
 

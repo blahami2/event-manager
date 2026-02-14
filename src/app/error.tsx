@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface ErrorProps {
   readonly error: Error & { digest?: string };
   readonly reset: () => void;
@@ -12,19 +14,21 @@ interface ErrorProps {
  * No stack traces or internal details are exposed.
  */
 export default function RootError({ reset }: ErrorProps): React.ReactElement {
+  const t = useTranslations("errors");
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="max-w-md text-center">
-        <h1 className="mb-4 text-2xl font-bold">Something went wrong</h1>
+        <h1 className="mb-4 text-2xl font-bold">{t("somethingWentWrong")}</h1>
         <p className="mb-6 text-gray-600">
-          Something went wrong. Please try again.
+          {t("unexpectedRetry")}
         </p>
         <button
           type="button"
           onClick={reset}
           className="rounded-md bg-black px-6 py-2 text-white hover:bg-gray-800"
         >
-          Try again
+          {t("tryAgain")}
         </button>
       </div>
     </div>

@@ -22,25 +22,55 @@
     "required": "This field is required",
     "invalidEmail": "Please enter a valid email address",
     "unexpected": "An unexpected error occurred",
+    "unexpectedRetry": "An unexpected error occurred. Please try again.",
     "notFound": "Page not found",
-    "forbidden": "Access denied"
+    "notFoundCode": "404",
+    "forbidden": "Access denied",
+    "somethingWentWrong": "Something went wrong",
+    "tryAgain": "Try again",
+    "goHome": "Go home",
+    "tooManyAttempts": "Too many attempts. Please try again later."
   },
   "form": {
     "email": "Email",
     "name": "Name",
-    "guestCount": "Number of guests",
-    "dietaryNotes": "Dietary notes",
+    "guestCount": "Number of Guests",
+    "dietaryNotes": "Dietary Notes (optional)",
     "submit": "Submit registration"
   },
+  "landing": {
+    "date": "Date",
+    "location": "Location",
+    "register": "Register",
+    "alreadyRegistered": "Already registered?"
+  },
   "registration": {
-    "title": "Event Registration",
-    "success": "Registration submitted successfully",
+    "title": "Register",
+    "submitting": "Submitting…",
+    "register": "Register",
+    "success": "Registration successful! Check your email for your manage link.",
     "alreadyRegistered": "You are already registered"
   },
   "manage": {
     "title": "Manage Registration",
-    "cancel": "Cancel registration",
+    "cancel": "Cancel Registration",
+    "cancelling": "Cancelling…",
     "update": "Update registration",
-    "cancelled": "Registration has been cancelled"
+    "saving": "Saving…",
+    "saveChanges": "Save Changes",
+    "cancelled": "Registration cancelled",
+    "cancelledDescription": "Your registration has been cancelled successfully.",
+    "updateSuccess": "Registration updated successfully! A new manage link has been sent to your email.",
+    "confirmCancel": "Are you sure you want to cancel your registration? This cannot be undone.",
+    "invalidLink": "This link is not valid or has expired.",
+    "tooManyRequests": "Too many requests. Please try again later."
+  },
+  "resend": {
+    "title": "Resend Manage Link",
+    "description": "Enter the email you registered with and we'll send you a new manage link.",
+    "sending": "Sending…",
+    "sendButton": "Send Manage Link",
+    "success": "If this email is registered, a manage link has been sent.",
+    "backToEvent": "Back to Event"
   }
 }
