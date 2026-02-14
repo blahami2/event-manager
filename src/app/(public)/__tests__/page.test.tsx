@@ -3,28 +3,29 @@
  */
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
+import { IntlWrapper } from "@/test/intl-wrapper";
 import HomePage from "../page";
 
 describe("HomePage", () => {
   it("displays event name", () => {
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: IntlWrapper });
     expect(screen.getByText("Birthday Celebration")).toBeDefined();
   });
 
   it("displays event date", () => {
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: IntlWrapper });
     expect(screen.getByText("Saturday, March 28, 2026")).toBeDefined();
   });
 
   it("displays event location", () => {
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: IntlWrapper });
     expect(
       screen.getByText("123 Party Lane, Prague, Czech Republic"),
     ).toBeDefined();
   });
 
   it("displays event description", () => {
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: IntlWrapper });
     expect(
       screen.getByText(
         "Join us for an unforgettable birthday celebration! Great food, music, and company await.",
@@ -33,13 +34,13 @@ describe("HomePage", () => {
   });
 
   it("has a Register CTA linking to /register", () => {
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: IntlWrapper });
     const link = screen.getByRole("link", { name: "Register" });
     expect(link.getAttribute("href")).toBe("/register");
   });
 
   it("has an Already registered link to /resend-link", () => {
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: IntlWrapper });
     const link = screen.getByRole("link", { name: "Already registered?" });
     expect(link.getAttribute("href")).toBe("/resend-link");
   });
