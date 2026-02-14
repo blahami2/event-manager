@@ -1544,14 +1544,14 @@ The iCalendar format (.ics, RFC 5545) is the universal standard for calendar eve
 - `src/lib/auth/middleware.ts` (extend with locale detection)
 
 **Acceptance criteria:**
-- [ ] i18n library installed (recommended: `next-intl` for App Router compatibility)
-- [ ] Three locale files created: `en.json`, `cs.json`, `sk.json` with initial keys for common UI strings (nav, buttons, form labels, error messages)
-- [ ] Locale detection middleware reads `Accept-Language` header and maps to closest supported locale
-- [ ] Fallback chain: exact match → language match (e.g., `cs-CZ` → `cs`) → default (`en`)
-- [ ] Selected locale stored in cookie (`NEXT_LOCALE`) for subsequent requests
-- [ ] Manual locale override (via cookie or URL parameter) takes precedence over auto-detection
-- [ ] TypeScript types for translation keys (type-safe translations)
-- [ ] `npm run build` succeeds with i18n configured
+- [x] i18n library installed (recommended: `next-intl` for App Router compatibility)
+- [x] Three locale files created: `en.json`, `cs.json`, `sk.json` with initial keys for common UI strings (nav, buttons, form labels, error messages)
+- [x] Locale detection middleware reads `Accept-Language` header and maps to closest supported locale
+- [x] Fallback chain: exact match → language match (e.g., `cs-CZ` → `cs`) → default (`en`)
+- [x] Selected locale stored in cookie (`NEXT_LOCALE`) for subsequent requests
+- [x] Manual locale override (via cookie or URL parameter) takes precedence over auto-detection
+- [x] TypeScript types for translation keys (type-safe translations)
+- [x] `npm run build` succeeds with i18n configured
 
 **Non-goals:**
 - Do not translate all pages yet (T-050, T-051, T-053)

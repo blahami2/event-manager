@@ -1,0 +1,46 @@
+{
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "loading": "Loading…",
+    "confirm": "Confirm",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "home": "Home",
+    "admin": "Administration",
+    "login": "Log in",
+    "logout": "Log out"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "unexpected": "An unexpected error occurred",
+    "notFound": "Page not found",
+    "forbidden": "Access denied"
+  },
+  "form": {
+    "email": "Email",
+    "name": "Name",
+    "guestCount": "Number of guests",
+    "dietaryNotes": "Dietary notes",
+    "submit": "Submit registration"
+  },
+  "registration": {
+    "title": "Event Registration",
+    "success": "Registration submitted successfully",
+    "alreadyRegistered": "You are already registered"
+  },
+  "manage": {
+    "title": "Manage Registration",
+    "cancel": "Cancel registration",
+    "update": "Update registration",
+    "cancelled": "Registration has been cancelled"
+  }
+}
