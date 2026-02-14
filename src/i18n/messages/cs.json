@@ -1,0 +1,46 @@
+{
+  "common": {
+    "submit": "Odeslat",
+    "cancel": "Zrušit",
+    "save": "Uložit",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "back": "Zpět",
+    "loading": "Načítání…",
+    "confirm": "Potvrdit",
+    "close": "Zavřít",
+    "yes": "Ano",
+    "no": "Ne"
+  },
+  "nav": {
+    "home": "Domů",
+    "admin": "Administrace",
+    "login": "Přihlásit se",
+    "logout": "Odhlásit se"
+  },
+  "errors": {
+    "required": "Toto pole je povinné",
+    "invalidEmail": "Zadejte prosím platnou e-mailovou adresu",
+    "unexpected": "Došlo k neočekávané chybě",
+    "notFound": "Stránka nenalezena",
+    "forbidden": "Přístup odepřen"
+  },
+  "form": {
+    "email": "E-mail",
+    "name": "Jméno",
+    "guestCount": "Počet hostů",
+    "dietaryNotes": "Poznámky ke stravování",
+    "submit": "Odeslat registraci"
+  },
+  "registration": {
+    "title": "Registrace na akci",
+    "success": "Registrace byla úspěšně odeslána",
+    "alreadyRegistered": "Již jste zaregistrováni"
+  },
+  "manage": {
+    "title": "Správa registrace",
+    "cancel": "Zrušit registraci",
+    "update": "Aktualizovat registraci",
+    "cancelled": "Registrace byla zrušena"
+  }
+}
