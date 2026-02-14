@@ -1,5 +1,11 @@
 import { Resend } from "resend";
 import { logger, maskEmail } from "@/lib/logger";
+import { generateIcsEvent } from "@/lib/email/ics-generator";
+import {
+  EVENT_NAME,
+  EVENT_LOCATION,
+  EVENT_DESCRIPTION,
+} from "@/config/event";
 
 interface SendManageLinkParams {
   /** Recipient email address. */
@@ -46,11 +52,29 @@ export async function sendManageLink(
     to: maskEmail(to),
   };
 
+  const eventStart = new Date("2026-03-28T18:00:00Z");
+  const eventEnd = new Date("2026-03-28T23:00:00Z");
+  const icsContent = generateIcsEvent({
+    eventName: EVENT_NAME,
+    eventDate: eventStart,
+    eventEndDate: eventEnd,
+    eventLocation: EVENT_LOCATION,
+    eventDescription: EVENT_DESCRIPTION,
+    organizerEmail: "noreply@resend.dev",
+  });
+
   const { error } = await resend.emails.send({
     from: "Birthday Celebration <noreply@resend.dev>",
     to,
     subject: "Your Registration Manage Link",
-    html: `<p>Hi ${guestName},</p><p>You are registered for <strong>${eventName}</strong> on <strong>${eventDate}</strong>.</p><p>Use the link below to manage your registration:</p><p><a href="${manageUrl}">${manageUrl}</a></p>`,
+    html: `<p>Hi ${guestName},</p><p>You are registered for <strong>${eventName}</strong> on <strong>${eventDate}</strong>.</p><p>Use the link below to manage your registration:</p><p><a href="${manageUrl}">${manageUrl}</a></p><p>A calendar invite is attached to this email.</p>`,
+    attachments: [
+      {
+        filename: "event.ics",
+        content: Buffer.from(icsContent).toString("base64"),
+        contentType: "text/calendar; method=REQUEST",
+      },
+    ],
   });
 
   if (error) {
