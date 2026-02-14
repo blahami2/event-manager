@@ -6,6 +6,7 @@ import {
 } from "@/repositories/registration-repository";
 import { logger } from "@/lib/logger";
 import { NotFoundError } from "@/lib/errors/app-errors";
+import { purgeExpiredTokens, purgeCancelledRegistrations } from "@/lib/usecases/data-retention";
 import type {
   RegistrationFilters,
   RegistrationOutput,
@@ -141,4 +142,37 @@ export async function exportRegistrationsCsv(): Promise<string> {
   );
 
   return [header, ...rows].join("\n");
+}
+
+/** Data retention purge results returned to admin callers. */
+export interface DataRetentionResult {
+  readonly expiredTokensPurged: number;
+  readonly cancelledRegistrationsPurged: number;
+}
+
+/**
+ * Admin-trigger data retention purge.
+ * Removes expired+revoked tokens and old cancelled registrations.
+ * Logs the admin action.
+ */
+export async function adminPurgeRetentionData(
+  adminId: string,
+  olderThan?: Date,
+): Promise<DataRetentionResult> {
+  const [tokenResult, regResult] = await Promise.all([
+    purgeExpiredTokens(),
+    purgeCancelledRegistrations(olderThan),
+  ]);
+
+  logger.info("Admin triggered data retention purge", {
+    adminUserId: adminId,
+    action: "purge_retention_data",
+    expiredTokensPurged: tokenResult.purgedCount,
+    cancelledRegistrationsPurged: regResult.purgedCount,
+  });
+
+  return {
+    expiredTokensPurged: tokenResult.purgedCount,
+    cancelledRegistrationsPurged: regResult.purgedCount,
+  };
 }
