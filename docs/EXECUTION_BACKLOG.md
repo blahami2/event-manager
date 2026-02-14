@@ -1237,11 +1237,11 @@ T-001 (Init Next.js)
 - `tests/security/no-token-logging.test.ts`
 
 **Acceptance criteria:**
-- [ ] Grep-based test: no `console.log` calls in production code that could log tokens
-- [ ] No `req.url` logging on manage routes
-- [ ] No `token` variable logged anywhere
-- [ ] Test scans `src/` directory for forbidden patterns (from `docs/ARCHITECTURE_RULES.md` F1-F3)
-- [ ] Test passes
+- [x] Grep-based test: no `console.log` calls in production code that could log tokens
+- [x] No `req.url` logging on manage routes
+- [x] No `token` variable logged anywhere
+- [x] Test scans `src/` directory for forbidden patterns (from `docs/ARCHITECTURE_RULES.md` F1-F3)
+- [x] Test passes
 
 **Non-goals:**
 - Do not implement runtime token leak detection
