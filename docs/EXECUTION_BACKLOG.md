@@ -1473,17 +1473,17 @@ T-001 (Init Next.js)
 The iCalendar format (.ics, RFC 5545) is the universal standard for calendar events. When an .ics file is attached to an email, all major clients (Gmail, Outlook, Apple Mail, Thunderbird) recognize it as a calendar event and offer to add it to the user's calendar. The MIME type is `text/calendar; method=REQUEST`.
 
 **Acceptance criteria:**
-- [ ] Exports `generateIcsEvent(params: { eventName: string; eventDate: Date; eventEndDate: Date; eventLocation: string; eventDescription: string; organizerEmail: string }): string`
-- [ ] Output is a valid iCalendar string (starts with `BEGIN:VCALENDAR`, ends with `END:VCALENDAR`)
-- [ ] Includes `VTIMEZONE` component or uses UTC
-- [ ] Contains required fields: `DTSTART`, `DTEND`, `SUMMARY`, `LOCATION`, `DESCRIPTION`, `UID`, `DTSTAMP`
-- [ ] `UID` is unique per generation (use UUID + domain)
-- [ ] `METHOD:REQUEST` is set so email clients treat it as an event invitation
-- [ ] Line folding follows RFC 5545 (max 75 octets per line)
-- [ ] Special characters in text fields are properly escaped
-- [ ] Unit test: output is valid iCalendar format
-- [ ] Unit test: all event details appear in output
-- [ ] Unit test: UID is unique across invocations
+- [x] Exports `generateIcsEvent(params: { eventName: string; eventDate: Date; eventEndDate: Date; eventLocation: string; eventDescription: string; organizerEmail: string }): string`
+- [x] Output is a valid iCalendar string (starts with `BEGIN:VCALENDAR`, ends with `END:VCALENDAR`)
+- [x] Includes `VTIMEZONE` component or uses UTC
+- [x] Contains required fields: `DTSTART`, `DTEND`, `SUMMARY`, `LOCATION`, `DESCRIPTION`, `UID`, `DTSTAMP`
+- [x] `UID` is unique per generation (use UUID + domain)
+- [x] `METHOD:REQUEST` is set so email clients treat it as an event invitation
+- [x] Line folding follows RFC 5545 (max 75 octets per line)
+- [x] Special characters in text fields are properly escaped
+- [x] Unit test: output is valid iCalendar format
+- [x] Unit test: all event details appear in output
+- [x] Unit test: UID is unique across invocations
 
 **Non-goals:**
 - Do not handle recurring events
