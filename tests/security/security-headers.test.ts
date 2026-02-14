@@ -4,7 +4,7 @@
  * Verifies that next.config.js exports the correct security headers
  * via the `headers()` async function.
  */
-import { describe, it, expect } from "vitest";
+import { beforeAll, describe, it, expect } from "vitest";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const nextConfig = require("../../next.config.js");
