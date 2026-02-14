@@ -102,10 +102,10 @@ describe("foldLine", () => {
     const parts = folded.split("\r\n ");
     // Each part should be at most 75 bytes
     const encoder = new TextEncoder();
-    expect(encoder.encode(parts[0]!).length).toBeLessThanOrEqual(75);
+    expect(encoder.encode(parts[0] ?? "").length).toBeLessThanOrEqual(75);
     for (let i = 1; i < parts.length; i++) {
       // continuation content + leading space = 75 max, so content <= 74
-      expect(encoder.encode(parts[i]!).length).toBeLessThanOrEqual(74);
+      expect(encoder.encode(parts[i] ?? "").length).toBeLessThanOrEqual(74);
     }
   });
 

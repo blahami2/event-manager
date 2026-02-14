@@ -49,7 +49,7 @@ export function foldLine(line: string): string {
     // We need to cut at a valid UTF-8 boundary. Walk back from max if needed.
     let end = Math.min(offset + currentMax, bytes.length);
     // Avoid splitting a multi-byte UTF-8 sequence: continuation bytes start with 10xxxxxx
-    while (end < bytes.length && end > offset && (bytes[end]! & 0xc0) === 0x80) {
+    while (end < bytes.length && end > offset && ((bytes[end] ?? 0) & 0xc0) === 0x80) {
       end--;
     }
     const chunk = new TextDecoder().decode(bytes.slice(offset, end));
