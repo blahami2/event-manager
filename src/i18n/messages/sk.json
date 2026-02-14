@@ -1,0 +1,46 @@
+{
+  "common": {
+    "submit": "Odoslať",
+    "cancel": "Zrušiť",
+    "save": "Uložiť",
+    "delete": "Zmazať",
+    "edit": "Upraviť",
+    "back": "Späť",
+    "loading": "Načítava sa…",
+    "confirm": "Potvrdiť",
+    "close": "Zavrieť",
+    "yes": "Áno",
+    "no": "Nie"
+  },
+  "nav": {
+    "home": "Domov",
+    "admin": "Administrácia",
+    "login": "Prihlásiť sa",
+    "logout": "Odhlásiť sa"
+  },
+  "errors": {
+    "required": "Toto pole je povinné",
+    "invalidEmail": "Zadajte prosím platnú e-mailovú adresu",
+    "unexpected": "Došlo k neočakávanej chybe",
+    "notFound": "Stránka nenájdená",
+    "forbidden": "Prístup zamietnutý"
+  },
+  "form": {
+    "email": "E-mail",
+    "name": "Meno",
+    "guestCount": "Počet hostí",
+    "dietaryNotes": "Poznámky k stravovaniu",
+    "submit": "Odoslať registráciu"
+  },
+  "registration": {
+    "title": "Registrácia na akciu",
+    "success": "Registrácia bola úspešne odoslaná",
+    "alreadyRegistered": "Už ste zaregistrovaní"
+  },
+  "manage": {
+    "title": "Správa registrácie",
+    "cancel": "Zrušiť registráciu",
+    "update": "Aktualizovať registráciu",
+    "cancelled": "Registrácia bola zrušená"
+  }
+}
