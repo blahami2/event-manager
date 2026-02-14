@@ -63,6 +63,7 @@ export function renderManageLinkEmail(params: ManageLinkEmailParams): string {
               </table>
               <p style="margin: 24px 0 0; color: #666666; font-size: 14px; line-height: 1.5;">If the button above doesn't work, copy and paste this link into your browser:</p>
               <p style="margin: 8px 0 0; word-break: break-all;"><a href="${manageUrl}" style="color: #4f46e5; font-size: 14px;">${manageUrl}</a></p>
+              <p style="margin: 24px 0 0; color: #333333; font-size: 14px; line-height: 1.5;">A calendar invite is attached to this email.</p>
             </td>
           </tr>
           <tr>

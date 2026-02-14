@@ -1507,15 +1507,15 @@ The iCalendar format (.ics, RFC 5545) is the universal standard for calendar eve
 - `tests/unit/lib/email/ics-attachment.test.ts`
 
 **Acceptance criteria:**
-- [ ] Registration confirmation email includes .ics file as attachment
-- [ ] Attachment MIME type: `text/calendar; method=REQUEST`
-- [ ] Attachment filename: `event.ics`
-- [ ] ICS content uses event details from `src/config/event.ts`
-- [ ] Email HTML body includes a note: "A calendar invite is attached to this email."
-- [ ] Resend API call includes attachment in correct format
-- [ ] Unit test: email service passes ICS attachment to Resend
-- [ ] Unit test: ICS content matches event configuration
-- [ ] Existing email tests still pass
+- [x] Registration confirmation email includes .ics file as attachment
+- [x] Attachment MIME type: `text/calendar; method=REQUEST`
+- [x] Attachment filename: `event.ics`
+- [x] ICS content uses event details from `src/config/event.ts`
+- [x] Email HTML body includes a note: "A calendar invite is attached to this email."
+- [x] Resend API call includes attachment in correct format
+- [x] Unit test: email service passes ICS attachment to Resend
+- [x] Unit test: ICS content matches event configuration
+- [x] Existing email tests still pass
 
 **Non-goals:**
 - Do not send calendar updates on registration edit/cancel (future enhancement)
