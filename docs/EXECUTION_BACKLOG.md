@@ -1335,13 +1335,13 @@ T-001 (Init Next.js)
 - `tests/unit/lib/usecases/data-retention.test.ts`
 
 **Acceptance criteria:**
-- [ ] `purgeExpiredTokens()` removes tokens where `expiresAt < now` and `isRevoked = true`
-- [ ] `purgeCancelledRegistrations(olderThan: Date)` removes cancelled registrations older than specified date
-- [ ] Default retention: cancelled registrations purged after 180 days
-- [ ] Functions are idempotent and safe to run repeatedly
-- [ ] Admin-callable via admin actions (manual trigger)
-- [ ] Unit test: correct records purged
-- [ ] Unit test: active records not affected
+- [x] `purgeExpiredTokens()` removes tokens where `expiresAt < now` and `isRevoked = true`
+- [x] `purgeCancelledRegistrations(olderThan: Date)` removes cancelled registrations older than specified date
+- [x] Default retention: cancelled registrations purged after 180 days
+- [x] Functions are idempotent and safe to run repeatedly
+- [x] Admin-callable via admin actions (manual trigger)
+- [x] Unit test: correct records purged
+- [x] Unit test: active records not affected
 
 **Non-goals:**
 - Do not implement scheduled/cron execution (manual or Vercel cron added later)

@@ -82,6 +82,17 @@ export async function revokeAllTokensForRegistration(
   return result.count;
 }
 
+/** Delete tokens that are both expired and revoked. Returns count of deleted rows. */
+export async function deleteExpiredRevokedTokens(): Promise<number> {
+  const result = await prisma.registrationToken.deleteMany({
+    where: {
+      expiresAt: { lt: new Date() },
+      isRevoked: true,
+    },
+  });
+  return result.count;
+}
+
 /** Find the most recent non-revoked, non-expired token for a registration. */
 export async function findActiveTokenForRegistration(
   registrationId: string,

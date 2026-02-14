@@ -142,6 +142,19 @@ export async function listRegistrations(
   };
 }
 
+/** Delete cancelled registrations older than the given date. Returns count of deleted rows. */
+export async function deleteCancelledRegistrationsBefore(
+  olderThan: Date,
+): Promise<number> {
+  const result = await prisma.registration.deleteMany({
+    where: {
+      status: RegistrationStatus.CANCELLED,
+      updatedAt: { lt: olderThan },
+    },
+  });
+  return result.count;
+}
+
 /** Return the total number of registrations. */
 export async function countRegistrations(): Promise<number> {
   return prisma.registration.count();
