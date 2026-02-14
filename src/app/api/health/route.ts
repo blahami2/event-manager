@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/repositories/prisma";
+import { checkDatabaseHealth } from "@/lib/health-check";
 import { logger } from "@/lib/logger";
 
 /**
@@ -14,7 +14,7 @@ export async function GET(): Promise<NextResponse> {
   const timestamp = new Date().toISOString();
 
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await checkDatabaseHealth();
 
     return NextResponse.json(
       { status: "ok", timestamp, version: "1.0.0" },
