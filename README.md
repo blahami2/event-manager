@@ -101,6 +101,14 @@ The application implements a data retention policy for responsible data manageme
 - Purge operations are idempotent and safe for repeated execution
 - An admin API endpoint is available for triggering manual purges
 
+## Planned Features
+
+- **Calendar Invite**: Registration confirmation emails will include an iCalendar (.ics) attachment, universally recognized by Gmail, Outlook, Apple Mail, and other clients
+- **Multilingual Support**: Czech, English, and Slovak with easy language switching
+- **Automatic Language Detection**: Language auto-detected from browser settings, with manual override via language switcher
+
+See [docs/EXECUTION_BACKLOG.md](docs/EXECUTION_BACKLOG.md) Phase 11 for implementation tickets.
+
 ## Documentation
 
 - [Architecture Specification](docs/ARCHITECTURE.md) — Implementation conventions, folder structure, layering rules

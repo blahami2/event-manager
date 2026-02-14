@@ -416,6 +416,10 @@ For each feature ticket, the following manual checks apply:
 | CSV export          | Download → file opens in Excel → data correct              |
 | Rate limiting       | Exceed limit → 429 shown → resets after window             |
 | Error states        | Invalid input → field errors shown → no crash              |
+| Calendar invite     | Register → email has .ics attachment → opens in calendar   |
+| Language switching   | Switch language → all UI text changes → persists on reload |
+| Auto locale detect  | Browser set to cs → page loads in Czech → can switch to EN |
+| Email language      | Register with CS locale → email arrives in Czech           |
 
 ---
 

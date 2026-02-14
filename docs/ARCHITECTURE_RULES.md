@@ -154,6 +154,18 @@ These patterns MUST NOT appear in the codebase:
 
 ---
 
+## Internationalization Rules
+
+| Rule  | Description |
+|-------|-------------|
+| I18N1 | All user-visible text in UI MUST come from translation files, no hardcoded strings |
+| I18N2 | Log messages MUST remain in English (not translated) |
+| I18N3 | API error codes MUST remain in English; only user-facing `message` fields are translated |
+| I18N4 | CSV export data MUST NOT be translated (contains user-entered data) |
+| I18N5 | All locale files (`en.json`, `cs.json`, `sk.json`) MUST have identical key sets |
+
+---
+
 ## API Contract Rules
 
 | Rule | Description |

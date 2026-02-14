@@ -69,6 +69,13 @@
 │   │   ├── ui/                       # Primitive UI components (Button, Input, etc.)
 │   │   ├── forms/                    # Form components
 │   │   └── admin/                    # Admin-specific components
+│   ├── i18n/                          # Internationalization (Phase 11)
+│   │   ├── config.ts                  # Supported locales, default locale
+│   │   ├── get-locale.ts             # Locale detection logic
+│   │   └── messages/                  # Translation files
+│   │       ├── en.json                # English
+│   │       ├── cs.json                # Czech
+│   │       └── sk.json                # Slovak
 │   ├── lib/                          # Application layer (business logic)
 │   │   ├── usecases/                 # Use case functions
 │   │   │   ├── register.ts
@@ -83,6 +90,7 @@
 │   │   │   └── capability-token.ts
 │   │   ├── email/                    # Email service abstraction
 │   │   │   ├── send-manage-link.ts
+│   │   │   ├── ics-generator.ts       # ICS calendar invite generator (Phase 11)
 │   │   │   └── templates/
 │   │   ├── auth/                     # Auth helpers
 │   │   │   ├── supabase-client.ts
@@ -500,6 +508,69 @@ All API endpoints return consistent response shapes.
 ### GET /api/health
 - **Healthy (200):** `{ "status": "ok", "timestamp": "ISO8601", "version": "1.0.0" }`
 - **Unhealthy (503):** `{ "status": "error", "timestamp": "ISO8601" }`
+
+---
+
+---
+
+# 13. Internationalization (i18n) — Phase 11
+
+## 13.1 Supported Locales
+
+| Locale | Language | Status   |
+|--------|----------|----------|
+| `en`   | English  | Default  |
+| `cs`   | Czech    | Planned  |
+| `sk`   | Slovak   | Planned  |
+
+## 13.2 Locale Detection Priority
+
+1. **Manual override**: `NEXT_LOCALE` cookie (set by language switcher)
+2. **Browser detection**: `Accept-Language` header, mapped to closest supported locale
+3. **Fallback**: English (`en`)
+
+## 13.3 Translation Architecture
+
+- Library: `next-intl` (recommended for Next.js App Router)
+- Translation files: `src/i18n/messages/{locale}.json`
+- Type-safe translation keys via TypeScript
+- Cookie-based locale persistence (no URL-based routing like `/en/register`)
+- Email templates accept `locale` parameter to render in recipient's language
+
+## 13.4 i18n Rules
+
+| Rule  | Description |
+|-------|-------------|
+| I18N1 | All user-visible text in UI MUST come from translation files, no hardcoded strings |
+| I18N2 | Log messages MUST remain in English (not translated) |
+| I18N3 | API error codes MUST remain in English; only user-facing messages are translated |
+| I18N4 | CSV export data MUST NOT be translated (contains user-entered data) |
+| I18N5 | All three locale files MUST have identical key sets (enforced by TypeScript types) |
+
+---
+
+# 14. Calendar Invite (ICS) — Phase 11
+
+## 14.1 Format
+
+Registration confirmation emails include an iCalendar (.ics) attachment per [RFC 5545](https://www.rfc-editor.org/rfc/rfc5545).
+
+## 14.2 ICS Specification
+
+| Property       | Value                                      |
+|----------------|--------------------------------------------|
+| MIME type      | `text/calendar; method=REQUEST`            |
+| Filename       | `event.ics`                                |
+| Method         | `REQUEST` (treated as invitation by clients) |
+| Event data     | From `src/config/event.ts`                 |
+| UID            | Unique per generation (UUID + domain)      |
+| Compatibility  | Gmail, Outlook, Apple Mail, Thunderbird    |
+
+## 14.3 Scope
+
+- Attached to registration confirmation email only (not resend-link emails)
+- No calendar update/cancellation emails (future enhancement)
+- No external library dependency (format generated directly)
 
 ---
 
