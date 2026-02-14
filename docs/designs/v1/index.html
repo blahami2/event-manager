@@ -1,0 +1,388 @@
+﻿<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIPLE THREAT FEST 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- ZÁKLADNÍ NASTAVENÍ --- */
+        :root {
+            --color-bg-main: #0a0a0a;    /* Úplně černá */
+            --color-bg-secondary: #141414; /* O něco světlejší černá pro sekce */
+            --color-accent: #c71f1f;       /* Krvavě rudá - hlavní barva */
+            --color-text-white: #ffffff;
+            --color-text-gray: #a1a1a1;
+            --font-heading: 'Anton', sans-serif; /* Masivní, vysoké nadpisy */
+            --font-body: 'Montserrat', sans-serif; /* Moderní, čitelné písmo */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--color-bg-main);
+            color: var(--color-text-white);
+            font-family: var(--font-body);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: var(--font-heading);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* --- POMOCNÉ TŘÍDY --- */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .text-accent { color: var(--color-accent); }
+        .uppercase { text-transform: uppercase; }
+        .section-padding { padding: 80px 0; }
+        
+        /* --- TLAČÍTKO --- */
+        .btn-rock {
+            display: inline-block;
+            background-color: var(--color-accent);
+            color: var(--color-text-white);
+            padding: 15px 40px;
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid var(--color-accent);
+        }
+
+        .btn-rock:hover {
+            background-color: transparent;
+            color: var(--color-accent);
+        }
+
+        /* --- HLAVNÍ SEKCE (HERO) --- */
+        #hero {
+            height: 100vh;
+            min-height: 600px;
+            /* ZDE VLOŽ URL SVÉ HLAVNÍ FOTKY (ideálně tmavá fotka pódia/davu) */
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('main.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-bottom: 5px solid var(--color-accent);
+        }
+
+        #hero h1 {
+            font-size: clamp(4rem, 10vw, 8rem); /* Obrovské písmo reagující na šířku okna */
+            line-height: 0.9;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0px #000;
+        }
+
+        #hero p.subtitle {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            letter-spacing: 4px;
+            color: var(--color-accent);
+        }
+
+
+        /* --- SEKCE HEADLINERS (Vaše fotky) --- */
+        #headliners {
+            background-color: var(--color-bg-secondary);
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .headliner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .headliner-card {
+            position: relative;
+            border-bottom: 5px solid var(--color-accent);
+            overflow: hidden;
+        }
+        
+        .headliner-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            /* Tento filtr udělá z jakékoliv fotky drsnou černobílou fotku */
+            filter: grayscale(100%) contrast(120%);
+            transition: all 0.3s ease;
+        }
+        
+        .headliner-card:hover .headliner-image {
+             filter: grayscale(0%) contrast(100%);
+             transform: scale(1.05);
+        }
+
+        .headliner-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,1), transparent);
+            text-align: left;
+        }
+
+        .headliner-number {
+            font-family: var(--font-heading);
+            font-size: 6rem;
+            color: var(--color-accent);
+            opacity: 0.5;
+            line-height: 0.8;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: -1;
+        }
+
+        .headliner-name {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+
+        /* --- SEKCE DETAILY AKCE --- */
+        #details {
+            background-color: var(--color-bg-main);
+            padding: 80px 0;
+            /* Textura betonu na pozadí */
+            background-image: url('https://www.transparenttextures.com/patterns/concrete-wall.png');
+        }
+        .details-flex {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 50px;
+            border: 2px solid #333;
+            background: rgba(0,0,0,0.8);
+        }
+        .detail-box {
+            flex: 1 1 300px;
+            padding: 40px;
+            border-right: 2px solid #333;
+        }
+        .detail-box:last-child { border-right: none; }
+
+        .detail-box h3 { font-size: 2rem; margin-bottom: 20px; color: var(--color-accent); }
+        .detail-item {
+            margin-bottom: 25px;
+        }
+        .detail-label {
+            font-weight: 900;
+            display: block;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            color: var(--color-text-gray);
+        }
+        .detail-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* --- FORMULÁŘ (Přihlašování) --- */
+        #rsvp {
+            background-color: var(--color-bg-secondary);
+            padding: 80px 0;
+            text-align: center;
+        }
+        .rsvp-form {
+            max-width: 600px;
+            margin: 50px auto 0;
+            background: var(--color-bg-main);
+            padding: 40px;
+            border: 2px solid var(--color-accent);
+        }
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            background: #222;
+            border: 2px solid #333;
+            color: var(--color-text-white);
+            font-family: var(--font-body);
+            font-size: 1rem;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        /* --- PATIČKA --- */
+        footer {
+            background: #000;
+            padding: 40px 0;
+            text-align: center;
+            border-top: 5px solid var(--color-accent);
+        }
+        footer p { color: var(--color-text-gray); }
+
+        /* Responzivní úpravy pro menší displeje */
+        @media (max-width: 768px) {
+            .detail-box { border-right: none; border-bottom: 2px solid #333; }
+            .detail-box:last-child { border-bottom: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <section id="hero">
+        <div class="container">
+            <h1>TRIPLE THREAT <span class="text-accent">2026</span></h1>
+            <p class="subtitle">3 HEADLINERS / JEDEN VEČER / JEDNA SHOW</p>
+            <a href="#rsvp" class="btn-rock">ZAREGISTROVAT ÚČAST</a>
+        </div>
+    </section>
+
+    <section id="headliners">
+        <div class="container">
+            <h2>HLAVNÍ HVĚZDY VEČERA</h2>
+            <div class="headliner-grid">
+                <div class="headliner-card">
+                    <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Headliner 1" class="headliner-image">
+                    <div class="headliner-info">
+                        <h3 class="headliner-name">JMÉNO 1</h3>
+                        <p class="text-accent uppercase">Kytara / Zpěv</p>
+                    </div>
+                    <span class="headliner-number">01</span>
+                </div>
+                <div class="headliner-card">
+                    <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Headliner 2" class="headliner-image">
+                    <div class="headliner-info">
+                        <h3 class="headliner-name">JMÉNO 2</h3>
+                        <p class="text-accent uppercase">Bicí / Rytmika</p>
+                    </div>
+                    <span class="headliner-number">02</span>
+                </div>
+                <div class="headliner-card">
+                    <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Headliner 3" class="headliner-image">
+                    <div class="headliner-info">
+                        <h3 class="headliner-name">JMÉNO 3</h3>
+                        <p class="text-accent uppercase">Basa / Texty</p>
+                    </div>
+                    <span class="headliner-number">03</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="details">
+        <div class="container">
+            <h2>TOUR INFO & TICKETS</h2>
+            <div class="details-flex">
+                <div class="detail-box">
+                    <h3>LINE-UP</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">18:00</span>
+                        <span class="detail-value">DOORS OPEN</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">20:00</span>
+                        <span class="detail-value">WARM-UP SET</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label text-accent">22:00</span>
+                        <span class="detail-value text-accent">HLAVNÍ SHOW</span>
+                    </div>
+                </div>
+                <div class="detail-box">
+                    <h3>LOKACE</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">DATUM</span>
+                        <span class="detail-value">PÁTEK 13. ČERVNA 2026</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">ARENA</span>
+                        <span class="detail-value">KLUB PODZEMÍ, PRAHA</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">STAGE</span>
+                        <span class="detail-value">MAIN STAGE</span>
+                    </div>
+                </div>
+                <div class="detail-box">
+                    <h3>BACKSTAGE</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">DRESS CODE</span>
+                        <span class="detail-value">ROCK CHIC / GRUNGE</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">CATERING</span>
+                        <span class="detail-value">ALL INCLUSIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="rsvp">
+        <div class="container">
+            <h2>REZERVACE VSTUPU</h2>
+            <p>Zajisti si své místo v kotli. Kapacita omezena!</p>
+            <form class="rsvp-form">
+                <div class="form-group">
+                    <label for="name" class="form-label">Tvé rockové jméno:</label>
+                    <input type="text" id="name" class="form-input" placeholder="Např. Petr 'Slash' Novák">
+                </div>
+                <div class="form-group">
+                    <label for="guests" class="form-label">Počet lupenů (včetně tebe):</label>
+                    <select id="guests" class="form-input">
+                        <option value="1">1 (Jdu sám/sama)</option>
+                        <option value="2">2 (+1 Doprovod)</option>
+                        <option value="3+">3 a více (Mám celou kapelu)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="note" class="form-label">Požadavek na rider (poznámka):</label>
+                    <input type="text" id="note" class="form-input" placeholder="Např. Alergie, oblíbené pití...">
+                </div>
+                <button type="submit" class="btn-rock" style="width: 100%;">ODESLAT REZERVACI</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <h3>MANAGEMENT & CREW KONTAKT</h3>
+            <p>Produkce: +420 666 666 666 | info@triplethreat.cz</p>
+            <p class="text-accent" style="margin-top: 20px; font-weight: 700;">SEE YOU IN THE PIT!</p>
+        </div>
+    </footer>
+
+</body>
+</html>
