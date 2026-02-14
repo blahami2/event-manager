@@ -1213,13 +1213,13 @@ T-001 (Init Next.js)
 - `tests/integration/rate-limiting.test.ts`
 
 **Acceptance criteria:**
-- [ ] Registration: 5 attempts/IP/hour
-- [ ] Manage lookup: 10 attempts/IP/hour
-- [ ] Resend link: 3 attempts/IP/hour
-- [ ] Admin login: 5 attempts/IP/15min
-- [ ] All rate-limited responses include `Retry-After` header
-- [ ] Rate limit trigger logged as `warn` with hashed IP
-- [ ] Integration test: exceed limit → 429
+- [x] Registration: 5 attempts/IP/hour
+- [x] Manage lookup: 10 attempts/IP/hour
+- [x] Resend link: 3 attempts/IP/hour
+- [x] Admin login: 5 attempts/IP/15min
+- [x] All rate-limited responses include `Retry-After` header
+- [x] Rate limit trigger logged as `warn` with hashed IP
+- [x] Integration test: exceed limit → 429
 
 **Non-goals:**
 - Do not implement distributed rate limiting (in-memory is acceptable for V1)

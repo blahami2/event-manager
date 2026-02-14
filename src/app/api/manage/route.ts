@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { updateRegistrationByToken, cancelRegistrationByToken } from "@/lib/usecases/manage-registration";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { createRateLimiter } from "@/lib/rate-limit/limiter";
-import { hashIp } from "@/lib/logger";
+import { logger, hashIp } from "@/lib/logger";
 import { RateLimitError, ValidationError } from "@/lib/errors/app-errors";
 
 /** Rate limiter: 10 attempts per IP per hour. */
@@ -27,7 +27,11 @@ function applyRateLimit(req: Request): void {
   const hashedIp = hashIp(ip);
   const result = limiter.check(hashedIp);
   if (!result.allowed) {
-    throw new RateLimitError();
+    const retryAfter = Math.ceil(
+      (result.resetAt.getTime() - Date.now()) / 1000,
+    );
+    logger.warn("Rate limit exceeded", { endpoint: "/api/manage", ip: hashedIp });
+    throw new RateLimitError(retryAfter);
   }
 }
 

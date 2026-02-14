@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import type { ApiSuccessResponse, ApiErrorResponse } from "@/types/api";
-import { AppError, ValidationError } from "@/lib/errors/app-errors";
+import { AppError, RateLimitError, ValidationError } from "@/lib/errors/app-errors";
 
 /**
  * Build a success JSON response matching ApiSuccessResponse<T>.
@@ -32,7 +32,12 @@ export function errorResponse(error: AppError): NextResponse<ApiErrorResponse> {
     },
   };
 
-  return NextResponse.json(body, { status: error.statusCode });
+  const headers: Record<string, string> = {};
+  if (error instanceof RateLimitError) {
+    headers["Retry-After"] = String(error.retryAfterSeconds);
+  }
+
+  return NextResponse.json(body, { status: error.statusCode, headers });
 }
 
 /**
