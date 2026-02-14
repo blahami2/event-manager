@@ -78,6 +78,7 @@ PHASE 11: Enhancements
   T-049 + T-020 → T-051 (translate email templates)
   T-049 → T-052 (language switcher component)
   T-049 + T-028..T-031 → T-053 (translate admin UI)
+  T-003 + T-040 + T-014 + T-022 → T-054 (registration field migration)
 ```
 
 **Visual dependency tree:**
@@ -1451,8 +1452,9 @@ T-001 (Init Next.js)
 | T-051 | Translate Email Templates          | 11    | T-049, T-020                  |
 | T-052 | Language Switcher Component        | 11    | T-049                         |
 | T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031           |
+| T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022    |
 
-**Total tickets: 52** (37 original + 8 Phase 1-10 additions + 7 Phase 11)
+**Total tickets: 53** (37 original + 8 Phase 1-10 additions + 8 Phase 11)
 
 ---
 
@@ -1685,6 +1687,74 @@ The iCalendar format (.ics, RFC 5545) is the universal standard for calendar eve
 
 ---
 
+## T-054: Registration Form Field Migration
+
+**Input:** T-003 (Prisma schema), T-040 (shared types), T-014 (register use case), T-022 (registration form)
+**Output:**
+- Updated domain model: replace `guestCount` + `dietaryNotes` with `stay` + `adultsCount` + `childrenCount` + `notes`
+- Database migration
+- All affected layers updated end-to-end
+
+**Context:**
+The registration form is changing from `{ name, email, guestCount, dietaryNotes? }` to `{ name, email, stay, adultsCount, childrenCount, notes? }`. This is a cross-cutting change that touches the schema, types, validation, use cases, repositories, API routes, UI forms, admin views, CSV export, seed data, and tests.
+
+**Schema changes (Prisma):**
+- Remove: `guestCount (Int)`, `dietaryNotes (String?)`
+- Add: `stay (StayOption enum: FRI_SAT, SAT_SUN, FRI_SUN)`, `adultsCount (Int)`, `childrenCount (Int)`, `notes (String?)`
+
+**Files modified:**
+- `prisma/schema.prisma` (add `StayOption` enum, update `Registration` model)
+- `prisma/seed.ts` (update seed records)
+- `src/types/registration.ts` (update `RegistrationInput`, `RegistrationOutput`)
+- `src/lib/validation/registration.ts` (update Zod schema)
+- `src/repositories/registration-repository.ts`
+- `src/lib/usecases/register.ts`
+- `src/lib/usecases/manage-registration.ts`
+- `src/lib/usecases/admin-actions.ts` (update CSV columns)
+- `src/app/api/register/route.ts`
+- `src/app/api/manage/route.ts`
+- `src/app/api/admin/registrations/route.ts`
+- `src/app/api/admin/registrations/export/route.ts` (CSV columns)
+- `src/components/forms/RegistrationForm.tsx`
+- `src/app/(public)/manage/[token]/ManageForm.tsx`
+- `src/components/admin/RegistrationTable.tsx`
+- `src/components/admin/EditRegistrationModal.tsx`
+- `src/app/admin/registrations/page.tsx`
+- `tests/fixtures/seed-data.ts`
+- `src/i18n/messages/en.json`, `cs.json`, `sk.json` (update field labels)
+- All affected test files
+
+**Files created:**
+- `prisma/migrations/YYYYMMDD_update_registration_fields/migration.sql` (auto-generated)
+
+**Acceptance criteria:**
+- [ ] `StayOption` enum added to Prisma schema with values: `FRI_SAT`, `SAT_SUN`, `FRI_SUN`
+- [ ] `Registration` model updated: `stay (StayOption)`, `adultsCount (Int)`, `childrenCount (Int)`, `notes (String?)`
+- [ ] Old fields `guestCount` and `dietaryNotes` removed from schema
+- [ ] Zod schema validates: `name` (1-200 chars), `email` (valid format), `stay` (one of three options), `adultsCount` (0-10), `childrenCount` (0-10), `notes` (optional, max 500)
+- [ ] At least one of `adultsCount` or `childrenCount` must be > 0 (Zod refinement)
+- [ ] `RegistrationInput` type updated: `{ name, email, stay, adultsCount, childrenCount, notes? }`
+- [ ] `RegistrationOutput` type updated accordingly
+- [ ] Registration form UI: name (text), email (text), stay (dropdown: "Friday to Saturday", "Saturday to Sunday", "Friday to Sunday"), adults (dropdown 0-10), children (dropdown 0-10), notes (textarea)
+- [ ] Manage form updated with same fields
+- [ ] Admin table columns updated: name, email, stay, adults, children, status, createdAt, actions
+- [ ] Admin edit modal updated with new fields
+- [ ] CSV export columns updated: name, email, stay, adultsCount, childrenCount, notes, status, createdAt
+- [ ] API request/response bodies updated in all routes
+- [ ] Seed data updated with new field values
+- [ ] All existing tests updated and passing
+- [ ] Migration generated: `npx prisma migrate dev --name update_registration_fields`
+- [ ] `npx prisma validate` passes
+- [ ] `npm run build` succeeds
+- [ ] `npx vitest run` passes
+- [ ] Translation files updated with labels for new fields (stay options, adults, children)
+
+**Non-goals:**
+- Do not implement data migration for existing production records (this is a pre-launch change)
+- Do not add price calculation based on stay duration
+
+---
+
 # Phase 11 Dependency Graph
 
 ```
@@ -1700,6 +1770,9 @@ PHASE 11: Enhancements
     T-049 + T-020 → T-051 (translate email templates)
     T-049 → T-052 (language switcher component)
     T-049 + T-028..T-031 → T-053 (translate admin UI)
+
+  Registration Form Redesign:
+    T-003 + T-040 + T-014 + T-022 → T-054 (registration field migration)
 ```
 
 ```
@@ -1711,6 +1784,8 @@ T-049 (i18n infrastructure)
   ├─ T-051 (translate email templates) ←[+T-020]
   ├─ T-052 (language switcher)
   └─ T-053 (translate admin UI) ←[+T-028..T-031]
+
+T-054 (Registration field migration) ←[T-003, T-040, T-014, T-022]
 ```
 
 ---
@@ -1726,8 +1801,9 @@ T-049 (i18n infrastructure)
 | T-051 | Translate Email Templates          | 11    | T-049, T-020                  |
 | T-052 | Language Switcher Component        | 11    | T-049                         |
 | T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031           |
+| T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022    |
 
-**Total tickets: 52** (37 original + 8 Phase 1-10 additions + 7 Phase 11)
+**Total tickets: 53** (37 original + 8 Phase 1-10 additions + 8 Phase 11)
 
 ---
 

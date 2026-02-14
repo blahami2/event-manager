@@ -338,8 +338,10 @@ export class AuthorizationError extends AppError {
 | id             | UUID        | Primary key, auto-generated       |
 | name           | String      | Required, 1-200 chars             |
 | email          | String      | Required, valid email format      |
-| guestCount     | Int         | Required, 1-10                    |
-| dietaryNotes   | String?     | Optional, max 500 chars           |
+| stay           | Enum        | Required: FRI_SAT, SAT_SUN, FRI_SUN |
+| adultsCount    | Int         | Required, 0-10                    |
+| childrenCount  | Int         | Required, 0-10                    |
+| notes          | String?     | Optional, max 500 chars           |
 | status         | Enum        | CONFIRMED, CANCELLED              |
 | createdAt      | DateTime    | Auto-set                          |
 | updatedAt      | DateTime    | Auto-updated                      |
@@ -433,7 +435,7 @@ All rate limit responses return:
 1. All schema changes go through `prisma migrate dev` (development) or `prisma migrate deploy` (production)
 2. Migrations MUST be incremental and additive
 3. **No destructive migrations** (dropping columns, tables) without an explicit backlog ticket
-4. Each migration has a descriptive name: `npx prisma migrate dev --name add_dietary_notes_to_registration`
+4. Each migration has a descriptive name: `npx prisma migrate dev --name update_registration_fields`
 5. Migration files are committed to version control
 6. The `prisma/seed.ts` script provides deterministic seed data for development
 

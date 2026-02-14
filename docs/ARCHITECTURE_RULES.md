@@ -113,7 +113,7 @@ These patterns MUST NOT appear in the codebase:
 
 | Rule | Description |
 |------|-------------|
-| D1 | Minimize personal data collection: name, email, guest count, optional dietary notes only |
+| D1 | Minimize personal data collection: name, email, stay preference, guest counts (adults + children), optional notes only |
 | D2 | No data collected beyond what is specified in the domain model |
 | D3 | Data retention policy MUST be implemented and documented |
 | D4 | Migrations MUST be incremental; no destructive migrations without explicit ticket |
