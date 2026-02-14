@@ -1,19 +1,22 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 /**
  * 404 page – shown when a route is not found.
  */
 export default function NotFound(): React.ReactElement {
+  const t = useTranslations("errors");
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="max-w-md text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-6 text-lg text-gray-600">Page not found</p>
+        <h1 className="mb-4 text-4xl font-bold">{t("notFoundCode")}</h1>
+        <p className="mb-6 text-lg text-gray-600">{t("notFound")}</p>
         <Link
           href="/"
           className="rounded-md bg-black px-6 py-2 text-white hover:bg-gray-800"
         >
-          Go home
+          {t("goHome")}
         </Link>
       </div>
     </div>

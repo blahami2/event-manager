@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 
@@ -9,10 +10,11 @@ const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
 
-const SUCCESS_MESSAGE =
-  "If this email is registered, a manage link has been sent.";
-
 export function ResendLinkForm(): React.ReactElement {
+  const t = useTranslations("resend");
+  const tForm = useTranslations("form");
+  const tErrors = useTranslations("errors");
+
   const [email, setEmail] = useState("");
   const [fieldError, setFieldError] = useState("");
   const [submitError, setSubmitError] = useState("");
@@ -29,7 +31,7 @@ export function ResendLinkForm(): React.ReactElement {
 
     const parsed = emailSchema.safeParse({ email: email.trim() });
     if (!parsed.success) {
-      setFieldError(parsed.error.issues[0]?.message ?? "Invalid email");
+      setFieldError(parsed.error.issues[0]?.message ?? tErrors("invalidEmail"));
       return;
     }
 
@@ -42,14 +44,14 @@ export function ResendLinkForm(): React.ReactElement {
       });
 
       if (response.status === 429) {
-        setSubmitError("Too many attempts. Please try again later.");
+        setSubmitError(tErrors("tooManyAttempts"));
         return;
       }
 
       // Always show same message regardless of response (S5)
-      setSuccessMessage(SUCCESS_MESSAGE);
+      setSuccessMessage(t("success"));
     } catch {
-      setSubmitError("An unexpected error occurred. Please try again.");
+      setSubmitError(tErrors("unexpectedRetry"));
     } finally {
       setIsSubmitting(false);
     }
@@ -65,7 +67,7 @@ export function ResendLinkForm(): React.ReactElement {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-      <FormField label="Email" htmlFor="resend-email" error={fieldError}>
+      <FormField label={tForm("email")} htmlFor="resend-email" error={fieldError}>
         <Input
           id="resend-email"
           type="email"
@@ -87,7 +89,7 @@ export function ResendLinkForm(): React.ReactElement {
         disabled={isSubmitting}
         className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isSubmitting ? "Sending…" : "Send Manage Link"}
+        {isSubmitting ? t("sending") : t("sendButton")}
       </button>
     </form>
   );
