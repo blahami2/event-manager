@@ -28,16 +28,14 @@ function buildRequest(
   ip: string = "192.168.1.1",
 ): NextRequest {
   const url = `http://localhost:3000${path}`;
-  const init: RequestInit & { headers: Record<string, string> } = {
+  const init = {
     method,
     headers: {
       "x-forwarded-for": ip,
       "content-type": "application/json",
     },
+    body: body ? JSON.stringify(body) : undefined,
   };
-  if (body) {
-    init.body = JSON.stringify(body);
-  }
   return new NextRequest(url, init);
 }
 
@@ -381,7 +379,7 @@ describe("Rate Limiting Integration", () => {
       );
 
       // Verify IP is hashed (not raw)
-      const loggedIp = warnSpy.mock.calls[0][1].ip;
+      const loggedIp = warnSpy.mock.calls[0]?.[1]?.ip;
       expect(loggedIp).not.toBe("192.168.1.1");
       expect(loggedIp.length).toBeGreaterThan(0);
     });
