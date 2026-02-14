@@ -52,7 +52,7 @@ function scanFiles(
     if (pathFilter && !pathFilter.test(rel)) continue;
     const lines = fs.readFileSync(file, 'utf-8').split('\n');
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+      const line = lines[i] ?? '';
       // Skip comments
       const trimmed = line.trim();
       if (trimmed.startsWith('//') || trimmed.startsWith('*')) continue;
