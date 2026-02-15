@@ -65,6 +65,16 @@
     "invalidLink": "Tento odkaz je neplatný alebo vypršal.",
     "tooManyRequests": "Príliš veľa požiadaviek. Skúste to prosím neskôr."
   },
+  "email": {
+    "subject": "Odkaz na správu vašej registrácie",
+    "greeting": "Dobrý deň, {guestName},",
+    "thankYou": "Ďakujeme za registráciu na akciu <strong>{eventName}</strong> dňa <strong>{eventDate}</strong>.",
+    "manageInstruction": "Pomocou tlačidla nižšie môžete kedykoľvek spravovať údaje svojej registrácie:",
+    "manageButton": "Spravovať registráciu",
+    "fallbackText": "Ak tlačidlo vyššie nefunguje, skopírujte a vložte tento odkaz do prehliadača:",
+    "calendarNote": "K tomuto e-mailu je priložená pozvánka do kalendára.",
+    "footer": "Toto je automatická správa. Prosím, neodpovedajte na ňu."
+  },
   "resend": {
     "title": "Znovu odoslať odkaz na správu",
     "description": "Zadajte e-mail, s ktorým ste sa registrovali, a my vám pošleme nový odkaz na správu.",

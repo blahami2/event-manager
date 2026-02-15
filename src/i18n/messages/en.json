@@ -65,6 +65,16 @@
     "invalidLink": "This link is not valid or has expired.",
     "tooManyRequests": "Too many requests. Please try again later."
   },
+  "email": {
+    "subject": "Your Registration Manage Link",
+    "greeting": "Hi {guestName},",
+    "thankYou": "Thank you for registering for <strong>{eventName}</strong> on <strong>{eventDate}</strong>.",
+    "manageInstruction": "Use the button below to manage your registration details at any time:",
+    "manageButton": "Manage Registration",
+    "fallbackText": "If the button above doesn't work, copy and paste this link into your browser:",
+    "calendarNote": "A calendar invite is attached to this email.",
+    "footer": "This is an automated message. Please do not reply directly."
+  },
   "resend": {
     "title": "Resend Manage Link",
     "description": "Enter the email you registered with and we'll send you a new manage link.",

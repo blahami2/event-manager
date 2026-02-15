@@ -2,10 +2,11 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 
 const TEST_REGISTRATION_ID = "00000000-0000-0000-0000-000000000001";
 
-const { mockSend, mockLoggerInfo, mockLoggerError } = vi.hoisted(() => ({
+const { mockSend, mockLoggerInfo, mockLoggerError, mockRenderManageLinkEmail } = vi.hoisted(() => ({
   mockSend: vi.fn(),
   mockLoggerInfo: vi.fn(),
   mockLoggerError: vi.fn(),
+  mockRenderManageLinkEmail: vi.fn(),
 }));
 
 vi.mock("resend", () => ({
@@ -28,12 +29,16 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
+vi.mock("@/lib/email/templates/manage-link-template", () => ({
+  renderManageLinkEmail: mockRenderManageLinkEmail,
+}));
+
 import { sendManageLink } from "@/lib/email/send-manage-link";
 
 describe("sendManageLink", () => {
   const baseParams = {
     to: "alice@example.com",
-    manageUrl: "https://example.com/manage/raw-token-123",
+    manageUrl: "https://example.com/manage/test-token-12345678",
     guestName: "Alice Johnson",
     registrationId: TEST_REGISTRATION_ID,
     emailType: "manage-link" as const,
@@ -44,11 +49,14 @@ describe("sendManageLink", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env["RESEND_API_KEY"] = "re_test_key";
+    mockRenderManageLinkEmail.mockResolvedValue({
+      subject: "Your Registration Manage Link",
+      html: "<p>rendered email</p>",
+    });
   });
 
   test("should return success true when Resend API sends successfully", async () => {
     // given
-    // - a valid set of params
     mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
 
     // when
@@ -58,9 +66,43 @@ describe("sendManageLink", () => {
     expect(result).toEqual({ success: true });
   });
 
-  test("should call Resend API with correct email content including event details", async () => {
+  test("should call renderManageLinkEmail with correct params", async () => {
     // given
     mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+
+    // when
+    await sendManageLink(baseParams);
+
+    // then
+    expect(mockRenderManageLinkEmail).toHaveBeenCalledWith({
+      guestName: "Alice Johnson",
+      eventName: "Birthday Celebration",
+      eventDate: "2026-03-15",
+      manageUrl: "https://example.com/manage/test-token-12345678",
+      locale: undefined,
+    });
+  });
+
+  test("should pass locale to renderManageLinkEmail when provided", async () => {
+    // given
+    mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+
+    // when
+    await sendManageLink({ ...baseParams, locale: "cs" });
+
+    // then
+    expect(mockRenderManageLinkEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "cs" }),
+    );
+  });
+
+  test("should call Resend API with rendered subject and html", async () => {
+    // given
+    mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+    mockRenderManageLinkEmail.mockResolvedValue({
+      subject: "Translated Subject",
+      html: "<p>translated html</p>",
+    });
 
     // when
     await sendManageLink(baseParams);
@@ -69,12 +111,8 @@ describe("sendManageLink", () => {
     expect(mockSend).toHaveBeenCalledOnce();
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(callArgs["to"]).toBe("alice@example.com");
-    expect(callArgs["subject"]).toBe("Your Registration Manage Link");
-    const html = callArgs["html"] as string;
-    expect(html).toContain("Alice Johnson");
-    expect(html).toContain("Birthday Celebration");
-    expect(html).toContain("2026-03-15");
-    expect(html).toContain("https://example.com/manage/raw-token-123");
+    expect(callArgs["subject"]).toBe("Translated Subject");
+    expect(callArgs["html"]).toBe("<p>translated html</p>");
   });
 
   test("should return success false with error message when Resend API fails", async () => {
