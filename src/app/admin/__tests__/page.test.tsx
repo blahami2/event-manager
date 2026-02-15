@@ -42,9 +42,9 @@ describe("AdminDashboardPage", () => {
     mockGetRegistrationStats.mockResolvedValue({
       total: 15,
       confirmed: 10,
-      cancelled: 5,
+      cancelled: 3,
       totalAdults: 25,
-      totalChildren: 5,
+      totalChildren: 7,
     });
 
     const page = await AdminDashboardPage();
@@ -52,8 +52,9 @@ describe("AdminDashboardPage", () => {
 
     expect(screen.getByText("15")).toBeDefined();
     expect(screen.getByText("10")).toBeDefined();
-    expect(screen.getByText("5")).toBeDefined();
+    expect(screen.getByText("3")).toBeDefined();
     expect(screen.getByText("25")).toBeDefined();
+    expect(screen.getByText("7")).toBeDefined();
   });
 
   it("should display translated stat labels when page loads", async () => {
