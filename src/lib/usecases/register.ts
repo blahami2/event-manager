@@ -5,6 +5,7 @@ import { sendManageLink } from "@/lib/email/send-manage-link";
 import { logger, maskEmail } from "@/lib/logger";
 import { ValidationError } from "@/lib/errors/app-errors";
 import { registrationSchema } from "@/lib/validation/registration";
+import { StayOption } from "@/types/registration";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
 import { EVENT_NAME, EVENT_DATE } from "@/config/event";
 
@@ -46,14 +47,16 @@ export async function registerGuest(
     throw new ValidationError("Validation failed", fields);
   }
 
-  const { name, email, guestCount, dietaryNotes } = parsed.data;
+  const { name, email, stay, adultsCount, childrenCount, notes } = parsed.data;
 
   // Step 2: Create the registration record
   const registration = await createRegistration({
     name,
     email,
-    guestCount,
-    dietaryNotes,
+    stay: stay as StayOption,
+    adultsCount,
+    childrenCount,
+    notes,
   });
 
   // Step 3: Generate a capability token

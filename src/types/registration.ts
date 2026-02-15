@@ -11,12 +11,21 @@ export enum RegistrationStatus {
   CANCELLED = "CANCELLED",
 }
 
+/** Stay option enum (mirrors Prisma StayOption). */
+export enum StayOption {
+  FRI_SAT = "FRI_SAT",
+  SAT_SUN = "SAT_SUN",
+  FRI_SUN = "FRI_SUN",
+}
+
 /** Input data for creating or updating a registration. */
 export interface RegistrationInput {
   readonly name: string;
   readonly email: string;
-  readonly guestCount: number;
-  readonly dietaryNotes?: string;
+  readonly stay: StayOption;
+  readonly adultsCount: number;
+  readonly childrenCount: number;
+  readonly notes?: string;
 }
 
 /** Output data returned when reading a registration. */
@@ -24,8 +33,10 @@ export interface RegistrationOutput {
   readonly id: string;
   readonly name: string;
   readonly email: string;
-  readonly guestCount: number;
-  readonly dietaryNotes: string | null;
+  readonly stay: StayOption;
+  readonly adultsCount: number;
+  readonly childrenCount: number;
+  readonly notes: string | null;
   readonly status: RegistrationStatus;
   readonly createdAt: Date;
   readonly updatedAt: Date;

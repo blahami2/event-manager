@@ -20,7 +20,8 @@ export interface RegistrationStats {
   readonly total: number;
   readonly confirmed: number;
   readonly cancelled: number;
-  readonly totalGuests: number;
+  readonly totalAdults: number;
+  readonly totalChildren: number;
 }
 
 /**
@@ -44,13 +45,15 @@ export async function getRegistrationStats(): Promise<RegistrationStats> {
   const confirmed = items.filter((r) => r.status === RegistrationStatus.CONFIRMED).length;
   const cancelled = items.filter((r) => r.status === RegistrationStatus.CANCELLED).length;
 
-  const totalGuests = items.reduce((sum, r) => sum + r.guestCount, 0);
+  const totalAdults = items.reduce((sum, r) => sum + r.adultsCount, 0);
+  const totalChildren = items.reduce((sum, r) => sum + r.childrenCount, 0);
 
   return {
     total: items.length,
     confirmed,
     cancelled,
-    totalGuests,
+    totalAdults,
+    totalChildren,
   };
 }
 
@@ -108,7 +111,7 @@ export async function adminEditRegistration(
 }
 
 /** CSV column headers. */
-const CSV_COLUMNS = ["name", "email", "guestCount", "dietaryNotes", "status", "createdAt"] as const;
+const CSV_COLUMNS = ["name", "email", "stay", "adultsCount", "childrenCount", "notes", "status", "createdAt"] as const;
 
 /**
  * Escape a CSV field: quote it if it contains commas, quotes, or newlines.
@@ -122,7 +125,7 @@ function escapeCsvField(value: string): string {
 
 /**
  * Export all registrations as a CSV string.
- * Columns: name, email, guestCount, dietaryNotes, status, createdAt.
+ * Columns: name, email, stay, adultsCount, childrenCount, notes, status, createdAt.
  */
 export async function exportRegistrationsCsv(): Promise<string> {
   const result = await listRegistrations({ page: 1, pageSize: 10000 });

@@ -34,8 +34,14 @@
   "form": {
     "email": "E-mail",
     "name": "Meno",
-    "guestCount": "Počet hostí",
-    "dietaryNotes": "Poznámky k stravovaniu (nepovinné)",
+    "stay": "Pobyt",
+    "stayPlaceholder": "Vyberte pobyt…",
+    "stayFriSat": "Piatok – Sobota",
+    "staySatSun": "Sobota – Nedeľa",
+    "stayFriSun": "Piatok – Nedeľa",
+    "adultsCount": "Počet dospelých",
+    "childrenCount": "Počet detí",
+    "notes": "Poznámky (nepovinné)",
     "submit": "Odoslať registráciu"
   },
   "landing": {
@@ -103,9 +109,10 @@
       "totalRegistrations": "Celkom registrácií",
       "confirmed": "Potvrdené",
       "cancelled": "Zrušené",
-      "totalGuests": "Celkom hostí",
       "viewRegistrations": "Zobraziť registrácie",
-      "exportCsv": "Exportovať CSV"
+      "exportCsv": "Exportovať CSV",
+      "totalAdults": "Celkom dospelých",
+      "totalChildren": "Celkom detí"
     },
     "registrations": {
       "title": "Registrácie",
@@ -126,7 +133,6 @@
       "table": {
         "name": "Meno",
         "email": "E-mail",
-        "guests": "Hostia",
         "status": "Stav",
         "created": "Vytvorené",
         "actions": "Akcie",
@@ -134,16 +140,24 @@
         "cancel": "Zrušiť",
         "confirmCancel": "Zrušiť túto registráciu?",
         "yes": "Áno",
-        "no": "Nie"
+        "no": "Nie",
+        "stay": "Pobyt",
+        "adults": "Dospelí",
+        "children": "Deti"
       },
       "edit": {
         "title": "Upraviť registráciu",
         "name": "Meno",
         "email": "E-mail",
-        "guestCount": "Počet hostí",
-        "dietaryNotes": "Poznámky k stravovaniu",
         "cancel": "Zrušiť",
-        "save": "Uložiť"
+        "save": "Uložiť",
+        "stay": "Pobyt",
+        "stayFriSat": "Pi–So",
+        "staySatSun": "So–Ne",
+        "stayFriSun": "Pi–Ne",
+        "adultsCount": "Dospelí",
+        "childrenCount": "Deti",
+        "notes": "Poznámky"
       }
     }
   }

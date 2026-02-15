@@ -40,20 +40,22 @@ export async function GET(request: NextRequest): Promise<Response> {
  * PUT /api/admin/registrations
  *
  * Admin edit a registration.
- * Body: { registrationId, name, email, guestCount, dietaryNotes? }
+ * Body: { registrationId, name, email, stay, adultsCount, childrenCount, notes? }
  */
 export async function PUT(request: NextRequest): Promise<Response> {
   try {
     const { adminId } = await verifyAdmin(request);
 
     const body = (await request.json()) as Record<string, unknown>;
-    const { registrationId, name, email, guestCount, dietaryNotes } = body;
+    const { registrationId, name, email, stay, adultsCount, childrenCount, notes } = body;
 
     const data: RegistrationInput = {
       name: name as string,
       email: email as string,
-      guestCount: guestCount as number,
-      ...(dietaryNotes !== undefined ? { dietaryNotes: dietaryNotes as string } : {}),
+      stay: stay as RegistrationInput["stay"],
+      adultsCount: adultsCount as number,
+      childrenCount: childrenCount as number,
+      ...(notes !== undefined ? { notes: notes as string } : {}),
     };
 
     const result = await adminEditRegistration(

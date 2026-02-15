@@ -45,7 +45,9 @@ function buildRequest(
 const validBody = {
   name: "Alice",
   email: "alice@example.com",
-  guestCount: 2,
+  stay: "FRI_SUN",
+  adultsCount: 2,
+  childrenCount: 0,
 };
 
 // --- Tests ---
@@ -83,7 +85,7 @@ describe("POST /api/register", () => {
 
   it("delegates to registerGuest use case", async () => {
     mockRegisterGuest.mockResolvedValue({ registrationId: "reg-456" });
-    const input = { ...validBody, dietaryNotes: "Vegan" };
+    const input = { ...validBody, notes: "Vegan" };
 
     await callRoute(buildRequest(input));
 

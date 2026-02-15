@@ -17,7 +17,8 @@ beforeEach(() => {
 async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void> {
   await user.type(screen.getByLabelText("Name"), "Alice");
   await user.type(screen.getByLabelText("Email"), "alice@example.com");
-  // guestCount defaults to 1
+  await user.selectOptions(screen.getByLabelText("Stay"), "FRI_SUN");
+  // adultsCount defaults to 1, childrenCount defaults to 0
 }
 
 describe("RegistrationForm", () => {
@@ -25,8 +26,10 @@ describe("RegistrationForm", () => {
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     expect(screen.getByLabelText("Name")).toBeDefined();
     expect(screen.getByLabelText("Email")).toBeDefined();
-    expect(screen.getByLabelText("Number of Guests")).toBeDefined();
-    expect(screen.getByLabelText("Dietary Notes (optional)")).toBeDefined();
+    expect(screen.getByLabelText("Stay")).toBeDefined();
+    expect(screen.getByLabelText("Number of Adults")).toBeDefined();
+    expect(screen.getByLabelText("Number of Children")).toBeDefined();
+    expect(screen.getByLabelText("Notes (optional)")).toBeDefined();
     expect(screen.getByRole("button", { name: "Register" })).toBeDefined();
   });
 
@@ -37,6 +40,7 @@ describe("RegistrationForm", () => {
 
     expect(screen.getByText("Name is required")).toBeDefined();
     expect(screen.getByText("Invalid email format")).toBeDefined();
+    expect(screen.getByText("Please select a stay option")).toBeDefined();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -69,7 +73,9 @@ describe("RegistrationForm", () => {
       body: JSON.stringify({
         name: "Alice",
         email: "alice@example.com",
-        guestCount: 1,
+        stay: "FRI_SUN",
+        adultsCount: 1,
+        childrenCount: 0,
       }),
     });
   });
@@ -180,11 +186,29 @@ describe("RegistrationForm", () => {
     });
   });
 
-  it("guest count dropdown has options 1-10", () => {
+  it("adults count dropdown has options 1-10", () => {
     render(<RegistrationForm />, { wrapper: IntlWrapper });
-    const select = screen.getByLabelText("Number of Guests") as HTMLSelectElement;
+    const select = screen.getByLabelText("Number of Adults") as HTMLSelectElement;
     expect(select.options.length).toBe(10);
     expect(select.options[0]?.value).toBe("1");
     expect(select.options[9]?.value).toBe("10");
+  });
+
+  it("children count dropdown has options 0-10", () => {
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
+    const select = screen.getByLabelText("Number of Children") as HTMLSelectElement;
+    expect(select.options.length).toBe(11);
+    expect(select.options[0]?.value).toBe("0");
+    expect(select.options[10]?.value).toBe("10");
+  });
+
+  it("stay dropdown has correct options", () => {
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
+    const select = screen.getByLabelText("Stay") as HTMLSelectElement;
+    // placeholder + 3 options
+    expect(select.options.length).toBe(4);
+    expect(select.options[1]?.value).toBe("FRI_SAT");
+    expect(select.options[2]?.value).toBe("SAT_SUN");
+    expect(select.options[3]?.value).toBe("FRI_SUN");
   });
 });

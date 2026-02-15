@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotFoundError } from "@/lib/errors/app-errors";
-import { RegistrationStatus } from "@/types/registration";
+import { RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
 // ── Mock dependencies ──
@@ -39,8 +39,10 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
     id: "reg-1",
     name: "Alice Johnson",
     email: "alice@example.com",
-    guestCount: 2,
-    dietaryNotes: null,
+    stay: StayOption.FRI_SUN,
+    adultsCount: 2,
+    childrenCount: 0,
+    notes: null,
     status: RegistrationStatus.CONFIRMED,
     createdAt: now,
     updatedAt: now,
@@ -48,9 +50,9 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
   };
 }
 
-const confirmedReg1 = makeRegistration({ id: "reg-1", name: "Alice Johnson", email: "alice@example.com", guestCount: 2 });
-const confirmedReg2 = makeRegistration({ id: "reg-2", name: "Bob Smith", email: "bob@example.com", guestCount: 4, dietaryNotes: "Vegetarian, nut allergy" });
-const cancelledReg = makeRegistration({ id: "reg-3", name: "Carol Davis", email: "carol@example.com", guestCount: 1, status: RegistrationStatus.CANCELLED });
+const confirmedReg1 = makeRegistration({ id: "reg-1", name: "Alice Johnson", email: "alice@example.com", adultsCount: 2, childrenCount: 1 });
+const confirmedReg2 = makeRegistration({ id: "reg-2", name: "Bob Smith", email: "bob@example.com", stay: StayOption.FRI_SAT, adultsCount: 2, childrenCount: 2, notes: "Vegetarian, nut allergy" });
+const cancelledReg = makeRegistration({ id: "reg-3", name: "Carol Davis", email: "carol@example.com", stay: StayOption.SAT_SUN, adultsCount: 1, childrenCount: 0, status: RegistrationStatus.CANCELLED });
 
 const adminId = "admin-user-001";
 
@@ -74,8 +76,6 @@ import {
 
 describe("listRegistrationsPaginated", () => {
   it("should return paginated list with total count when called with filters", async () => {
-    // given
-    // - a paginated result from the repository
     const paginatedResult: PaginatedResult<RegistrationOutput> = {
       items: [confirmedReg1, confirmedReg2],
       total: 5,
@@ -84,16 +84,13 @@ describe("listRegistrationsPaginated", () => {
     };
     mockListRegistrations.mockResolvedValue(paginatedResult);
 
-    // when
     const result = await listRegistrationsPaginated({ page: 1, pageSize: 2 });
 
-    // then
     expect(result).toEqual(paginatedResult);
     expect(mockListRegistrations).toHaveBeenCalledWith({ page: 1, pageSize: 2 });
   });
 
   it("should pass status filter to repository when provided", async () => {
-    // given
     const paginatedResult: PaginatedResult<RegistrationOutput> = {
       items: [cancelledReg],
       total: 1,
@@ -102,16 +99,13 @@ describe("listRegistrationsPaginated", () => {
     };
     mockListRegistrations.mockResolvedValue(paginatedResult);
 
-    // when
     const result = await listRegistrationsPaginated({ status: RegistrationStatus.CANCELLED });
 
-    // then
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.status).toBe(RegistrationStatus.CANCELLED);
   });
 
   it("should return empty list when no registrations match", async () => {
-    // given
     const emptyResult: PaginatedResult<RegistrationOutput> = {
       items: [],
       total: 0,
@@ -120,19 +114,15 @@ describe("listRegistrationsPaginated", () => {
     };
     mockListRegistrations.mockResolvedValue(emptyResult);
 
-    // when
     const result = await listRegistrationsPaginated({ search: "nonexistent" });
 
-    // then
     expect(result.items).toHaveLength(0);
     expect(result.total).toBe(0);
   });
 });
 
 describe("getRegistrationStats", () => {
-  it("should return total, confirmed, and cancelled counts", async () => {
-    // given
-    // - a list of all registrations (no filters, large page)
+  it("should return total, confirmed, cancelled, totalAdults, and totalChildren counts", async () => {
     const allRegs: PaginatedResult<RegistrationOutput> = {
       items: [confirmedReg1, confirmedReg2, cancelledReg],
       total: 3,
@@ -141,20 +131,18 @@ describe("getRegistrationStats", () => {
     };
     mockListRegistrations.mockResolvedValue(allRegs);
 
-    // when
     const stats = await getRegistrationStats();
 
-    // then
     expect(stats).toEqual({
       total: 3,
       confirmed: 2,
       cancelled: 1,
-      totalGuests: 7,
+      totalAdults: 5,
+      totalChildren: 3,
     });
   });
 
   it("should return zero counts when no registrations exist", async () => {
-    // given
     const emptyResult: PaginatedResult<RegistrationOutput> = {
       items: [],
       total: 0,
@@ -163,26 +151,20 @@ describe("getRegistrationStats", () => {
     };
     mockListRegistrations.mockResolvedValue(emptyResult);
 
-    // when
     const stats = await getRegistrationStats();
 
-    // then
-    expect(stats).toEqual({ total: 0, confirmed: 0, cancelled: 0, totalGuests: 0 });
+    expect(stats).toEqual({ total: 0, confirmed: 0, cancelled: 0, totalAdults: 0, totalChildren: 0 });
   });
 });
 
 describe("adminCancelRegistration", () => {
   it("should cancel registration and log admin action when registration exists", async () => {
-    // given
-    // - an existing confirmed registration
     mockFindRegistrationById.mockResolvedValue(confirmedReg1);
     const cancelledVersion = makeRegistration({ id: "reg-1", status: RegistrationStatus.CANCELLED });
     mockCancelRegistration.mockResolvedValue(cancelledVersion);
 
-    // when
     const result = await adminCancelRegistration("reg-1", adminId);
 
-    // then
     expect(result.status).toBe(RegistrationStatus.CANCELLED);
     expect(mockCancelRegistration).toHaveBeenCalledWith("reg-1");
     expect(mockLogger.info).toHaveBeenCalledWith(
@@ -196,38 +178,28 @@ describe("adminCancelRegistration", () => {
   });
 
   it("should throw NotFoundError when registration does not exist", async () => {
-    // given
     mockFindRegistrationById.mockResolvedValue(null);
-
-    // when / then
     await expect(adminCancelRegistration("nonexistent", adminId)).rejects.toThrow(NotFoundError);
   });
 
   it("should throw NotFoundError when registration is already cancelled", async () => {
-    // given
     mockFindRegistrationById.mockResolvedValue(cancelledReg);
-
-    // when / then
     await expect(adminCancelRegistration("reg-3", adminId)).rejects.toThrow(NotFoundError);
   });
 });
 
 describe("adminEditRegistration", () => {
   it("should update registration and log admin action when registration exists", async () => {
-    // given
-    // - an existing registration
     mockFindRegistrationById.mockResolvedValue(confirmedReg1);
-    const updatedReg = makeRegistration({ id: "reg-1", name: "Alice Updated", guestCount: 3 });
+    const updatedReg = makeRegistration({ id: "reg-1", name: "Alice Updated", adultsCount: 3 });
     mockUpdateRegistration.mockResolvedValue(updatedReg);
 
-    const editData = { name: "Alice Updated", email: "alice@example.com", guestCount: 3 };
+    const editData = { name: "Alice Updated", email: "alice@example.com", stay: StayOption.FRI_SUN, adultsCount: 3, childrenCount: 0 };
 
-    // when
     const result = await adminEditRegistration("reg-1", editData, adminId);
 
-    // then
     expect(result.name).toBe("Alice Updated");
-    expect(result.guestCount).toBe(3);
+    expect(result.adultsCount).toBe(3);
     expect(mockLogger.info).toHaveBeenCalledWith(
       "Admin edited registration",
       expect.objectContaining({
@@ -239,20 +211,15 @@ describe("adminEditRegistration", () => {
   });
 
   it("should throw NotFoundError when registration does not exist", async () => {
-    // given
     mockFindRegistrationById.mockResolvedValue(null);
-
-    // when / then
     await expect(
-      adminEditRegistration("nonexistent", { name: "X", email: "x@x.com", guestCount: 1 }, adminId),
+      adminEditRegistration("nonexistent", { name: "X", email: "x@x.com", stay: StayOption.FRI_SAT, adultsCount: 1, childrenCount: 0 }, adminId),
     ).rejects.toThrow(NotFoundError);
   });
 });
 
 describe("exportRegistrationsCsv", () => {
   it("should return CSV string with correct headers and data rows", async () => {
-    // given
-    // - registrations with various data
     const allRegs: PaginatedResult<RegistrationOutput> = {
       items: [confirmedReg1, confirmedReg2, cancelledReg],
       total: 3,
@@ -261,21 +228,18 @@ describe("exportRegistrationsCsv", () => {
     };
     mockListRegistrations.mockResolvedValue(allRegs);
 
-    // when
     const csv = await exportRegistrationsCsv();
 
-    // then
     const lines = csv.split("\n");
-    expect(lines[0]).toBe("name,email,guestCount,dietaryNotes,status,createdAt");
-    expect(lines).toHaveLength(4); // header + 3 data rows
+    expect(lines[0]).toBe("name,email,stay,adultsCount,childrenCount,notes,status,createdAt");
+    expect(lines).toHaveLength(4);
     expect(lines[1]).toContain("Alice Johnson");
     expect(lines[1]).toContain("alice@example.com");
-    expect(lines[1]).toContain("2");
+    expect(lines[1]).toContain("FRI_SUN");
     expect(lines[1]).toContain("CONFIRMED");
   });
 
-  it("should handle dietary notes with commas by quoting the field", async () => {
-    // given
+  it("should handle notes with commas by quoting the field", async () => {
     const allRegs: PaginatedResult<RegistrationOutput> = {
       items: [confirmedReg2],
       total: 1,
@@ -284,17 +248,13 @@ describe("exportRegistrationsCsv", () => {
     };
     mockListRegistrations.mockResolvedValue(allRegs);
 
-    // when
     const csv = await exportRegistrationsCsv();
 
-    // then
     const lines = csv.split("\n");
-    // "Vegetarian, nut allergy" contains a comma, so it should be quoted
     expect(lines[1]).toContain('"Vegetarian, nut allergy"');
   });
 
   it("should return only header when no registrations exist", async () => {
-    // given
     const emptyResult: PaginatedResult<RegistrationOutput> = {
       items: [],
       total: 0,
@@ -303,32 +263,27 @@ describe("exportRegistrationsCsv", () => {
     };
     mockListRegistrations.mockResolvedValue(emptyResult);
 
-    // when
     const csv = await exportRegistrationsCsv();
 
-    // then
     const lines = csv.split("\n");
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toBe("name,email,guestCount,dietaryNotes,status,createdAt");
+    expect(lines[0]).toBe("name,email,stay,adultsCount,childrenCount,notes,status,createdAt");
   });
 
-  it("should handle null dietary notes as empty string", async () => {
-    // given
+  it("should handle null notes as empty string", async () => {
     const allRegs: PaginatedResult<RegistrationOutput> = {
-      items: [confirmedReg1], // dietaryNotes is null
+      items: [confirmedReg1],
       total: 1,
       page: 1,
       pageSize: 10000,
     };
     mockListRegistrations.mockResolvedValue(allRegs);
 
-    // when
     const csv = await exportRegistrationsCsv();
 
-    // then
     const lines = csv.split("\n");
-    // null dietaryNotes should be empty string in CSV
+    // notes is after childrenCount (index 5)
     const fields = lines[1]?.split(",");
-    expect(fields?.[3]).toBe("");
+    expect(fields?.[5]).toBe("");
   });
 });

@@ -24,23 +24,27 @@ export const SEED_ADMIN = {
   email: "admin@example.com",
 } as const;
 
-/** Confirmed registration without dietary notes. */
+/** Confirmed registration without notes. */
 export const SEED_REGISTRATION_1 = {
   id: "00000000-0000-0000-0000-000000000001",
   name: "Alice Johnson",
   email: "alice@example.com",
-  guestCount: 2,
-  dietaryNotes: null,
+  stay: "FRI_SUN",
+  adultsCount: 2,
+  childrenCount: 0,
+  notes: null,
   status: "CONFIRMED",
 } as const;
 
-/** Confirmed registration with dietary notes. */
+/** Confirmed registration with notes. */
 export const SEED_REGISTRATION_2 = {
   id: "00000000-0000-0000-0000-000000000002",
   name: "Bob Smith",
   email: "bob@example.com",
-  guestCount: 4,
-  dietaryNotes: "Vegetarian, nut allergy",
+  stay: "FRI_SAT",
+  adultsCount: 2,
+  childrenCount: 2,
+  notes: "Vegetarian, nut allergy",
   status: "CONFIRMED",
 } as const;
 
@@ -49,7 +53,9 @@ export const SEED_REGISTRATION_3 = {
   id: "00000000-0000-0000-0000-000000000003",
   name: "Carol Davis",
   email: "carol@example.com",
-  guestCount: 1,
-  dietaryNotes: null,
+  stay: "SAT_SUN",
+  adultsCount: 1,
+  childrenCount: 0,
+  notes: null,
   status: "CANCELLED",
 } as const;

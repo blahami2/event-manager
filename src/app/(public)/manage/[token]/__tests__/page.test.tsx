@@ -5,13 +5,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// We test the ManageForm client component which receives registration data as props
-// The server component (page.tsx) handles data fetching and is tested indirectly via integration
-
 import { IntlWrapper } from "@/test/intl-wrapper";
 import { ManageForm } from "../ManageForm";
 import type { RegistrationOutput } from "@/types/registration";
-import { RegistrationStatus } from "@/types/registration";
+import { RegistrationStatus, StayOption } from "@/types/registration";
 
 const fetchMock = vi.fn();
 
@@ -21,8 +18,10 @@ const mockRegistration: RegistrationOutput = {
   id: "reg-001",
   name: "Alice Smith",
   email: "alice@example.com",
-  guestCount: 2,
-  dietaryNotes: "Vegetarian",
+  stay: StayOption.FRI_SUN,
+  adultsCount: 2,
+  childrenCount: 1,
+  notes: "Vegetarian",
   status: RegistrationStatus.CONFIRMED,
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),
@@ -53,10 +52,16 @@ describe("ManageForm", () => {
         (screen.getByLabelText("Email") as HTMLInputElement).value,
       ).toBe("alice@example.com");
       expect(
-        (screen.getByLabelText("Number of Guests") as HTMLSelectElement).value,
+        (screen.getByLabelText("Stay") as HTMLSelectElement).value,
+      ).toBe("FRI_SUN");
+      expect(
+        (screen.getByLabelText("Number of Adults") as HTMLSelectElement).value,
       ).toBe("2");
       expect(
-        (screen.getByLabelText("Dietary Notes (optional)") as HTMLTextAreaElement).value,
+        (screen.getByLabelText("Number of Children") as HTMLSelectElement).value,
+      ).toBe("1");
+      expect(
+        (screen.getByLabelText("Notes (optional)") as HTMLTextAreaElement).value,
       ).toBe("Vegetarian");
       expect(screen.getByRole("button", { name: "Save Changes" })).toBeDefined();
       expect(
@@ -231,7 +236,6 @@ describe("ManageForm", () => {
         screen.getByRole("button", { name: "Cancel Registration" }),
       );
 
-      // Form should still be visible
       expect(screen.getByDisplayValue("Alice Smith")).toBeDefined();
       expect(fetchMock).not.toHaveBeenCalled();
     });

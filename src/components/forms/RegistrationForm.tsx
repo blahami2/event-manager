@@ -11,8 +11,10 @@ import type { ApiErrorResponse } from "@/types/api";
 interface FieldErrors {
   name?: string;
   email?: string;
-  guestCount?: string;
-  dietaryNotes?: string;
+  stay?: string;
+  adultsCount?: string;
+  childrenCount?: string;
+  notes?: string;
 }
 
 export function RegistrationForm(): React.ReactElement {
@@ -22,8 +24,10 @@ export function RegistrationForm(): React.ReactElement {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [guestCount, setGuestCount] = useState("1");
-  const [dietaryNotes, setDietaryNotes] = useState("");
+  const [stay, setStay] = useState("");
+  const [adultsCount, setAdultsCount] = useState("1");
+  const [childrenCount, setChildrenCount] = useState("0");
+  const [notes, setNotes] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submitError, setSubmitError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -40,8 +44,10 @@ export function RegistrationForm(): React.ReactElement {
     const parsed = registrationSchema.safeParse({
       name: name.trim(),
       email: email.trim(),
-      guestCount: Number(guestCount),
-      dietaryNotes: dietaryNotes.trim() || undefined,
+      stay: stay || undefined,
+      adultsCount: Number(adultsCount),
+      childrenCount: Number(childrenCount),
+      notes: notes.trim() || undefined,
     });
 
     if (!parsed.success) {
@@ -129,14 +135,32 @@ export function RegistrationForm(): React.ReactElement {
       </FormField>
 
       <FormField
-        label={tForm("guestCount")}
-        htmlFor="guestCount"
-        error={fieldErrors.guestCount}
+        label={tForm("stay")}
+        htmlFor="stay"
+        error={fieldErrors.stay}
       >
         <select
-          id="guestCount"
-          value={guestCount}
-          onChange={(e) => setGuestCount(e.target.value)}
+          id="stay"
+          value={stay}
+          onChange={(e) => setStay(e.target.value)}
+          className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:text-sm"
+        >
+          <option value="">{tForm("stayPlaceholder")}</option>
+          <option value="FRI_SAT">{tForm("stayFriSat")}</option>
+          <option value="SAT_SUN">{tForm("staySatSun")}</option>
+          <option value="FRI_SUN">{tForm("stayFriSun")}</option>
+        </select>
+      </FormField>
+
+      <FormField
+        label={tForm("adultsCount")}
+        htmlFor="adultsCount"
+        error={fieldErrors.adultsCount}
+      >
+        <select
+          id="adultsCount"
+          value={adultsCount}
+          onChange={(e) => setAdultsCount(e.target.value)}
           className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:text-sm"
         >
           {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
@@ -148,15 +172,34 @@ export function RegistrationForm(): React.ReactElement {
       </FormField>
 
       <FormField
-        label={tForm("dietaryNotes")}
-        htmlFor="dietaryNotes"
-        error={fieldErrors.dietaryNotes}
+        label={tForm("childrenCount")}
+        htmlFor="childrenCount"
+        error={fieldErrors.childrenCount}
+      >
+        <select
+          id="childrenCount"
+          value={childrenCount}
+          onChange={(e) => setChildrenCount(e.target.value)}
+          className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:text-sm"
+        >
+          {Array.from({ length: 11 }, (_, i) => i).map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </FormField>
+
+      <FormField
+        label={tForm("notes")}
+        htmlFor="notes"
+        error={fieldErrors.notes}
       >
         <Textarea
-          id="dietaryNotes"
-          value={dietaryNotes}
-          onChange={(e) => setDietaryNotes(e.target.value)}
-          error={fieldErrors.dietaryNotes}
+          id="notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          error={fieldErrors.notes}
           rows={3}
         />
       </FormField>

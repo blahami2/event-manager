@@ -37,7 +37,7 @@ describe("GET /api/admin/registrations/export", () => {
   });
 
   it("returns CSV with correct content-type and disposition headers", async () => {
-    const csv = "name,email,guestCount,dietaryNotes,status,createdAt\nJane,jane@example.com,2,,CONFIRMED,2026-01-01T00:00:00.000Z";
+    const csv = "name,email,stay,adultsCount,childrenCount,notes,status,createdAt\nJane,jane@example.com,FRI_SAT,2,0,,CONFIRMED,2026-01-01T00:00:00.000Z";
     vi.mocked(exportRegistrationsCsv).mockResolvedValue(csv);
 
     const res = await GET(makeRequest());
@@ -53,21 +53,18 @@ describe("GET /api/admin/registrations/export", () => {
 
   it("returns 401 for unauthenticated requests", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthenticationError());
-
     const res = await GET(makeRequest());
     expect(res.status).toBe(401);
   });
 
   it("returns 403 for non-admin users", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthorizationError());
-
     const res = await GET(makeRequest());
     expect(res.status).toBe(403);
   });
 
   it("returns 500 on unexpected error", async () => {
     vi.mocked(exportRegistrationsCsv).mockRejectedValue(new Error("DB down"));
-
     const res = await GET(makeRequest());
     expect(res.status).toBe(500);
   });

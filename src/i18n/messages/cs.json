@@ -34,8 +34,14 @@
   "form": {
     "email": "E-mail",
     "name": "Jméno",
-    "guestCount": "Počet hostů",
-    "dietaryNotes": "Poznámky ke stravování (nepovinné)",
+    "stay": "Pobyt",
+    "stayPlaceholder": "Vyberte pobyt…",
+    "stayFriSat": "Pátek – Sobota",
+    "staySatSun": "Sobota – Neděle",
+    "stayFriSun": "Pátek – Neděle",
+    "adultsCount": "Počet dospělých",
+    "childrenCount": "Počet dětí",
+    "notes": "Poznámky (nepovinné)",
     "submit": "Odeslat registraci"
   },
   "landing": {
@@ -103,9 +109,10 @@
       "totalRegistrations": "Celkem registrací",
       "confirmed": "Potvrzené",
       "cancelled": "Zrušené",
-      "totalGuests": "Celkem hostů",
       "viewRegistrations": "Zobrazit registrace",
-      "exportCsv": "Exportovat CSV"
+      "exportCsv": "Exportovat CSV",
+      "totalAdults": "Celkem dospělých",
+      "totalChildren": "Celkem dětí"
     },
     "registrations": {
       "title": "Registrace",
@@ -126,7 +133,6 @@
       "table": {
         "name": "Jméno",
         "email": "E-mail",
-        "guests": "Hosté",
         "status": "Stav",
         "created": "Vytvořeno",
         "actions": "Akce",
@@ -134,16 +140,24 @@
         "cancel": "Zrušit",
         "confirmCancel": "Zrušit tuto registraci?",
         "yes": "Ano",
-        "no": "Ne"
+        "no": "Ne",
+        "stay": "Pobyt",
+        "adults": "Dospělí",
+        "children": "Děti"
       },
       "edit": {
         "title": "Upravit registraci",
         "name": "Jméno",
         "email": "E-mail",
-        "guestCount": "Počet hostů",
-        "dietaryNotes": "Poznámky ke stravování",
         "cancel": "Zrušit",
-        "save": "Uložit"
+        "save": "Uložit",
+        "stay": "Pobyt",
+        "stayFriSat": "Pá–So",
+        "staySatSun": "So–Ne",
+        "stayFriSun": "Pá–Ne",
+        "adultsCount": "Dospělí",
+        "childrenCount": "Děti",
+        "notes": "Poznámky"
       }
     }
   }
