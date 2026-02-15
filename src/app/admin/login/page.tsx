@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createBrowserClient } from "@/lib/auth/supabase-client";
 
 export default function LoginPage(): React.ReactElement {
   const router = useRouter();
+  const t = useTranslations("admin.login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,13 +28,13 @@ export default function LoginPage(): React.ReactElement {
       });
 
       if (authError) {
-        setError("Invalid credentials");
+        setError(t("error"));
         return;
       }
 
       router.push("/admin");
     } catch {
-      setError("Invalid credentials");
+      setError(t("error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -42,7 +44,7 @@ export default function LoginPage(): React.ReactElement {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
         <h1 className="mb-6 text-center text-2xl font-bold text-gray-900">
-          Admin Login
+          {t("title")}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -51,7 +53,7 @@ export default function LoginPage(): React.ReactElement {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email
+              {t("email")}
             </label>
             <input
               id="email"
@@ -69,7 +71,7 @@ export default function LoginPage(): React.ReactElement {
               htmlFor="password"
               className="block text-sm font-medium text-gray-700"
             >
-              Password
+              {t("password")}
             </label>
             <input
               id="password"
@@ -93,7 +95,7 @@ export default function LoginPage(): React.ReactElement {
             disabled={isSubmitting}
             className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
           >
-            {isSubmitting ? "Signing in…" : "Sign in"}
+            {isSubmitting ? t("submitting") : t("submit")}
           </button>
         </form>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 
@@ -36,6 +37,8 @@ export function RegistrationTable({
   onEdit,
   onCancel,
 }: RegistrationTableProps): React.ReactElement {
+  const t = useTranslations("admin.registrations.table");
+  const tReg = useTranslations("admin.registrations");
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const handleCancelClick = useCallback((id: string) => {
@@ -57,7 +60,7 @@ export function RegistrationTable({
   if (registrations.length === 0) {
     return (
       <div className="rounded-md bg-gray-50 py-12 text-center text-sm text-gray-500">
-        No registrations found.
+        {tReg("noResults")}
       </div>
     );
   }
@@ -67,12 +70,12 @@ export function RegistrationTable({
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Name</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Guests</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Created</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("name")}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("email")}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("guests")}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("status")}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("created")}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("actions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white">
@@ -88,20 +91,20 @@ export function RegistrationTable({
               <td className="whitespace-nowrap px-6 py-4 text-sm">
                 {confirmingId === reg.id ? (
                   <span className="flex items-center gap-2">
-                    <span className="text-red-600">Cancel this registration?</span>
+                    <span className="text-red-600">{t("confirmCancel")}</span>
                     <button
                       type="button"
                       onClick={() => handleConfirmCancel(reg.id)}
                       className="rounded bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700"
                     >
-                      Yes
+                      {t("yes")}
                     </button>
                     <button
                       type="button"
                       onClick={handleDismissConfirm}
                       className="rounded bg-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-300"
                     >
-                      No
+                      {t("no")}
                     </button>
                   </span>
                 ) : (
@@ -111,7 +114,7 @@ export function RegistrationTable({
                       onClick={() => onEdit(reg)}
                       className="text-indigo-600 hover:text-indigo-900"
                     >
-                      Edit
+                      {t("edit")}
                     </button>
                     {reg.status !== RegistrationStatus.CANCELLED && (
                       <button
@@ -119,7 +122,7 @@ export function RegistrationTable({
                         onClick={() => handleCancelClick(reg.id)}
                         className="text-red-600 hover:text-red-900"
                       >
-                        Cancel
+                        {t("cancel")}
                       </button>
                     )}
                   </span>

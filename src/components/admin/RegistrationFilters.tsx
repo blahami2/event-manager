@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { RegistrationStatus } from "@/types/registration";
 
 export interface RegistrationFiltersProps {
@@ -10,18 +11,20 @@ export interface RegistrationFiltersProps {
   readonly onSearchChange: (search: string) => void;
 }
 
-const STATUS_OPTIONS = [
-  { value: "", label: "All" },
-  { value: RegistrationStatus.CONFIRMED, label: "Confirmed" },
-  { value: RegistrationStatus.CANCELLED, label: "Cancelled" },
-] as const;
-
 export function RegistrationFilters({
   status,
   search,
   onStatusChange,
   onSearchChange,
 }: RegistrationFiltersProps): React.ReactElement {
+  const t = useTranslations("admin.registrations.filters");
+
+  const statusOptions = [
+    { value: "", labelKey: "all" },
+    { value: RegistrationStatus.CONFIRMED, labelKey: "confirmed" },
+    { value: RegistrationStatus.CANCELLED, labelKey: "cancelled" },
+  ] as const;
+
   const handleStatusChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       onStatusChange(e.target.value);
@@ -40,7 +43,7 @@ export function RegistrationFilters({
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
       <div>
         <label htmlFor="status-filter" className="sr-only">
-          Filter by status
+          {t("statusLabel")}
         </label>
         <select
           id="status-filter"
@@ -48,21 +51,21 @@ export function RegistrationFilters({
           onChange={handleStatusChange}
           className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         >
-          {STATUS_OPTIONS.map((opt) => (
+          {statusOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.labelKey)}
             </option>
           ))}
         </select>
       </div>
       <div className="flex-1">
         <label htmlFor="search-input" className="sr-only">
-          Search by name or email
+          {t("searchLabel")}
         </label>
         <input
           id="search-input"
           type="text"
-          placeholder="Search by name or email…"
+          placeholder={t("searchPlaceholder")}
           value={search}
           onChange={handleSearchChange}
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:max-w-xs"

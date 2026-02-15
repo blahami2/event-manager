@@ -7,6 +7,11 @@ import { RegistrationTable } from "../RegistrationTable";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 
+// Mock next-intl
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 function makeRegistration(overrides: Partial<RegistrationOutput> = {}): RegistrationOutput {
   return {
     id: "reg-1",
@@ -28,22 +33,22 @@ describe("RegistrationTable", () => {
     onCancel: vi.fn(),
   };
 
-  it("renders empty state when no registrations", () => {
+  it("should render empty state when no registrations", () => {
     render(<RegistrationTable registrations={[]} onEdit={vi.fn()} onCancel={vi.fn()} />);
-    expect(screen.getByText("No registrations found.")).toBeDefined();
+    expect(screen.getByText("noResults")).toBeDefined();
   });
 
-  it("renders table headers", () => {
+  it("should render table headers when registrations exist", () => {
     render(<RegistrationTable {...defaultProps} />);
-    expect(screen.getByText("Name")).toBeDefined();
-    expect(screen.getByText("Email")).toBeDefined();
-    expect(screen.getByText("Guests")).toBeDefined();
-    expect(screen.getByText("Status")).toBeDefined();
-    expect(screen.getByText("Created")).toBeDefined();
-    expect(screen.getByText("Actions")).toBeDefined();
+    expect(screen.getByText("name")).toBeDefined();
+    expect(screen.getByText("email")).toBeDefined();
+    expect(screen.getByText("guests")).toBeDefined();
+    expect(screen.getByText("status")).toBeDefined();
+    expect(screen.getByText("created")).toBeDefined();
+    expect(screen.getByText("actions")).toBeDefined();
   });
 
-  it("renders registration data", () => {
+  it("should render registration data when registrations provided", () => {
     render(<RegistrationTable {...defaultProps} />);
     expect(screen.getByText("John Doe")).toBeDefined();
     expect(screen.getByText("john@example.com")).toBeDefined();
@@ -51,47 +56,47 @@ describe("RegistrationTable", () => {
     expect(screen.getByText("CONFIRMED")).toBeDefined();
   });
 
-  it("shows Edit and Cancel buttons for confirmed registration", () => {
+  it("should show edit and cancel buttons for confirmed registration", () => {
     render(<RegistrationTable {...defaultProps} />);
-    expect(screen.getByText("Edit")).toBeDefined();
-    expect(screen.getByText("Cancel")).toBeDefined();
+    expect(screen.getByText("edit")).toBeDefined();
+    expect(screen.getByText("cancel")).toBeDefined();
   });
 
-  it("hides Cancel button for cancelled registration", () => {
+  it("should hide cancel button for cancelled registration", () => {
     const cancelled = makeRegistration({ status: RegistrationStatus.CANCELLED });
     render(<RegistrationTable registrations={[cancelled]} onEdit={vi.fn()} onCancel={vi.fn()} />);
-    expect(screen.getByText("Edit")).toBeDefined();
-    expect(screen.queryByText("Cancel")).toBeNull();
+    expect(screen.getByText("edit")).toBeDefined();
+    expect(screen.queryByText("cancel")).toBeNull();
   });
 
-  it("calls onEdit when Edit is clicked", () => {
+  it("should call onEdit when edit is clicked", () => {
     const onEdit = vi.fn();
     const reg = makeRegistration();
     render(<RegistrationTable registrations={[reg]} onEdit={onEdit} onCancel={vi.fn()} />);
-    fireEvent.click(screen.getByText("Edit"));
+    fireEvent.click(screen.getByText("edit"));
     expect(onEdit).toHaveBeenCalledWith(reg);
   });
 
-  it("shows confirmation dialog when Cancel is clicked", () => {
+  it("should show confirmation dialog when cancel is clicked", () => {
     render(<RegistrationTable {...defaultProps} />);
-    fireEvent.click(screen.getByText("Cancel"));
-    expect(screen.getByText("Cancel this registration?")).toBeDefined();
-    expect(screen.getByText("Yes")).toBeDefined();
-    expect(screen.getByText("No")).toBeDefined();
+    fireEvent.click(screen.getByText("cancel"));
+    expect(screen.getByText("confirmCancel")).toBeDefined();
+    expect(screen.getByText("yes")).toBeDefined();
+    expect(screen.getByText("no")).toBeDefined();
   });
 
-  it("calls onCancel when confirmation is accepted", () => {
+  it("should call onCancel when confirmation is accepted", () => {
     const onCancel = vi.fn();
     render(<RegistrationTable {...defaultProps} onCancel={onCancel} />);
-    fireEvent.click(screen.getByText("Cancel"));
-    fireEvent.click(screen.getByText("Yes"));
+    fireEvent.click(screen.getByText("cancel"));
+    fireEvent.click(screen.getByText("yes"));
     expect(onCancel).toHaveBeenCalledWith("reg-1");
   });
 
-  it("dismisses confirmation when No is clicked", () => {
+  it("should dismiss confirmation when no is clicked", () => {
     render(<RegistrationTable {...defaultProps} />);
-    fireEvent.click(screen.getByText("Cancel"));
-    fireEvent.click(screen.getByText("No"));
-    expect(screen.queryByText("Cancel this registration?")).toBeNull();
+    fireEvent.click(screen.getByText("cancel"));
+    fireEvent.click(screen.getByText("no"));
+    expect(screen.queryByText("confirmCancel")).toBeNull();
   });
 });

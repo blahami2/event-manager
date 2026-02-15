@@ -82,5 +82,69 @@
     "sendButton": "Odeslat odkaz pro správu",
     "success": "Pokud je tento e-mail zaregistrován, odkaz pro správu byl odeslán.",
     "backToEvent": "Zpět na akci"
+  },
+  "admin": {
+    "nav": {
+      "title": "Admin",
+      "dashboard": "Přehled",
+      "registrations": "Registrace",
+      "logout": "Odhlásit se"
+    },
+    "login": {
+      "title": "Přihlášení administrátora",
+      "email": "E-mail",
+      "password": "Heslo",
+      "submit": "Přihlásit se",
+      "submitting": "Přihlašování…",
+      "error": "Neplatné přihlašovací údaje"
+    },
+    "dashboard": {
+      "title": "Přehled",
+      "totalRegistrations": "Celkem registrací",
+      "confirmed": "Potvrzené",
+      "cancelled": "Zrušené",
+      "totalGuests": "Celkem hostů",
+      "viewRegistrations": "Zobrazit registrace",
+      "exportCsv": "Exportovat CSV"
+    },
+    "registrations": {
+      "title": "Registrace",
+      "downloadCsv": "Stáhnout CSV",
+      "loading": "Načítání…",
+      "errorLoad": "Nepodařilo se načíst registrace",
+      "errorCancel": "Nepodařilo se zrušit registraci",
+      "errorUpdate": "Nepodařilo se aktualizovat registraci",
+      "noResults": "Žádné registrace nenalezeny.",
+      "filters": {
+        "statusLabel": "Filtrovat podle stavu",
+        "all": "Vše",
+        "confirmed": "Potvrzené",
+        "cancelled": "Zrušené",
+        "searchPlaceholder": "Hledat podle jména nebo e-mailu…",
+        "searchLabel": "Hledat podle jména nebo e-mailu"
+      },
+      "table": {
+        "name": "Jméno",
+        "email": "E-mail",
+        "guests": "Hosté",
+        "status": "Stav",
+        "created": "Vytvořeno",
+        "actions": "Akce",
+        "edit": "Upravit",
+        "cancel": "Zrušit",
+        "confirmCancel": "Zrušit tuto registraci?",
+        "yes": "Ano",
+        "no": "Ne"
+      },
+      "edit": {
+        "title": "Upravit registraci",
+        "name": "Jméno",
+        "email": "E-mail",
+        "guestCount": "Počet hostů",
+        "dietaryNotes": "Poznámky ke stravování",
+        "cancel": "Zrušit",
+        "save": "Uložit"
+      }
+    }
   }
 }

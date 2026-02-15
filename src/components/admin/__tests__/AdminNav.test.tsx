@@ -5,6 +5,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AdminNav } from "../AdminNav";
 
+// Mock next-intl
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 // Mock next/navigation
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -44,35 +49,40 @@ describe("AdminNav", () => {
     vi.clearAllMocks();
   });
 
-  it("renders Dashboard link", () => {
+  it("should render dashboard link when component mounts", () => {
     render(<AdminNav />);
-    const link = screen.getByRole("link", { name: /dashboard/i });
+    const link = screen.getByRole("link", { name: "dashboard" });
     expect(link).toBeDefined();
     expect(link.getAttribute("href")).toBe("/admin");
   });
 
-  it("renders Registrations link", () => {
+  it("should render registrations link when component mounts", () => {
     render(<AdminNav />);
-    const link = screen.getByRole("link", { name: /registrations/i });
+    const link = screen.getByRole("link", { name: "registrations" });
     expect(link).toBeDefined();
     expect(link.getAttribute("href")).toBe("/admin/registrations");
   });
 
-  it("renders Logout button", () => {
+  it("should render logout button when component mounts", () => {
     render(<AdminNav />);
-    const button = screen.getByRole("button", { name: /logout/i });
+    const button = screen.getByRole("button", { name: "logout" });
     expect(button).toBeDefined();
   });
 
-  it("calls signOut and redirects on logout", async () => {
+  it("should call signOut and redirect on logout when logout button clicked", async () => {
     mockSignOut.mockResolvedValue({ error: null });
     render(<AdminNav />);
 
-    fireEvent.click(screen.getByRole("button", { name: /logout/i }));
+    fireEvent.click(screen.getByRole("button", { name: "logout" }));
 
     await waitFor(() => {
       expect(mockSignOut).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith("/admin/login");
     });
+  });
+
+  it("should render admin title when component mounts", () => {
+    render(<AdminNav />);
+    expect(screen.getByText("title")).toBeDefined();
   });
 });

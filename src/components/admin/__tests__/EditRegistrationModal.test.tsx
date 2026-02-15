@@ -7,6 +7,11 @@ import { EditRegistrationModal } from "../EditRegistrationModal";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 
+// Mock next-intl
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 const mockReg: RegistrationOutput = {
   id: "reg-1",
   name: "John Doe",
@@ -19,27 +24,27 @@ const mockReg: RegistrationOutput = {
 };
 
 describe("EditRegistrationModal", () => {
-  it("renders with pre-filled values", () => {
+  it("should render with pre-filled values when registration provided", () => {
     render(<EditRegistrationModal registration={mockReg} onSave={vi.fn()} onClose={vi.fn()} />);
-    expect((screen.getByLabelText("Name") as HTMLInputElement).value).toBe("John Doe");
-    expect((screen.getByLabelText("Email") as HTMLInputElement).value).toBe("john@example.com");
-    expect((screen.getByLabelText("Guest Count") as HTMLInputElement).value).toBe("2");
-    expect((screen.getByLabelText("Dietary Notes") as HTMLTextAreaElement).value).toBe("Vegan");
+    expect((screen.getByLabelText("name") as HTMLInputElement).value).toBe("John Doe");
+    expect((screen.getByLabelText("email") as HTMLInputElement).value).toBe("john@example.com");
+    expect((screen.getByLabelText("guestCount") as HTMLInputElement).value).toBe("2");
+    expect((screen.getByLabelText("dietaryNotes") as HTMLTextAreaElement).value).toBe("Vegan");
   });
 
-  it("calls onClose when Cancel is clicked", () => {
+  it("should call onClose when cancel is clicked", () => {
     const onClose = vi.fn();
     render(<EditRegistrationModal registration={mockReg} onSave={vi.fn()} onClose={onClose} />);
-    fireEvent.click(screen.getByText("Cancel"));
+    fireEvent.click(screen.getByText("cancel"));
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("calls onSave with updated data on submit", () => {
+  it("should call onSave with updated data when form submitted", () => {
     const onSave = vi.fn();
     render(<EditRegistrationModal registration={mockReg} onSave={onSave} onClose={vi.fn()} />);
 
-    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Jane Doe" } });
-    fireEvent.change(screen.getByLabelText("Guest Count"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText("name"), { target: { value: "Jane Doe" } });
+    fireEvent.change(screen.getByLabelText("guestCount"), { target: { value: "3" } });
     const dialog = screen.getByRole("dialog");
     const form = dialog.querySelector("form");
     if (!form) throw new Error("Form not found");
@@ -53,7 +58,7 @@ describe("EditRegistrationModal", () => {
     });
   });
 
-  it("renders dialog with accessible role", () => {
+  it("should render dialog with accessible role when mounted", () => {
     render(<EditRegistrationModal registration={mockReg} onSave={vi.fn()} onClose={vi.fn()} />);
     expect(screen.getByRole("dialog")).toBeDefined();
   });

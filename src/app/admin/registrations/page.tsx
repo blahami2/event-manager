@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { RegistrationFilters } from "@/components/admin/RegistrationFilters";
 import { RegistrationTable } from "@/components/admin/RegistrationTable";
 import { EditRegistrationModal } from "@/components/admin/EditRegistrationModal";
@@ -35,6 +36,7 @@ async function fetchRegistrations(
 }
 
 export default function AdminRegistrationsPage(): React.ReactElement {
+  const t = useTranslations("admin.registrations");
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -47,9 +49,9 @@ export default function AdminRegistrationsPage(): React.ReactElement {
       const data = await fetchRegistrations(status, search, page);
       setState({ data, loading: false, error: null });
     } catch {
-      setState((prev) => ({ ...prev, loading: false, error: "Failed to load registrations" }));
+      setState((prev) => ({ ...prev, loading: false, error: t("errorLoad") }));
     }
-  }, [status, search, page]);
+  }, [status, search, page, t]);
 
   useEffect(() => {
     void loadData();
@@ -78,10 +80,10 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         }
         await loadData();
       } catch {
-        setState((prev) => ({ ...prev, error: "Failed to cancel registration" }));
+        setState((prev) => ({ ...prev, error: t("errorCancel") }));
       }
     },
-    [loadData],
+    [loadData, t],
   );
 
   const handleEdit = useCallback((registration: RegistrationOutput) => {
@@ -105,22 +107,22 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         setEditing(null);
         await loadData();
       } catch {
-        setState((prev) => ({ ...prev, error: "Failed to update registration" }));
+        setState((prev) => ({ ...prev, error: t("errorUpdate") }));
       }
     },
-    [loadData],
+    [loadData, t],
   );
 
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Registrations</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <a
           href="/api/admin/registrations/export"
           download
           className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
         >
-          Download CSV
+          {t("downloadCsv")}
         </a>
       </div>
 
@@ -141,7 +143,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         )}
 
         {state.loading ? (
-          <div className="py-12 text-center text-sm text-gray-500">Loading…</div>
+          <div className="py-12 text-center text-sm text-gray-500">{t("loading")}</div>
         ) : state.data ? (
           <>
             <RegistrationTable
