@@ -265,6 +265,59 @@ describe("renderManageLinkEmail", () => {
     expect(html).toContain("automatická správa");
   });
 
+  // --- B-004 regression: bold formatting for event name and date ---
+
+  test("should render event name wrapped in <strong> tags in the HTML body", async () => {
+    // given
+    setupMockTranslator(enMessages.email);
+
+    // when
+    const { html } = await renderManageLinkEmail(defaultParams);
+
+    // then
+    expect(html).toContain("<strong>Triple Threat</strong>");
+  });
+
+  test("should render event date wrapped in <strong> tags in the HTML body", async () => {
+    // given
+    setupMockTranslator(enMessages.email);
+
+    // when
+    const { html } = await renderManageLinkEmail(defaultParams);
+
+    // then
+    expect(html).toContain("<strong>March 15, 2026</strong>");
+  });
+
+  test("should not contain literal ICU tag syntax in rendered thankYou text", async () => {
+    // given
+    // - ensures translation strings don't contain <strong> as ICU tags
+    setupMockTranslator(enMessages.email);
+
+    // when
+    const { html } = await renderManageLinkEmail(defaultParams);
+
+    // then
+    // The thankYou paragraph should not contain escaped HTML entities from tags
+    // (which would indicate the translation string itself had HTML that got escaped)
+    expect(html).not.toContain("&lt;strong&gt;");
+  });
+
+  test("should escape HTML in event name even when wrapped in bold tags", async () => {
+    // given
+    setupMockTranslator(enMessages.email);
+    const params = {
+      ...defaultParams,
+      eventName: 'Party & "Fun" <Night>',
+    };
+
+    // when
+    const { html } = await renderManageLinkEmail(params);
+
+    // then
+    expect(html).toContain("<strong>Party &amp; &quot;Fun&quot; &lt;Night&gt;</strong>");
+  });
+
   test("should keep manage URL language-independent across locales", async () => {
     // given
     const url = "https://example.com/manage?token=test-token-12345678";

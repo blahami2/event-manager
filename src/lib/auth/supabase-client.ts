@@ -6,7 +6,13 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  * Uses NEXT_PUBLIC_* env vars which are available in the browser bundle.
  * Persists session in browser storage for cookie-based auth.
  */
+let browserClientInstance: SupabaseClient | undefined;
+
 export function createBrowserClient(): SupabaseClient {
+  if (browserClientInstance) {
+    return browserClientInstance;
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -16,7 +22,16 @@ export function createBrowserClient(): SupabaseClient {
     );
   }
 
-  return createClient(url, anonKey);
+  browserClientInstance = createClient(url, anonKey);
+  return browserClientInstance;
+}
+
+/**
+ * Resets the browser client singleton. Only for use in tests.
+ * @internal
+ */
+export function resetBrowserClient(): void {
+  browserClientInstance = undefined;
 }
 
 /**
