@@ -16,7 +16,7 @@ describe("Button", () => {
   it("applies primary variant styles by default", () => {
     render(<Button href="/test">Click</Button>);
     const link = screen.getByRole("link", { name: "Click" });
-    expect(link.className).toContain("bg-indigo-600");
+    expect(link.className).toContain("bg-accent");
   });
 
   it("applies secondary variant styles", () => {
@@ -27,6 +27,6 @@ describe("Button", () => {
     );
     const link = screen.getByRole("link", { name: "Link" });
     expect(link.className).toContain("underline");
-    expect(link.className).not.toContain("bg-indigo-600");
+    expect(link.className).not.toContain("bg-accent");
   });
 });

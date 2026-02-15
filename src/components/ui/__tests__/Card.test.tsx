@@ -17,6 +17,6 @@ describe("Card", () => {
     );
     const div = container.firstChild as HTMLElement;
     expect(div.className).toContain("text-center");
-    expect(div.className).toContain("rounded-2xl");
+    expect(div.className).toContain("border-2");
   });
 });
