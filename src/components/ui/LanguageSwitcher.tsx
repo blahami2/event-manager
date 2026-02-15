@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { locales, defaultLocale } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
 import { LOCALE_COOKIE } from "@/i18n/get-locale";
@@ -25,11 +25,7 @@ function getLocaleFromCookie(): Locale {
 }
 
 export function LanguageSwitcher(): React.ReactElement {
-  const [currentLocale, setCurrentLocale] = useState<Locale>(defaultLocale);
-
-  useEffect(() => {
-    setCurrentLocale(getLocaleFromCookie());
-  }, []);
+  const [currentLocale] = useState<Locale>(() => getLocaleFromCookie());
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>): void {
     const newLocale = e.target.value;

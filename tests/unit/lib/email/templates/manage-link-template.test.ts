@@ -42,7 +42,7 @@ describe("renderManageLinkEmail", () => {
     manageUrl: "https://example.com/manage?token=test-token-12345678",
   } as const;
 
-  function setupMockTranslator(messages: EmailMessages) {
+  function setupMockTranslator(messages: EmailMessages): void {
     mockGetTranslations.mockResolvedValue(createMockTranslator(messages));
   }
 
