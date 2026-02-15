@@ -17,6 +17,32 @@ interface FieldErrors {
   notes?: string;
 }
 
+/* Matches template .form-input exactly */
+const selectStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "15px",
+  background: "#222",
+  border: "2px solid #333",
+  color: "#fff",
+  fontFamily: "'Montserrat', sans-serif",
+  fontSize: "1rem",
+};
+
+/* Matches template .btn-rock with width:100% */
+const submitStyle: React.CSSProperties = {
+  width: "100%",
+  display: "block",
+  backgroundColor: "var(--color-accent)",
+  color: "#fff",
+  padding: "15px 40px",
+  fontFamily: "'Anton', sans-serif",
+  fontSize: "1.5rem",
+  textTransform: "uppercase",
+  border: "3px solid var(--color-accent)",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+};
+
 export function RegistrationForm(): React.ReactElement {
   const t = useTranslations("registration");
   const tForm = useTranslations("form");
@@ -100,20 +126,23 @@ export function RegistrationForm(): React.ReactElement {
 
   if (successMessage) {
     return (
-      <div role="status" className="text-center">
-        <p className="text-lg font-bold uppercase tracking-wide text-accent">{successMessage}</p>
+      <div role="status" style={{ textAlign: "center" }}>
+        <p style={{ fontSize: "1.1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", color: "var(--color-accent)" }}>
+          {successMessage}
+        </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+    <form onSubmit={handleSubmit} noValidate>
       <FormField label={tForm("name")} htmlFor="name" error={fieldErrors.name}>
         <Input
           id="name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          placeholder={tForm("namePlaceholder")}
           error={fieldErrors.name}
           required
         />
@@ -143,7 +172,8 @@ export function RegistrationForm(): React.ReactElement {
           id="stay"
           value={stay}
           onChange={(e) => setStay(e.target.value)}
-          className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
+          className="form-input"
+          style={selectStyle}
         >
           <option value="">{tForm("stayPlaceholder")}</option>
           <option value="FRI_SAT">{tForm("stayFriSat")}</option>
@@ -161,7 +191,8 @@ export function RegistrationForm(): React.ReactElement {
           id="adultsCount"
           value={adultsCount}
           onChange={(e) => setAdultsCount(e.target.value)}
-          className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
+          className="form-input"
+          style={selectStyle}
         >
           {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
             <option key={n} value={n}>
@@ -180,7 +211,8 @@ export function RegistrationForm(): React.ReactElement {
           id="childrenCount"
           value={childrenCount}
           onChange={(e) => setChildrenCount(e.target.value)}
-          className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
+          className="form-input"
+          style={selectStyle}
         >
           {Array.from({ length: 11 }, (_, i) => i).map((n) => (
             <option key={n} value={n}>
@@ -199,13 +231,14 @@ export function RegistrationForm(): React.ReactElement {
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
+          placeholder={tForm("notesPlaceholder")}
           error={fieldErrors.notes}
           rows={3}
         />
       </FormField>
 
       {submitError && (
-        <p className="text-sm text-accent" role="alert">
+        <p style={{ fontSize: "0.875rem", color: "var(--color-accent)", marginBottom: "15px" }} role="alert">
           {submitError}
         </p>
       )}
@@ -213,7 +246,12 @@ export function RegistrationForm(): React.ReactElement {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-accent px-4 py-4 font-heading text-lg uppercase tracking-wide text-white border-3 border-accent transition-all duration-300 hover:bg-transparent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn-rock"
+        style={{
+          ...submitStyle,
+          opacity: isSubmitting ? 0.5 : 1,
+          cursor: isSubmitting ? "not-allowed" : "pointer",
+        }}
       >
         {isSubmitting ? t("submitting") : t("register")}
       </button>

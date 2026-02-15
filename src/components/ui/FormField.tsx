@@ -12,16 +12,24 @@ export function FormField({
   children,
 }: FormFieldProps): React.ReactElement {
   return (
-    <div className="space-y-2">
+    // .form-group { margin-bottom:25px; text-align:left }
+    <div style={{ marginBottom: "25px", textAlign: "left" }}>
+      {/* .form-label { display:block; margin-bottom:10px; font-weight:700; text-transform:uppercase } */}
       <label
         htmlFor={htmlFor}
-        className="block text-sm font-bold uppercase tracking-wide text-text-gray"
+        style={{
+          display: "block",
+          marginBottom: "10px",
+          fontWeight: 700,
+          textTransform: "uppercase",
+          fontFamily: "'Montserrat', sans-serif",
+        }}
       >
         {label}
       </label>
       {children}
       {error && (
-        <p className="text-sm text-accent" role="alert">
+        <p className="text-sm text-accent" role="alert" style={{ marginTop: "5px" }}>
           {error}
         </p>
       )}

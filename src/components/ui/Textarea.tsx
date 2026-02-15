@@ -7,16 +7,19 @@ interface TextareaProps
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   function Textarea({ error, className = "", ...props }, ref) {
-    const base =
-      "block w-full border-2 bg-input-bg px-4 py-3 text-white font-body focus:outline-none transition-colors sm:text-sm";
-    const borderClass = error
-      ? "border-accent"
-      : "border-border-dark focus:border-accent";
-
     return (
       <textarea
         ref={ref}
-        className={`${base} ${borderClass} ${className}`}
+        className={`form-input ${className}`}
+        style={{
+          width: "100%",
+          padding: "15px",
+          background: "#222",
+          border: error ? "2px solid var(--color-accent)" : "2px solid #333",
+          color: "#fff",
+          fontFamily: "'Montserrat', sans-serif",
+          fontSize: "1rem",
+        }}
         aria-invalid={error ? "true" : undefined}
         {...props}
       />

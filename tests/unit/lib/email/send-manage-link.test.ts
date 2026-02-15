@@ -42,7 +42,7 @@ describe("sendManageLink", () => {
     guestName: "Alice Johnson",
     registrationId: TEST_REGISTRATION_ID,
     emailType: "manage-link" as const,
-    eventName: "Birthday Celebration",
+    eventName: "Triple Threat",
     eventDate: "2026-03-15",
   } as const;
 
@@ -76,7 +76,7 @@ describe("sendManageLink", () => {
     // then
     expect(mockRenderManageLinkEmail).toHaveBeenCalledWith({
       guestName: "Alice Johnson",
-      eventName: "Birthday Celebration",
+      eventName: "Triple Threat",
       eventDate: "2026-03-15",
       manageUrl: "https://example.com/manage/test-token-12345678",
       locale: undefined,

@@ -23,6 +23,30 @@ interface FieldErrors {
   notes?: string;
 }
 
+const selectStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "15px",
+  background: "#222",
+  border: "2px solid #333",
+  color: "#fff",
+  fontFamily: "'Montserrat', sans-serif",
+  fontSize: "1rem",
+};
+
+const submitStyle: React.CSSProperties = {
+  width: "100%",
+  display: "block",
+  backgroundColor: "var(--color-accent)",
+  color: "#fff",
+  padding: "15px 40px",
+  fontFamily: "'Anton', sans-serif",
+  fontSize: "1.5rem",
+  textTransform: "uppercase",
+  border: "3px solid var(--color-accent)",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+};
+
 export function ManageForm({
   registration,
   token,
@@ -148,11 +172,11 @@ export function ManageForm({
 
   if (isCancelled) {
     return (
-      <div role="status" className="text-center">
-        <p className="text-lg font-bold uppercase tracking-wide text-accent">
+      <div role="status" style={{ textAlign: "center" }}>
+        <p style={{ fontSize: "1.1rem", fontWeight: 700, textTransform: "uppercase", color: "var(--color-accent)" }}>
           {t("cancelled")}
         </p>
-        <p className="mt-2 text-sm text-text-gray">
+        <p style={{ marginTop: "8px", fontSize: "0.875rem", color: "var(--color-text-gray)" }}>
           {t("cancelledDescription")}
         </p>
       </div>
@@ -161,15 +185,17 @@ export function ManageForm({
 
   if (successMessage) {
     return (
-      <div role="status" className="text-center">
-        <p className="text-lg font-bold uppercase tracking-wide text-accent">{successMessage}</p>
+      <div role="status" style={{ textAlign: "center" }}>
+        <p style={{ fontSize: "1.1rem", fontWeight: 700, textTransform: "uppercase", color: "var(--color-accent)" }}>
+          {successMessage}
+        </p>
       </div>
     );
   }
 
   return (
     <div>
-      <form onSubmit={handleSave} className="space-y-5" noValidate>
+      <form onSubmit={handleSave} noValidate>
         <FormField label={tForm("name")} htmlFor="name" error={fieldErrors.name}>
           <Input
             id="name"
@@ -201,7 +227,8 @@ export function ManageForm({
             id="stay"
             value={stay}
             onChange={(e) => setStay(e.target.value)}
-            className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
+            className="form-input"
+            style={selectStyle}
           >
             <option value="">{tForm("stayPlaceholder")}</option>
             <option value="FRI_SAT">{tForm("stayFriSat")}</option>
@@ -219,7 +246,8 @@ export function ManageForm({
             id="adultsCount"
             value={adultsCount}
             onChange={(e) => setAdultsCount(e.target.value)}
-            className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
+            className="form-input"
+            style={selectStyle}
           >
             {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
@@ -238,7 +266,8 @@ export function ManageForm({
             id="childrenCount"
             value={childrenCount}
             onChange={(e) => setChildrenCount(e.target.value)}
-            className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
+            className="form-input"
+            style={selectStyle}
           >
             {Array.from({ length: 11 }, (_, i) => i).map((n) => (
               <option key={n} value={n}>
@@ -263,7 +292,7 @@ export function ManageForm({
         </FormField>
 
         {submitError && (
-          <p className="text-sm text-accent" role="alert">
+          <p style={{ fontSize: "0.875rem", color: "var(--color-accent)", marginBottom: "15px" }} role="alert">
             {submitError}
           </p>
         )}
@@ -271,18 +300,36 @@ export function ManageForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-accent px-4 py-4 font-heading text-lg uppercase tracking-wide text-white border-3 border-accent transition-all duration-300 hover:bg-transparent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-rock"
+          style={{
+            ...submitStyle,
+            opacity: isSubmitting ? 0.5 : 1,
+            cursor: isSubmitting ? "not-allowed" : "pointer",
+          }}
         >
           {isSubmitting ? t("saving") : t("saveChanges")}
         </button>
       </form>
 
-      <div className="mt-6 border-t border-border-dark pt-6">
+      <div style={{ marginTop: "24px", borderTop: "1px solid #333", paddingTop: "24px" }}>
         <button
           type="button"
           onClick={handleCancel}
           disabled={isCancelling}
-          className="w-full border-2 border-border-dark bg-transparent px-4 py-3 font-heading uppercase tracking-wide text-text-gray transition-all duration-300 hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+          style={{
+            width: "100%",
+            display: "block",
+            backgroundColor: "transparent",
+            color: "var(--color-text-gray)",
+            padding: "12px 16px",
+            fontFamily: "'Anton', sans-serif",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+            border: "2px solid #333",
+            cursor: isCancelling ? "not-allowed" : "pointer",
+            transition: "all 0.3s ease",
+            opacity: isCancelling ? 0.5 : 1,
+          }}
         >
           {isCancelling ? t("cancelling") : t("cancel")}
         </button>

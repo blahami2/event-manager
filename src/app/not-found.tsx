@@ -10,13 +10,15 @@ import Link from "next/link";
  */
 export default function NotFound(): React.ReactElement {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-dark-primary p-4">
       <div className="max-w-md text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-6 text-lg text-gray-600">Page not found</p>
+        <h1 className="mb-4 font-heading text-6xl uppercase tracking-wider text-accent">
+          404
+        </h1>
+        <p className="mb-6 text-lg text-text-gray">Page not found</p>
         <Link
           href="/"
-          className="rounded-md bg-black px-6 py-2 text-white hover:bg-gray-800"
+          className="inline-block bg-accent px-10 py-[15px] font-heading text-2xl uppercase tracking-wide text-white border-3 border-accent transition-all duration-300 hover:bg-transparent hover:text-accent"
         >
           Go home
         </Link>

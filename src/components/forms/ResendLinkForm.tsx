@@ -48,7 +48,6 @@ export function ResendLinkForm(): React.ReactElement {
         return;
       }
 
-      // Always show same message regardless of response (S5)
       setSuccessMessage(t("success"));
     } catch {
       setSubmitError(tErrors("unexpectedRetry"));
@@ -59,14 +58,16 @@ export function ResendLinkForm(): React.ReactElement {
 
   if (successMessage) {
     return (
-      <div role="status" className="text-center">
-        <p className="text-lg font-bold uppercase tracking-wide text-accent">{successMessage}</p>
+      <div role="status" style={{ textAlign: "center" }}>
+        <p style={{ fontSize: "1.1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", color: "var(--color-accent)" }}>
+          {successMessage}
+        </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+    <form onSubmit={handleSubmit} noValidate>
       <FormField label={tForm("email")} htmlFor="resend-email" error={fieldError}>
         <Input
           id="resend-email"
@@ -79,7 +80,7 @@ export function ResendLinkForm(): React.ReactElement {
       </FormField>
 
       {submitError && (
-        <p className="text-sm text-accent" role="alert">
+        <p style={{ fontSize: "0.875rem", color: "var(--color-accent)", marginBottom: "15px" }} role="alert">
           {submitError}
         </p>
       )}
@@ -87,7 +88,21 @@ export function ResendLinkForm(): React.ReactElement {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-accent px-4 py-4 font-heading text-lg uppercase tracking-wide text-white border-3 border-accent transition-all duration-300 hover:bg-transparent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn-rock"
+        style={{
+          width: "100%",
+          display: "block",
+          backgroundColor: "var(--color-accent)",
+          color: "#fff",
+          padding: "15px 40px",
+          fontFamily: "'Anton', sans-serif",
+          fontSize: "1.5rem",
+          textTransform: "uppercase",
+          border: "3px solid var(--color-accent)",
+          cursor: isSubmitting ? "not-allowed" : "pointer",
+          transition: "all 0.3s ease",
+          opacity: isSubmitting ? 0.5 : 1,
+        }}
       >
         {isSubmitting ? t("sending") : t("sendButton")}
       </button>

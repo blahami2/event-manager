@@ -8,7 +8,7 @@
  */
 
 /** Display name of the event. */
-export const EVENT_NAME = "Birthday Celebration";
+export const EVENT_NAME = "Triple Threat";
 
 /** Human-readable event date string. */
 export const EVENT_DATE = "Saturday, March 28, 2026";

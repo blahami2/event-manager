@@ -38,7 +38,7 @@ describe("ICS calendar attachment in registration email", () => {
     guestName: "Bob Smith",
     registrationId: "00000000-0000-0000-0000-000000000002",
     emailType: "manage-link" as const,
-    eventName: "Birthday Celebration",
+    eventName: "Triple Threat",
     eventDate: "2026-03-28",
   } as const;
 
@@ -88,7 +88,7 @@ describe("ICS calendar attachment in registration email", () => {
     const decoded = Buffer.from(content, "base64").toString("utf-8");
     expect(decoded).toContain("BEGIN:VCALENDAR");
     expect(decoded).toContain("END:VCALENDAR");
-    expect(decoded).toContain("Birthday Celebration");
+    expect(decoded).toContain("Triple Threat");
     expect(decoded).toContain("123 Party Lane");
     expect(decoded).toContain("METHOD:REQUEST");
   });
