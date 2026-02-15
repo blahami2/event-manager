@@ -1,7 +1,7 @@
 "use client";
 
-import { useLocale } from "next-intl";
-import { locales } from "@/i18n/config";
+import { useState, useEffect } from "react";
+import { locales, defaultLocale } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
 import { LOCALE_COOKIE } from "@/i18n/get-locale";
 
@@ -11,8 +11,25 @@ const localeLabels: Record<Locale, string> = {
   sk: "SK",
 };
 
+/**
+ * Read current locale from the NEXT_LOCALE cookie on the client.
+ * Falls back to defaultLocale if not set.
+ */
+function getLocaleFromCookie(): Locale {
+  if (typeof document === "undefined") return defaultLocale;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${LOCALE_COOKIE}=([^;]*)`));
+  const value = match?.[1];
+  return value && (locales as readonly string[]).includes(value)
+    ? (value as Locale)
+    : defaultLocale;
+}
+
 export function LanguageSwitcher(): React.ReactElement {
-  const currentLocale = useLocale();
+  const [currentLocale, setCurrentLocale] = useState<Locale>(defaultLocale);
+
+  useEffect(() => {
+    setCurrentLocale(getLocaleFromCookie());
+  }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>): void {
     const newLocale = e.target.value;
