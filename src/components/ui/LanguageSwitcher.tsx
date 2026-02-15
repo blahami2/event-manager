@@ -23,17 +23,19 @@ function getCookie(name: string): string | undefined {
   return match?.[1];
 }
 
+function getInitialLocale(): Locale {
+  if (typeof document === "undefined") return "en";
+  const cookieVal = getCookie(LOCALE_COOKIE);
+  if (cookieVal === "cs" || cookieVal === "sk" || cookieVal === "en") {
+    return cookieVal;
+  }
+  return "en";
+}
+
 export function LanguageSwitcher(): React.ReactElement {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentLocale, setCurrentLocale] = useState<Locale>("en");
+  const [currentLocale] = useState<Locale>(getInitialLocale);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const cookieVal = getCookie(LOCALE_COOKIE);
-    if (cookieVal === "cs" || cookieVal === "sk" || cookieVal === "en") {
-      setCurrentLocale(cookieVal);
-    }
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent): void {
