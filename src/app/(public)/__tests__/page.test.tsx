@@ -35,8 +35,9 @@ describe("HomePage", () => {
 
   it("has a Register CTA linking to /register", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
-    const link = screen.getByRole("link", { name: "Register" });
-    expect(link.getAttribute("href")).toBe("/register");
+    const links = screen.getAllByRole("link", { name: "Register" });
+    expect(links.length).toBeGreaterThanOrEqual(1);
+    expect(links.every((l) => l.getAttribute("href") === "/register")).toBe(true);
   });
 
   it("has an Already registered link to /resend-link", () => {

@@ -35,7 +35,7 @@ export function LanguageSwitcher(): React.ReactElement {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const current = LANGUAGES.find((l) => l.locale === currentLocale) ?? LANGUAGES[0];
+  const current = LANGUAGES.find((l) => l.locale === currentLocale) as LanguageOption;
 
   const handleSelect = useCallback((locale: Locale) => {
     document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=31536000`;

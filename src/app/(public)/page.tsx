@@ -14,11 +14,7 @@ export default function HomePage(): React.ReactElement {
     <main>
       {/* Hero Section */}
       <section
-        className="flex min-h-screen items-center justify-center border-b-4 border-accent bg-cover bg-center text-center"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('/images/hero.jpg')",
-        }}
+        className="flex min-h-screen items-center justify-center border-b-4 border-accent bg-cover bg-center text-center bg-[linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.8)),url('/images/hero.jpg')]"
       >
         <div className="mx-auto w-[90%] max-w-5xl px-4">
           <h1 className="mb-5 font-heading text-[clamp(4rem,10vw,8rem)] uppercase leading-[0.9] tracking-wider text-white [text-shadow:3px_3px_0px_#000]">
