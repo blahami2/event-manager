@@ -27,6 +27,10 @@ dist/
 credentials.json
 service-account*.json
 
+# Supabase local dev
+supabase/.temp/
+supabase/.branches/
+
 # Vercel
 .vercel/
 
