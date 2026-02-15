@@ -61,13 +61,13 @@
     "location": "Location",
     "venue": "Venue",
     "info": "Info",
-    "description": "Secure your spot. Capacity is limited!",
+    "reservationSubtitle": "Secure your spot. Capacity is limited!",
     "rsvpHeading": "Register",
     "rsvpDescription": "Secure your spot. Capacity is limited!"
   },
   "registration": {
     "title": "Register",
-    "description": "Secure your spot. Capacity is limited!",
+    "reservationSubtitle": "Secure your spot. Capacity is limited!",
     "submitting": "Submitting…",
     "register": "Register",
     "success": "Registration successful! Check your email for your manage link.",
@@ -104,7 +104,7 @@
   },
   "resend": {
     "title": "Resend Manage Link",
-    "description": "Enter the email you registered with and we'll send you a new manage link.",
+    "reservationSubtitle": "Enter the email you registered with and we'll send you a new manage link.",
     "sending": "Sending…",
     "sendButton": "Send Manage Link",
     "success": "If this email is registered, a manage link has been sent.",

@@ -61,13 +61,13 @@
     "location": "Lokácia",
     "venue": "Aréna",
     "info": "Backstage",
-    "description": "Zabezpeč si svoje miesto. Kapacita obmedzená!",
+    "reservationSubtitle": "Zabezpeč si svoje miesto. Kapacita obmedzená!",
     "rsvpHeading": "Rezervácia vstupu",
     "rsvpDescription": "Zabezpeč si svoje miesto. Kapacita obmedzená!"
   },
   "registration": {
     "title": "Registrácia",
-    "description": "Zabezpeč si svoje miesto. Kapacita obmedzená!",
+    "reservationSubtitle": "Zabezpeč si svoje miesto. Kapacita obmedzená!",
     "submitting": "Odosielanie…",
     "register": "Registrovať",
     "success": "Registrácia prebehla úspešne! Na váš e-mail sme odoslali odkaz na správu.",
@@ -104,7 +104,7 @@
   },
   "resend": {
     "title": "Znovu odoslať odkaz na správu",
-    "description": "Zadajte e-mail, s ktorým ste sa registrovali, a my vám pošleme nový odkaz na správu.",
+    "reservationSubtitle": "Zadajte e-mail, s ktorým ste sa registrovali, a my vám pošleme nový odkaz na správu.",
     "sending": "Odosielanie…",
     "sendButton": "Odoslať odkaz na správu",
     "success": "Ak je tento e-mail zaregistrovaný, odkaz na správu bol odoslaný.",

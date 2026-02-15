@@ -6,7 +6,7 @@
  *
  * Update these values to customise the event.
  */
-
+// TODO verify usage - should be localized everywhere
 /** Display name of the event. */
 export const EVENT_NAME = "Triple Threat";
 
