@@ -1,9 +1,3 @@
-import {
-  EVENT_NAME,
-  EVENT_DATE,
-  EVENT_LOCATION,
-  EVENT_DESCRIPTION,
-} from "@/config/event";
 import { Button } from "@/components/ui/Button";
 import { RegistrationForm } from "@/components/forms/RegistrationForm";
 import { useTranslations } from "next-intl";
@@ -53,7 +47,7 @@ export default function HomePage(): React.ReactElement {
               color: "#fff",
             }}
           >
-            {EVENT_NAME} <span style={{ color: "var(--color-accent)" }}>2026</span>
+            {t("eventName")} <span style={{ color: "var(--color-accent)" }}>2026</span>
           </h1>
           {/* #hero p.subtitle { font-size:1.5rem; font-weight:700; margin-bottom:40px; letter-spacing:4px; color:accent } */}
           <p
@@ -67,7 +61,7 @@ export default function HomePage(): React.ReactElement {
               textTransform: "uppercase",
             }}
           >
-            {EVENT_DESCRIPTION}
+            {t("eventDescription")}
           </p>
           {/* .btn-rock { display:inline-block; bg:accent; color:white; padding:15px 40px; font-family:heading; font-size:1.5rem; text-transform:uppercase; border:3px solid accent; } */}
           <a
@@ -250,7 +244,7 @@ export default function HomePage(): React.ReactElement {
                   letterSpacing: "2px",
                 }}
               >
-                {t("date")}
+                {t("lineupHeader")}
               </h3>
               {/* .detail-item { margin-bottom:25px } */}
               <div style={{ marginBottom: "25px" }}>
@@ -265,13 +259,55 @@ export default function HomePage(): React.ReactElement {
                     color: "var(--color-text-gray)",
                   }}
                 >
-                  {t("date")}
+                  12:00
                 </span>
                 {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
-                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", fontWeight: 700 }}>
-                  {EVENT_DATE}
+                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsLineup1")}
                 </span>
               </div>
+
+                {/* .detail-item { margin-bottom:25px } */}
+                <div style={{ marginBottom: "25px" }}>
+                    {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
+                    <span
+                        style={{
+                            fontFamily: BODY_FONT,
+                            fontWeight: 900,
+                            display: "block",
+                            textTransform: "uppercase",
+                            marginBottom: "5px",
+                            color: "var(--color-text-gray)",
+                        }}
+                    >
+                  14:00
+                </span>
+                    {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
+                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsLineup2")}
+                </span>
+
+                </div>
+                {/* .detail-item { margin-bottom:25px } */}
+                <div style={{ marginBottom: "25px" }}>
+                    {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
+                    <span
+                        style={{
+                            fontFamily: BODY_FONT,
+                            fontWeight: 900,
+                            display: "block",
+                            textTransform: "uppercase",
+                            marginBottom: "5px",
+                            color: "var(--color-text-gray)",
+                        }}
+                    >
+                  18:00
+                </span>
+                    {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
+                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsLineup3")}
+                </span>
+                </div>
             </div>
 
             <div
@@ -288,7 +324,7 @@ export default function HomePage(): React.ReactElement {
                   letterSpacing: "2px",
                 }}
               >
-                {t("location")}
+                {t("locationHeader")}
               </h3>
               <div style={{ marginBottom: "25px" }}>
                 <span
@@ -301,12 +337,46 @@ export default function HomePage(): React.ReactElement {
                     color: "var(--color-text-gray)",
                   }}
                 >
-                  {t("venue")}
+                  {t("dateHeader")}
                 </span>
-                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", fontWeight: 700 }}>
-                  {EVENT_LOCATION}
+                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsLocationDate")}
                 </span>
               </div>
+                <div style={{ marginBottom: "25px" }}>
+                <span
+                    style={{
+                        fontFamily: BODY_FONT,
+                        fontWeight: 900,
+                        display: "block",
+                        textTransform: "uppercase",
+                        marginBottom: "5px",
+                        color: "var(--color-text-gray)",
+                    }}
+                >
+                  {t("venueHeader")}
+                </span>
+                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsLocationStage")}
+                </span>
+                </div>
+                <div style={{ marginBottom: "25px" }}>
+                <span
+                    style={{
+                        fontFamily: BODY_FONT,
+                        fontWeight: 900,
+                        display: "block",
+                        textTransform: "uppercase",
+                        marginBottom: "5px",
+                        color: "var(--color-text-gray)",
+                    }}
+                >
+                  {t("addressHeader")}
+                </span>
+                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsLocationAddress")}
+                </span>
+                </div>
             </div>
 
             {/* last detail-box: no border-right */}
@@ -324,7 +394,7 @@ export default function HomePage(): React.ReactElement {
                   letterSpacing: "2px",
                 }}
               >
-                {t("info")}
+                {t("infoHeader")}
               </h3>
               <div style={{ marginBottom: "25px" }}>
                 <span
@@ -337,12 +407,29 @@ export default function HomePage(): React.ReactElement {
                     color: "var(--color-text-gray)",
                   }}
                 >
-                  {t("description")}
+                  {t("dressCodeHeader")}
                 </span>
-                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", fontWeight: 700 }}>
-                  {EVENT_DESCRIPTION}
+                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsInfoDressCode")}
                 </span>
               </div>
+                <div style={{ marginBottom: "25px" }}>
+                <span
+                    style={{
+                        fontFamily: BODY_FONT,
+                        fontWeight: 900,
+                        display: "block",
+                        textTransform: "uppercase",
+                        marginBottom: "5px",
+                        color: "var(--color-text-gray)",
+                    }}
+                >
+                  {t("cateringHeader")}
+                </span>
+                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsInfoCatering")}
+                </span>
+                </div>
             </div>
           </div>
         </div>

@@ -9,27 +9,26 @@ import HomePage from "../page";
 describe("HomePage", () => {
   it("displays event name", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
-    expect(screen.getByText("Triple Threat")).toBeDefined();
+    expect(screen.getByText("Triple threat")).toBeDefined();
   });
 
   it("displays event date", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
-    expect(screen.getByText("Saturday, March 28, 2026")).toBeDefined();
+    expect(screen.getByText("Saturday, June 6, 2026")).toBeDefined();
   });
 
   it("displays event location", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
     expect(
-      screen.getByText("123 Party Lane, Prague, Czech Republic"),
+      screen.getByText("Piesok, 900 01 Modra, Slovakia"),
     ).toBeDefined();
   });
 
   it("displays event description", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
-    const matches = screen.getAllByText(
-      "Join us for an unforgettable birthday celebration! Great food, music, and company await.",
-    );
-    expect(matches.length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByText("3 headliners / one event / a unique experience"),
+    ).toBeDefined();
   });
 
   it("has a Register CTA linking to #rsvp", () => {
