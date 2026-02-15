@@ -43,10 +43,10 @@ vi.mock('next-intl/server', () => ({
       },
     };
 
-    const localeMessages = messages[locale as keyof typeof messages]?.[namespace] ?? messages.en[namespace];
+    const localeMessages = messages[locale as keyof typeof messages]?.[namespace] ?? messages.en[namespace]!;
     
     return (key: string, params?: Record<string, string>) => {
-      let text = localeMessages[key] ?? key;
+      let text = localeMessages![key] ?? key;
       if (params) {
         Object.entries(params).forEach(([param, value]) => {
           text = text.replace(`{${param}}`, value);
