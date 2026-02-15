@@ -15,7 +15,7 @@ beforeEach(() => {
 });
 
 async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void> {
-  await user.type(screen.getByLabelText("Your Name"), "Alice");
+  await user.type(screen.getByLabelText("Participant"), "Alice");
   await user.type(screen.getByLabelText("Email"), "alice@example.com");
   await user.selectOptions(screen.getByLabelText("Stay"), "FRI_SUN");
   // adultsCount defaults to 1, childrenCount defaults to 0
@@ -24,19 +24,19 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void>
 describe("RegistrationForm", () => {
   it("renders all form fields", () => {
     render(<RegistrationForm />, { wrapper: IntlWrapper });
-    expect(screen.getByLabelText("Your Name")).toBeDefined();
+    expect(screen.getByLabelText("Participant")).toBeDefined();
     expect(screen.getByLabelText("Email")).toBeDefined();
     expect(screen.getByLabelText("Stay")).toBeDefined();
     expect(screen.getByLabelText("Number of Adults")).toBeDefined();
     expect(screen.getByLabelText("Number of Children")).toBeDefined();
-    expect(screen.getByLabelText("Rider Request (Notes)")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Register" })).toBeDefined();
+    expect(screen.getByLabelText("Notes (anything else)")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Submit Reservation" })).toBeDefined();
   });
 
   it("shows client-side validation errors for empty fields", async () => {
     const user = userEvent.setup();
     render(<RegistrationForm />, { wrapper: IntlWrapper });
-    await user.click(screen.getByRole("button", { name: "Register" }));
+    await user.click(screen.getByRole("button", { name: "Submit Reservation" }));
 
     expect(screen.getByText("Name is required")).toBeDefined();
     expect(screen.getByText("Invalid email format")).toBeDefined();
@@ -57,7 +57,7 @@ describe("RegistrationForm", () => {
 
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
-    await user.click(screen.getByRole("button", { name: "Register" }));
+    await user.click(screen.getByRole("button", { name: "Submit Reservation" }));
 
     await waitFor(() => {
       expect(
@@ -91,7 +91,7 @@ describe("RegistrationForm", () => {
 
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
-    await user.click(screen.getByRole("button", { name: "Register" }));
+    await user.click(screen.getByRole("button", { name: "Submit Reservation" }));
 
     expect(screen.getByRole("button", { name: "Submitting…" })).toBeDefined();
     expect(
@@ -114,7 +114,7 @@ describe("RegistrationForm", () => {
 
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
-    await user.click(screen.getByRole("button", { name: "Register" }));
+    await user.click(screen.getByRole("button", { name: "Submit Reservation" }));
 
     await waitFor(() => {
       expect(
@@ -139,7 +139,7 @@ describe("RegistrationForm", () => {
 
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
-    await user.click(screen.getByRole("button", { name: "Register" }));
+    await user.click(screen.getByRole("button", { name: "Submit Reservation" }));
 
     await waitFor(() => {
       expect(screen.getByText("Email already registered")).toBeDefined();
@@ -158,7 +158,7 @@ describe("RegistrationForm", () => {
 
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
-    await user.click(screen.getByRole("button", { name: "Register" }));
+    await user.click(screen.getByRole("button", { name: "Submit Reservation" }));
 
     await waitFor(() => {
       expect(
@@ -175,7 +175,7 @@ describe("RegistrationForm", () => {
 
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     await fillForm(user);
-    await user.click(screen.getByRole("button", { name: "Register" }));
+    await user.click(screen.getByRole("button", { name: "Submit Reservation" }));
 
     await waitFor(() => {
       expect(

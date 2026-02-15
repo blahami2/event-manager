@@ -46,7 +46,7 @@ describe("ManageForm", () => {
       renderForm();
 
       expect(
-        (screen.getByLabelText("Your Name") as HTMLInputElement).value,
+        (screen.getByLabelText("Participant") as HTMLInputElement).value,
       ).toBe("Alice Smith");
       expect(
         (screen.getByLabelText("Email") as HTMLInputElement).value,
@@ -61,7 +61,7 @@ describe("ManageForm", () => {
         (screen.getByLabelText("Number of Children") as HTMLSelectElement).value,
       ).toBe("1");
       expect(
-        (screen.getByLabelText("Rider Request (Notes)") as HTMLTextAreaElement).value,
+        (screen.getByLabelText("Notes (anything else)") as HTMLTextAreaElement).value,
       ).toBe("Vegetarian");
       expect(screen.getByRole("button", { name: "Save Changes" })).toBeDefined();
       expect(
@@ -89,7 +89,7 @@ describe("ManageForm", () => {
 
       renderForm();
 
-      const nameInput = screen.getByLabelText("Your Name");
+      const nameInput = screen.getByLabelText("Participant");
       await user.clear(nameInput);
       await user.type(nameInput, "Bob Jones");
       await user.click(screen.getByRole("button", { name: "Save Changes" }));
@@ -152,7 +152,7 @@ describe("ManageForm", () => {
       const user = userEvent.setup();
       renderForm();
 
-      const nameInput = screen.getByLabelText("Your Name");
+      const nameInput = screen.getByLabelText("Participant");
       await user.clear(nameInput);
       await user.click(screen.getByRole("button", { name: "Save Changes" }));
 
