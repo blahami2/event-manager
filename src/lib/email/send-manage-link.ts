@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 import { logger, maskEmail } from "@/lib/logger";
 import { generateIcsEvent } from "@/lib/email/ics-generator";
+import { renderManageLinkEmail } from "@/lib/email/templates/manage-link-template";
+import { getTranslations } from "next-intl/server";
+import { defaultLocale } from "@/i18n/config";
+import type { Locale } from "@/i18n/config";
 import {
   EVENT_NAME,
   EVENT_LOCATION,
@@ -22,6 +26,8 @@ interface SendManageLinkParams {
   readonly eventName: string;
   /** Date of the event (display string). */
   readonly eventDate: string;
+  /** Locale for email content (optional, defaults to English). */
+  readonly locale?: Locale;
 }
 
 interface SendManageLinkResult {
@@ -44,7 +50,7 @@ export async function sendManageLink(
   }
 
   const resend = new Resend(apiKey);
-  const { to, manageUrl, guestName, registrationId, emailType, eventName, eventDate } = params;
+  const { to, manageUrl, guestName, registrationId, emailType, eventName, eventDate, locale = defaultLocale } = params;
 
   const logContext = {
     registrationId,
@@ -63,11 +69,21 @@ export async function sendManageLink(
     organizerEmail: "noreply@resend.dev",
   });
 
+  const t = await getTranslations({ locale, namespace: 'email' });
+  const subject = t('subject');
+  const html = await renderManageLinkEmail({
+    guestName,
+    eventName,
+    eventDate,
+    manageUrl,
+    locale,
+  });
+
   const { error } = await resend.emails.send({
     from: "Birthday Celebration <noreply@resend.dev>",
     to,
-    subject: "Your Registration Manage Link",
-    html: `<p>Hi ${guestName},</p><p>You are registered for <strong>${eventName}</strong> on <strong>${eventDate}</strong>.</p><p>Use the link below to manage your registration:</p><p><a href="${manageUrl}">${manageUrl}</a></p><p>A calendar invite is attached to this email.</p>`,
+    subject,
+    html,
     attachments: [
       {
         filename: "event.ics",

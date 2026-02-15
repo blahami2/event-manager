@@ -24,6 +24,38 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
+vi.mock('next-intl/server', () => ({
+  getTranslations: async ({ locale, namespace }: { locale: string; namespace: string }) => {
+    const messages: Record<string, Record<string, Record<string, string>>> = {
+      en: {
+        email: {
+          subject: 'Your Registration Manage Link',
+          greeting: 'Hi {name},',
+          thankYou: 'Thank you for registering for <strong>{eventName}</strong> on <strong>{eventDate}</strong>.',
+          instructions: 'Use the button below to manage your registration details at any time:',
+          manageButton: 'Manage Registration',
+          fallbackText: "If the button above doesn't work, copy and paste this link into your browser:",
+          calendarNote: 'A calendar invite is attached to this email.',
+          footerDisclaimer: 'This is an automated message. Please do not reply directly.',
+          title: 'Manage Your Registration',
+        },
+      },
+    };
+
+    const localeMessages = messages[locale as keyof typeof messages]?.[namespace] ?? messages.en[namespace];
+    
+    return (key: string, params?: Record<string, string>) => {
+      let text = localeMessages[key] ?? key;
+      if (params) {
+        Object.entries(params).forEach(([param, value]) => {
+          text = text.replace(`{${param}}`, value);
+        });
+      }
+      return text;
+    };
+  },
+}));
+
 import { sendManageLink } from "@/lib/email/send-manage-link";
 
 describe("ICS calendar attachment in registration email", () => {

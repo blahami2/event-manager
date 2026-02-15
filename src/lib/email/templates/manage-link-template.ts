@@ -3,11 +3,16 @@
  * Uses inline styles only for email client compatibility.
  */
 
+import { getTranslations } from 'next-intl/server';
+import { defaultLocale } from '@/i18n/config';
+import type { Locale } from '@/i18n/config';
+
 interface ManageLinkEmailParams {
   readonly guestName: string;
   readonly eventName: string;
   readonly eventDate: string;
   readonly manageUrl: string;
+  readonly locale?: Locale;
 }
 
 /** Escapes HTML special characters to prevent XSS in email output. */
@@ -23,21 +28,32 @@ function escapeHtml(text: string): string {
 /**
  * Renders a responsive HTML email for the manage-link flow.
  *
- * @param params - Guest name, event name, event date, and manage URL.
+ * @param params - Guest name, event name, event date, manage URL, and optional locale.
  * @returns A complete HTML string ready to be sent as an email body.
  */
-export function renderManageLinkEmail(params: ManageLinkEmailParams): string {
+export async function renderManageLinkEmail(params: ManageLinkEmailParams): Promise<string> {
   const guestName = escapeHtml(params.guestName);
   const eventName = escapeHtml(params.eventName);
   const eventDate = escapeHtml(params.eventDate);
-  const { manageUrl } = params;
+  const { manageUrl, locale = defaultLocale } = params;
+
+  const t = await getTranslations({ locale, namespace: 'email' });
+
+  const greeting = t('greeting', { name: guestName });
+  const thankYou = t('thankYou', { eventName, eventDate });
+  const instructions = t('instructions');
+  const manageButton = t('manageButton');
+  const fallbackText = t('fallbackText');
+  const calendarNote = t('calendarNote');
+  const footerDisclaimer = t('footerDisclaimer');
+  const title = t('title');
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${locale}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manage Your Registration</title>
+  <title>${title}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f7;">
@@ -51,24 +67,24 @@ export function renderManageLinkEmail(params: ManageLinkEmailParams): string {
           </tr>
           <tr>
             <td style="padding: 32px 24px;">
-              <p style="margin: 0 0 16px; color: #333333; font-size: 16px; line-height: 1.5;">Hi ${guestName},</p>
-              <p style="margin: 0 0 16px; color: #333333; font-size: 16px; line-height: 1.5;">Thank you for registering for <strong>${eventName}</strong> on <strong>${eventDate}</strong>.</p>
-              <p style="margin: 0 0 24px; color: #333333; font-size: 16px; line-height: 1.5;">Use the button below to manage your registration details at any time:</p>
+              <p style="margin: 0 0 16px; color: #333333; font-size: 16px; line-height: 1.5;">${greeting}</p>
+              <p style="margin: 0 0 16px; color: #333333; font-size: 16px; line-height: 1.5;">${thankYou}</p>
+              <p style="margin: 0 0 24px; color: #333333; font-size: 16px; line-height: 1.5;">${instructions}</p>
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                 <tr>
                   <td style="border-radius: 6px; background-color: #4f46e5;">
-                    <a href="${manageUrl}" target="_blank" style="display: inline-block; padding: 14px 32px; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 6px;">Manage Registration</a>
+                    <a href="${manageUrl}" target="_blank" style="display: inline-block; padding: 14px 32px; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 6px;">${manageButton}</a>
                   </td>
                 </tr>
               </table>
-              <p style="margin: 24px 0 0; color: #666666; font-size: 14px; line-height: 1.5;">If the button above doesn't work, copy and paste this link into your browser:</p>
+              <p style="margin: 24px 0 0; color: #666666; font-size: 14px; line-height: 1.5;">${fallbackText}</p>
               <p style="margin: 8px 0 0; word-break: break-all;"><a href="${manageUrl}" style="color: #4f46e5; font-size: 14px;">${manageUrl}</a></p>
-              <p style="margin: 24px 0 0; color: #333333; font-size: 14px; line-height: 1.5;">A calendar invite is attached to this email.</p>
+              <p style="margin: 24px 0 0; color: #333333; font-size: 14px; line-height: 1.5;">${calendarNote}</p>
             </td>
           </tr>
           <tr>
             <td style="padding: 24px; text-align: center; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-              <p style="margin: 0; color: #9ca3af; font-size: 12px;">This is an automated message. Please do not reply directly.</p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">${footerDisclaimer}</p>
             </td>
           </tr>
         </table>

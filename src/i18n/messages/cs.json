@@ -72,5 +72,16 @@
     "sendButton": "Odeslat odkaz pro správu",
     "success": "Pokud je tento e-mail zaregistrován, odkaz pro správu byl odeslán.",
     "backToEvent": "Zpět na akci"
+  },
+  "email": {
+    "subject": "Váš odkaz pro správu registrace",
+    "greeting": "Ahoj {name},",
+    "thankYou": "Děkujeme za registraci na <strong>{eventName}</strong> dne <strong>{eventDate}</strong>.",
+    "instructions": "Pomocí tlačítka níže můžete kdykoli spravovat své registrační údaje:",
+    "manageButton": "Spravovat registraci",
+    "fallbackText": "Pokud výše uvedené tlačítko nefunguje, zkopírujte a vložte tento odkaz do prohlížeče:",
+    "calendarNote": "K tomuto e-mailu je připojena pozvánka do kalendáře.",
+    "footerDisclaimer": "Toto je automatická zpráva. Neodpovídejte prosím přímo.",
+    "title": "Spravovat registraci"
   }
 }

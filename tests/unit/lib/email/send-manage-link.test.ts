@@ -28,6 +28,46 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
+vi.mock('next-intl/server', () => ({
+  getTranslations: async ({ locale, namespace }: { locale: string; namespace: string }) => {
+    const messages: Record<string, Record<string, Record<string, string>>> = {
+      en: {
+        email: {
+          subject: 'Your Registration Manage Link',
+          greeting: 'Hi {name},',
+          thankYou: 'Thank you for registering for <strong>{eventName}</strong> on <strong>{eventDate}</strong>.',
+        },
+      },
+      cs: {
+        email: {
+          subject: 'Váš odkaz pro správu registrace',
+          greeting: 'Ahoj {name},',
+          thankYou: 'Děkujeme za registraci na <strong>{eventName}</strong> dne <strong>{eventDate}</strong>.',
+        },
+      },
+      sk: {
+        email: {
+          subject: 'Váš odkaz na správu registrácie',
+          greeting: 'Ahoj {name},',
+          thankYou: 'Ďakujeme za registráciu na <strong>{eventName}</strong> dňa <strong>{eventDate}</strong>.',
+        },
+      },
+    };
+
+    const localeMessages = messages[locale as keyof typeof messages]?.[namespace] ?? messages.en[namespace];
+    
+    return (key: string, params?: Record<string, string>) => {
+      let text = localeMessages[key] ?? key;
+      if (params) {
+        Object.entries(params).forEach(([param, value]) => {
+          text = text.replace(`{${param}}`, value);
+        });
+      }
+      return text;
+    };
+  },
+}));
+
 import { sendManageLink } from "@/lib/email/send-manage-link";
 
 describe("sendManageLink", () => {
@@ -150,5 +190,52 @@ describe("sendManageLink", () => {
     const allCalls = [...mockLoggerInfo.mock.calls, ...mockLoggerError.mock.calls];
     const serialized = JSON.stringify(allCalls);
     expect(serialized).not.toContain("alice@example.com");
+  });
+
+  test("should send email in Czech when locale is 'cs'", async () => {
+    // given
+    // - locale parameter set to Czech
+    mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+    const params = { ...baseParams, locale: "cs" as const };
+
+    // when
+    await sendManageLink(params);
+
+    // then
+    const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
+    const html = callArgs["html"] as string;
+    expect(html).toContain("Ahoj Alice Johnson");
+    expect(html).toContain("Děkujeme za registraci");
+  });
+
+  test("should send email in Slovak when locale is 'sk'", async () => {
+    // given
+    // - locale parameter set to Slovak
+    mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+    const params = { ...baseParams, locale: "sk" as const };
+
+    // when
+    await sendManageLink(params);
+
+    // then
+    const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
+    const html = callArgs["html"] as string;
+    expect(html).toContain("Ahoj Alice Johnson");
+    expect(html).toContain("Ďakujeme za registráciu");
+  });
+
+  test("should default to English when locale is not provided", async () => {
+    // given
+    // - no locale parameter
+    mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+
+    // when
+    await sendManageLink(baseParams);
+
+    // then
+    const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
+    const html = callArgs["html"] as string;
+    expect(html).toContain("Hi Alice Johnson");
+    expect(html).toContain("Thank you for registering");
   });
 });

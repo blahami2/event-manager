@@ -72,5 +72,16 @@
     "sendButton": "Send Manage Link",
     "success": "If this email is registered, a manage link has been sent.",
     "backToEvent": "Back to Event"
+  },
+  "email": {
+    "subject": "Your Registration Manage Link",
+    "greeting": "Hi {name},",
+    "thankYou": "Thank you for registering for <strong>{eventName}</strong> on <strong>{eventDate}</strong>.",
+    "instructions": "Use the button below to manage your registration details at any time:",
+    "manageButton": "Manage Registration",
+    "fallbackText": "If the button above doesn't work, copy and paste this link into your browser:",
+    "calendarNote": "A calendar invite is attached to this email.",
+    "footerDisclaimer": "This is an automated message. Please do not reply directly.",
+    "title": "Manage Your Registration"
   }
 }
