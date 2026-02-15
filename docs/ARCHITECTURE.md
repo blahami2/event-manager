@@ -67,8 +67,14 @@
 │   │   └── globals.css
 │   ├── components/                   # Shared UI components
 │   │   ├── ui/                       # Primitive UI components (Button, Input, etc.)
+│   │   ├── layout/                   # Reusable layout wrappers (Phase 12)
 │   │   ├── forms/                    # Form components
 │   │   └── admin/                    # Admin-specific components
+│   ├── hooks/                        # Client-side React hooks (Phase 12)
+│   │   ├── useRegister.ts            # Registration form data fetching
+│   │   ├── useManageRegistration.ts  # Manage form data fetching
+│   │   ├── useResendLink.ts          # Resend link data fetching
+│   │   └── useAdminRegistrations.ts  # Admin list data fetching
 │   ├── i18n/                          # Internationalization (Phase 11)
 │   │   ├── config.ts                  # Supported locales, default locale
 │   │   ├── get-locale.ts             # Locale detection logic

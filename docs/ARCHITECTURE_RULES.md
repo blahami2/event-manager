@@ -30,6 +30,8 @@ Before starting ANY ticket, the agent MUST:
 | L5 | Repositories (`src/repositories/`) MUST NOT import from `src/lib/usecases/` |
 | L6 | Only repositories may import `@prisma/client` |
 | L7 | All cross-layer data passes through typed interfaces in `src/types/` |
+| L8 | Client-side hooks (`src/hooks/`) communicate with the server ONLY via API routes (`fetch`); they MUST NOT import from `src/lib/usecases/`, `src/repositories/`, or server-only modules |
+| L9 | Client-side hooks (`src/hooks/`) MUST NOT import from `src/components/` (hooks provide state/callbacks; components consume them) |
 
 ---
 
