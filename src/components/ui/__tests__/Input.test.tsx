@@ -16,8 +16,9 @@ describe("Input", () => {
     expect(screen.getByLabelText("test").getAttribute("aria-invalid")).toBe("true");
   });
 
-  it("applies error border class", () => {
+  it("applies error border style", () => {
     render(<Input aria-label="test" error="Bad" />);
-    expect(screen.getByLabelText("test").className).toContain("border-accent");
+    const input = screen.getByLabelText("test") as HTMLElement;
+    expect(input.style.border).toContain("var(--color-accent)");
   });
 });

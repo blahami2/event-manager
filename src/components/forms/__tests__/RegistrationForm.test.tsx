@@ -15,7 +15,7 @@ beforeEach(() => {
 });
 
 async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void> {
-  await user.type(screen.getByLabelText("Name"), "Alice");
+  await user.type(screen.getByLabelText("Your Name"), "Alice");
   await user.type(screen.getByLabelText("Email"), "alice@example.com");
   await user.selectOptions(screen.getByLabelText("Stay"), "FRI_SUN");
   // adultsCount defaults to 1, childrenCount defaults to 0
@@ -24,12 +24,12 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void>
 describe("RegistrationForm", () => {
   it("renders all form fields", () => {
     render(<RegistrationForm />, { wrapper: IntlWrapper });
-    expect(screen.getByLabelText("Name")).toBeDefined();
+    expect(screen.getByLabelText("Your Name")).toBeDefined();
     expect(screen.getByLabelText("Email")).toBeDefined();
     expect(screen.getByLabelText("Stay")).toBeDefined();
     expect(screen.getByLabelText("Number of Adults")).toBeDefined();
     expect(screen.getByLabelText("Number of Children")).toBeDefined();
-    expect(screen.getByLabelText("Notes (optional)")).toBeDefined();
+    expect(screen.getByLabelText("Rider Request (Notes)")).toBeDefined();
     expect(screen.getByRole("button", { name: "Register" })).toBeDefined();
   });
 
