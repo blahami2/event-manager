@@ -43,7 +43,7 @@ vi.mock('next-intl/server', () => ({
       },
     };
 
-    const localeMessages = messages[locale as keyof typeof messages]?.[namespace] ?? messages.en[namespace]!;
+    const localeMessages = messages[locale as keyof typeof messages]?.[namespace] ?? messages.en![namespace]!;
     
     return (key: string, params?: Record<string, string>) => {
       let text = localeMessages![key] ?? key;
