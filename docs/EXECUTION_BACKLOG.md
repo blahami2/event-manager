@@ -79,6 +79,13 @@ PHASE 11: Enhancements
   T-049 → T-052 (language switcher component)
   T-049 + T-028..T-031 → T-053 (translate admin UI)
   T-003 + T-040 + T-014 + T-022 → T-054 (registration field migration)
+
+PHASE 12: UI Architecture & Maintainability
+  T-022 + T-023 + T-024 + T-030 → T-056 (client-side data fetching hooks)
+  T-055 → T-057 (complete UI primitive library)
+  T-057 + T-028..T-030 → T-058 (unify admin with shared UI primitives)
+  T-055 → T-059 (extract reusable layout components)
+  T-056 + T-022 + T-023 → T-060 (deduplicate form logic)
 ```
 
 **Visual dependency tree:**
@@ -1453,8 +1460,14 @@ T-001 (Init Next.js)
 | T-052 | Language Switcher Component        | 11    | T-049                         |
 | T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031           |
 | T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022    |
+| T-055 | Visual Redesign – v1 Design System | 11    | T-021..T-024, T-036           |
+| T-056 | Client-Side Data Fetching Hooks    | 12    | T-022, T-023, T-024, T-030    |
+| T-057 | Complete UI Primitive Library       | 12    | T-055                         |
+| T-058 | Unify Admin with Shared UI Primitives | 12 | T-057, T-028, T-029, T-030    |
+| T-059 | Extract Reusable Layout Components | 12    | T-055                         |
+| T-060 | Deduplicate Form Logic             | 12    | T-056, T-022, T-023           |
 
-**Total tickets: 53** (37 original + 8 Phase 1-10 additions + 8 Phase 11)
+**Total tickets: 59** (37 original + 8 Phase 1-10 additions + 9 Phase 11 + 5 Phase 12)
 
 ---
 
@@ -1869,6 +1882,14 @@ T-049 (i18n infrastructure)
 T-054 (Registration field migration) ←[T-003, T-040, T-014, T-022]
 
 T-055 (Visual redesign) ←[T-021..T-024, T-036]
+
+T-056 (Client-side data fetching hooks) ←[T-022, T-023, T-024, T-030]
+  └─ T-060 (Deduplicate form logic) ←[+T-022, +T-023]
+
+T-055 → T-057 (Complete UI primitive library)
+  └─ T-058 (Unify admin with shared UI) ←[+T-028..T-030]
+
+T-055 → T-059 (Extract reusable layout components)
 ```
 
 ---
@@ -1887,7 +1908,258 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 | T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022    |
 | T-055 | Visual Redesign – v1 Design System | 11    | T-021..T-024, T-036           |
 
-**Total tickets: 54** (37 original + 8 Phase 1-10 additions + 9 Phase 11)
+**Total tickets: 59** (37 original + 8 Phase 1-10 additions + 9 Phase 11 + 5 Phase 12)
+
+---
+
+# Phase 12: UI Architecture & Maintainability
+
+> **Context:** Analysis of the codebase revealed that while server-side layering (use cases, repositories, infrastructure) is exemplary, the client-side UI layer has weak separation between presentation and data-fetching logic. Form components mix API calls, state management, and rendering. The UI primitive library is incomplete, and the admin section does not reuse shared UI components. These tickets address those gaps to improve design swappability and long-term maintainability.
+
+## T-056: Extract Client-Side Data Fetching Hooks
+
+**Input:** T-022 (registration form), T-023 (manage page), T-024 (resend link page), T-030 (admin registration list)
+**Output:**
+- Custom React hooks that encapsulate API communication, request state, and error handling
+- Form components become purely presentational (receive state and callbacks from hooks)
+
+**Files created:**
+- `src/hooks/useRegister.ts`
+- `src/hooks/useManageRegistration.ts`
+- `src/hooks/useResendLink.ts`
+- `src/hooks/useAdminRegistrations.ts`
+- `tests/unit/hooks/useRegister.test.ts`
+- `tests/unit/hooks/useManageRegistration.test.ts`
+- `tests/unit/hooks/useResendLink.test.ts`
+- `tests/unit/hooks/useAdminRegistrations.test.ts`
+
+**Files modified:**
+- `src/components/forms/RegistrationForm.tsx` (extract fetch + state logic into `useRegister`)
+- `src/app/(public)/manage/[token]/ManageForm.tsx` (extract fetch + state logic into `useManageRegistration`)
+- `src/components/forms/ResendLinkForm.tsx` (extract fetch + state logic into `useResendLink`)
+- `src/app/admin/registrations/page.tsx` (extract fetch + pagination + mutation logic into `useAdminRegistrations`)
+
+**Acceptance criteria:**
+- [ ] `useRegister` hook encapsulates: form submission via `POST /api/register`, loading state, success state, error state (field-level and general), rate limit handling
+- [ ] `useManageRegistration` hook encapsulates: initial data fetch by token, update via `PUT /api/manage`, cancel via `DELETE /api/manage`, loading/success/error states
+- [ ] `useResendLink` hook encapsulates: submission via `POST /api/resend-link`, loading state, submitted state
+- [ ] `useAdminRegistrations` hook encapsulates: list fetch with filters/pagination, edit mutation, cancel mutation, CSV export trigger
+- [ ] Each hook returns typed state objects and callback functions (no raw `fetch` in components)
+- [ ] Form components contain zero `fetch()` calls after refactoring
+- [ ] Form components contain zero direct `useState` calls for API-related state (loading, error, success)
+- [ ] All hooks handle HTTP status codes consistently (400 → validation errors, 429 → rate limit message, 500 → generic error)
+- [ ] Unit tests for each hook mock `fetch` and verify state transitions
+- [ ] No business logic in hooks — they orchestrate API calls and state, not validation or transformation
+- [ ] All existing functionality unchanged (forms still submit, errors still display, rate limits still shown)
+- [ ] `npm run build` succeeds
+- [ ] `npx vitest run` passes
+
+**Non-goals:**
+- Do not introduce a data fetching library (React Query, SWR) — keep hooks simple with `useState`/`useEffect`
+- Do not change API contracts or response shapes
+- Do not add new functionality — this is a pure refactoring ticket
+
+---
+
+## T-057: Complete UI Primitive Library
+
+**Input:** T-055 (visual redesign — design language is established)
+**Output:**
+- Missing UI primitives added to `src/components/ui/`
+- All primitives follow the established dark theme design language
+- Duplicated inline Tailwind class strings replaced with component usage
+
+**Files created:**
+- `src/components/ui/SubmitButton.tsx`
+- `src/components/ui/Select.tsx`
+- `src/components/ui/Modal.tsx`
+- `src/components/ui/Badge.tsx`
+- `src/components/ui/Alert.tsx`
+- `tests/unit/components/ui/SubmitButton.test.ts`
+- `tests/unit/components/ui/Select.test.ts`
+- `tests/unit/components/ui/Modal.test.ts`
+- `tests/unit/components/ui/Badge.test.ts`
+- `tests/unit/components/ui/Alert.test.ts`
+
+**Files modified:**
+- `src/components/forms/RegistrationForm.tsx` (replace inline submit button with `SubmitButton`, inline `<select>` with `Select`)
+- `src/app/(public)/manage/[token]/ManageForm.tsx` (same replacements)
+- `src/components/forms/ResendLinkForm.tsx` (replace inline submit button with `SubmitButton`)
+
+**Acceptance criteria:**
+- [ ] `SubmitButton` — Form submit button with: loading state (spinner/disabled), Anton font uppercase styling, red accent bg with hover-to-outline transition, `disabled` prop, `loading` prop, full-width option. Replaces all duplicated form button class strings.
+- [ ] `Select` — Styled `<select>` dropdown with: dark background (`#222`), `#333` border, red focus border, error state variant, `FormField`-compatible. Replaces all inline `<select>` elements with duplicated class strings.
+- [ ] `Modal` — Reusable modal wrapper with: dark overlay, centered dark card, close button, title slot, body slot, footer action slot. Accessible (focus trap, Escape to close, `aria-modal`).
+- [ ] `Badge` — Status badge with variants: `confirmed` (green), `cancelled` (red), `default` (gray). Used for registration status display.
+- [ ] `Alert` — Message display with variants: `success` (green border/icon), `error` (red border/icon), `warning` (yellow border/icon), `info` (blue border/icon). Replaces ad-hoc success/error message `<div>` blocks in forms.
+- [ ] All primitives accept `className` prop for composition (using existing `cn` utility or `clsx`)
+- [ ] All primitives are properly typed with TypeScript props interfaces
+- [ ] All primitives follow the established design token system (colors from `globals.css` theme)
+- [ ] No inline styles — all styling via Tailwind utility classes
+- [ ] Unit tests for each component: renders correctly, handles props/variants, accessible
+- [ ] Existing form functionality unchanged after primitive replacement
+- [ ] `npm run build` succeeds
+- [ ] `npx vitest run` passes
+
+**Non-goals:**
+- Do not refactor admin components to use these primitives (T-058)
+- Do not add animation beyond existing hover transitions
+- Do not create a Table primitive (admin table has specific enough needs to stay custom for now)
+
+---
+
+## T-058: Unify Admin Components with Shared UI Primitives
+
+**Input:** T-057 (complete UI primitive library), T-028 (admin layout), T-029 (admin dashboard), T-030 (admin registration list)
+**Output:**
+- Admin components refactored to use shared UI primitives from `src/components/ui/`
+- Consistent styling API across public and admin sections
+- Admin components support theme variants (light/dark) via primitive props
+
+**Files modified:**
+- `src/components/admin/EditRegistrationModal.tsx` (use `Modal`, `Input`, `Textarea`, `Select`, `FormField`, `SubmitButton`)
+- `src/components/admin/RegistrationTable.tsx` (use `Badge` for status, consistent table styling)
+- `src/components/admin/RegistrationFilters.tsx` (use `Select`, `Input`)
+- `src/components/admin/StatsCard.tsx` (use `Card`)
+- `src/app/admin/registrations/page.tsx` (use `Alert` for messages)
+- `src/app/admin/login/page.tsx` (use `Input`, `SubmitButton`, `Alert`)
+
+**Files modified (UI primitives — add admin/light variant):**
+- `src/components/ui/Input.tsx` (add `variant: 'dark' | 'light'` prop, default `'dark'`)
+- `src/components/ui/Select.tsx` (add `variant` prop)
+- `src/components/ui/Card.tsx` (add `variant` prop)
+- `src/components/ui/SubmitButton.tsx` (add `variant` prop)
+- `src/components/ui/Modal.tsx` (add `variant` prop if needed)
+
+**Acceptance criteria:**
+- [ ] Admin components import from `src/components/ui/` instead of using raw HTML elements with inline Tailwind
+- [ ] `EditRegistrationModal` uses `Modal`, `Input`, `Textarea`, `Select`, `FormField`, `SubmitButton` from shared library
+- [ ] `RegistrationTable` uses `Badge` for status display instead of inline `StatusBadge`
+- [ ] `RegistrationFilters` uses `Select` and `Input` from shared library
+- [ ] `StatsCard` uses `Card` from shared library (or is refactored to wrap it)
+- [ ] Admin login page uses `Input`, `SubmitButton`, `Alert` from shared library
+- [ ] UI primitives support a `variant` prop (at minimum `'dark'` and `'light'`) to accommodate both public (dark) and admin (light) themes
+- [ ] Default variant is `'dark'` (no breaking change to public pages)
+- [ ] No duplicated Tailwind class strings between admin and public sections for equivalent UI elements
+- [ ] All admin functionality unchanged (list, filter, edit, cancel, export, login)
+- [ ] `npm run build` succeeds
+- [ ] `npx vitest run` passes
+
+**Non-goals:**
+- Do not redesign the admin visual style (keep its current light theme)
+- Do not unify admin and public into a single theme
+- Do not add new admin features
+
+---
+
+## T-059: Extract Reusable Layout Components
+
+**Input:** T-055 (visual redesign — layout patterns are established)
+**Output:**
+- Layout components that encapsulate large Tailwind class strings from page files
+- Page components become focused on composition, not visual layout details
+
+**Files created:**
+- `src/components/layout/CenteredFormLayout.tsx`
+- `src/components/layout/SectionLayout.tsx`
+
+**Files modified:**
+- `src/app/(public)/register/page.tsx` (use `CenteredFormLayout`)
+- `src/app/(public)/resend-link/page.tsx` (use `CenteredFormLayout`)
+- `src/app/(public)/manage/[token]/page.tsx` (use `CenteredFormLayout`)
+- `src/app/error.tsx` (use `CenteredFormLayout`)
+- `src/app/not-found.tsx` (use `CenteredFormLayout`)
+
+**Acceptance criteria:**
+- [ ] `CenteredFormLayout` wraps the recurring pattern: full-height flex container, centered content, dark background, optional max-width card wrapper. Accepts `children`, optional `title`, optional `maxWidth` prop.
+- [ ] `SectionLayout` wraps the recurring pattern: section with consistent padding (80px top/bottom), max-width container (1200px), dark background. Accepts `children`, optional heading.
+- [ ] Registration, manage, resend-link, error, and not-found pages use `CenteredFormLayout` instead of repeating `"flex min-h-screen items-center justify-center bg-dark-secondary px-4 py-12"` (or similar)
+- [ ] Page components are reduced to simple composition: layout + content, no long class strings
+- [ ] Layout components accept `className` for composition
+- [ ] All existing visual appearance preserved exactly (no visual regression)
+- [ ] `npm run build` succeeds
+- [ ] `npx vitest run` passes
+
+**Non-goals:**
+- Do not change the landing page hero layout (it's unique enough to stay inline or in its own `Hero` component from T-055)
+- Do not create admin layout components (admin has its own layout in `src/app/admin/layout.tsx`)
+- Do not add animation or transitions
+
+---
+
+## T-060: Deduplicate Registration and Manage Form Logic
+
+**Input:** T-056 (client-side data fetching hooks), T-022 (registration form), T-023 (manage page)
+**Output:**
+- Shared form component or configuration that eliminates duplication between `RegistrationForm` and `ManageForm`
+- Single source of truth for form field definitions, validation display, and field rendering
+
+**Files created:**
+- `src/components/forms/RegistrationFieldSet.tsx`
+
+**Files modified:**
+- `src/components/forms/RegistrationForm.tsx` (use `RegistrationFieldSet`)
+- `src/app/(public)/manage/[token]/ManageForm.tsx` (use `RegistrationFieldSet`)
+
+**Acceptance criteria:**
+- [ ] `RegistrationFieldSet` renders the shared form fields: name (`Input`), email (`Input`), stay (`Select`), adultsCount (`Select`), childrenCount (`Select`), notes (`Textarea`) — all using UI primitives from `src/components/ui/`
+- [ ] `RegistrationFieldSet` accepts props: `values` (current form values), `errors` (field-level error map), `onChange` (field change handler), `disabled` (for loading states)
+- [ ] `RegistrationForm` composes: `RegistrationFieldSet` + `SubmitButton` + success/error `Alert` + `useRegister` hook
+- [ ] `ManageForm` composes: `RegistrationFieldSet` (pre-populated) + `SubmitButton` (save) + cancel button + success/error `Alert` + `useManageRegistration` hook
+- [ ] Zero duplicated field rendering code between the two forms
+- [ ] Field labels and placeholders come from translation files (no hardcoded strings)
+- [ ] Client-side validation error display works identically in both forms
+- [ ] All existing form functionality unchanged (submit, validate, error display, success state, rate limit handling)
+- [ ] `npm run build` succeeds
+- [ ] `npx vitest run` passes
+
+**Non-goals:**
+- Do not merge the two forms into a single component with mode prop — they have different enough lifecycles (create vs. edit+cancel) to remain separate
+- Do not change validation schemas or API contracts
+- Do not add new form fields
+
+---
+
+# Phase 12 Dependency Graph
+
+```
+PHASE 12: UI Architecture & Maintainability
+
+  Client-Side Separation:
+    T-022 + T-023 + T-024 + T-030 → T-056 (client-side data fetching hooks)
+    T-056 + T-022 + T-023 → T-060 (deduplicate form logic)
+
+  UI Primitive Completion:
+    T-055 → T-057 (complete UI primitive library)
+    T-057 + T-028..T-030 → T-058 (unify admin with shared UI primitives)
+
+  Layout Abstraction:
+    T-055 → T-059 (extract reusable layout components)
+```
+
+```
+T-056 (Client-side data fetching hooks) ←[T-022, T-023, T-024, T-030]
+  └─ T-060 (Deduplicate form logic) ←[+T-022, +T-023]
+
+T-057 (Complete UI primitive library) ←[T-055]
+  └─ T-058 (Unify admin with shared UI) ←[+T-028..T-030]
+
+T-059 (Extract reusable layout components) ←[T-055]
+```
+
+---
+
+# Updated Ticket Index (Phase 12)
+
+| ID    | Title                                    | Phase | Dependencies                  |
+|-------|------------------------------------------|-------|-------------------------------|
+| T-056 | Client-Side Data Fetching Hooks          | 12    | T-022, T-023, T-024, T-030   |
+| T-057 | Complete UI Primitive Library             | 12    | T-055                         |
+| T-058 | Unify Admin with Shared UI Primitives    | 12    | T-057, T-028, T-029, T-030   |
+| T-059 | Extract Reusable Layout Components       | 12    | T-055                         |
+| T-060 | Deduplicate Registration/Manage Form Logic | 12  | T-056, T-022, T-023          |
+
+**Total tickets: 59** (37 original + 8 Phase 1-10 additions + 9 Phase 11 + 5 Phase 12)
 
 ---
 
