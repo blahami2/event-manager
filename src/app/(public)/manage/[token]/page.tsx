@@ -35,18 +35,18 @@ export default async function ManagePage({
 
   if (result.error !== null) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
+      <main className="flex min-h-screen items-center justify-center bg-dark-secondary px-4 py-12">
         <Card className="mx-auto w-full max-w-md text-center">
-          <p className="text-lg font-medium text-gray-700">{result.error}</p>
+          <p className="text-lg font-medium text-text-gray">{result.error}</p>
         </Card>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
-      <Card className="mx-auto w-full max-w-md">
-        <h1 className="mb-6 text-center text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+    <main className="flex min-h-screen items-center justify-center bg-dark-secondary px-4 py-12">
+      <Card className="mx-auto w-full max-w-md border-2 border-accent">
+        <h1 className="mb-6 text-center font-heading text-3xl uppercase tracking-wider text-white sm:text-4xl">
           {t("title")}
         </h1>
         <ManageForm registration={result.registration} token={token} />

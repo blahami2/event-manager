@@ -60,7 +60,7 @@ export function ResendLinkForm(): React.ReactElement {
   if (successMessage) {
     return (
       <div role="status" className="text-center">
-        <p className="text-lg font-medium text-green-700">{successMessage}</p>
+        <p className="text-lg font-bold uppercase tracking-wide text-accent">{successMessage}</p>
       </div>
     );
   }
@@ -79,7 +79,7 @@ export function ResendLinkForm(): React.ReactElement {
       </FormField>
 
       {submitError && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-accent" role="alert">
           {submitError}
         </p>
       )}
@@ -87,7 +87,7 @@ export function ResendLinkForm(): React.ReactElement {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full bg-accent px-4 py-4 font-heading text-lg uppercase tracking-wide text-white border-3 border-accent transition-all duration-300 hover:bg-transparent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? t("sending") : t("sendButton")}
       </button>

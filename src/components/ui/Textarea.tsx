@@ -8,10 +8,10 @@ interface TextareaProps
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   function Textarea({ error, className = "", ...props }, ref) {
     const base =
-      "block w-full rounded-lg border px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 sm:text-sm";
+      "block w-full border-2 bg-input-bg px-4 py-3 text-white font-body focus:outline-none transition-colors sm:text-sm";
     const borderClass = error
-      ? "border-red-500 focus:ring-red-500"
-      : "border-gray-300 focus:ring-indigo-500";
+      ? "border-accent"
+      : "border-border-dark focus:border-accent";
 
     return (
       <textarea

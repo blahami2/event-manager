@@ -12,12 +12,12 @@ export default function ResendLinkPage(): React.ReactElement {
   const t = useTranslations("resend");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
-      <Card className="mx-auto w-full max-w-md">
-        <h1 className="mb-2 text-center text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+    <main className="flex min-h-screen items-center justify-center bg-dark-secondary px-4 py-12">
+      <Card className="mx-auto w-full max-w-md border-2 border-accent">
+        <h1 className="mb-2 text-center font-heading text-3xl uppercase tracking-wider text-white sm:text-4xl">
           {t("title")}
         </h1>
-        <p className="mb-6 text-center text-sm text-gray-500">
+        <p className="mb-6 text-center text-sm text-text-gray">
           {t("description")}
         </p>
 
