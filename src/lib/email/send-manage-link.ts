@@ -6,7 +6,9 @@ import {
   EVENT_NAME,
   EVENT_LOCATION,
   EVENT_DESCRIPTION,
+  EVENT_DATES_BY_STAY,
 } from "@/config/event";
+import type { StayOption } from "@/types/registration";
 import type { Locale } from "@/i18n/config";
 
 interface SendManageLinkParams {
@@ -20,6 +22,8 @@ interface SendManageLinkParams {
   readonly registrationId: string;
   /** Email type identifier for structured logging. */
   readonly emailType: "manage-link";
+  /** Guest's selected stay option, determines ICS calendar dates. */
+  readonly stay: StayOption;
   /** Name of the event. */
   readonly eventName: string;
   /** Date of the event (display string). */
@@ -48,7 +52,7 @@ export async function sendManageLink(
   }
 
   const resend = new Resend(apiKey);
-  const { to, manageUrl, guestName, registrationId, emailType, eventName, eventDate, locale } = params;
+  const { to, manageUrl, guestName, registrationId, emailType, stay, eventName, eventDate, locale } = params;
 
   const logContext = {
     registrationId,
@@ -56,8 +60,7 @@ export async function sendManageLink(
     to: maskEmail(to),
   };
 
-  const eventStart = new Date("2026-03-28T18:00:00Z");
-  const eventEnd = new Date("2026-03-28T23:00:00Z");
+  const { start: eventStart, end: eventEnd } = EVENT_DATES_BY_STAY[stay];
   const icsContent = generateIcsEvent({
     eventName: EVENT_NAME,
     eventDate: eventStart,

@@ -30,6 +30,7 @@ vi.mock("@/lib/email/templates/manage-link-template", () => ({
 }));
 
 import { sendManageLink } from "@/lib/email/send-manage-link";
+import { StayOption } from "@/types/registration";
 
 describe("ICS calendar attachment in registration email", () => {
   const baseParams = {
@@ -40,6 +41,7 @@ describe("ICS calendar attachment in registration email", () => {
     emailType: "manage-link" as const,
     eventName: "Triple Threat",
     eventDate: "2026-03-28",
+    stay: StayOption.FRI_SUN,
   } as const;
 
   beforeEach(() => {
@@ -99,5 +101,38 @@ describe("ICS calendar attachment in registration email", () => {
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
     const html = callArgs["html"] as string;
     expect(html).toContain("A calendar invite is attached to this email.");
+  });
+
+  test("should use FRI_SUN dates when stay is FRI_SUN", async () => {
+    await sendManageLink({ ...baseParams, stay: StayOption.FRI_SUN });
+
+    const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
+    const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
+    const decoded = Buffer.from(attachments[0]?.["content"] as string, "base64").toString("utf-8");
+    // FRI_SUN: 2026-06-05T20:00+02:00 = 2026-06-05T18:00Z to 2026-06-07T12:00+02:00 = 2026-06-07T10:00Z
+    expect(decoded).toContain("DTSTART:20260605T180000Z");
+    expect(decoded).toContain("DTEND:20260607T100000Z");
+  });
+
+  test("should use FRI_SAT dates when stay is FRI_SAT", async () => {
+    await sendManageLink({ ...baseParams, stay: StayOption.FRI_SAT });
+
+    const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
+    const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
+    const decoded = Buffer.from(attachments[0]?.["content"] as string, "base64").toString("utf-8");
+    // FRI_SAT: 2026-06-05T20:00+02:00 = 2026-06-05T18:00Z to 2026-06-06T20:00+02:00 = 2026-06-06T18:00Z
+    expect(decoded).toContain("DTSTART:20260605T180000Z");
+    expect(decoded).toContain("DTEND:20260606T180000Z");
+  });
+
+  test("should use SAT_SUN dates when stay is SAT_SUN", async () => {
+    await sendManageLink({ ...baseParams, stay: StayOption.SAT_SUN });
+
+    const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
+    const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
+    const decoded = Buffer.from(attachments[0]?.["content"] as string, "base64").toString("utf-8");
+    // SAT_SUN: 2026-06-06T20:00+02:00 = 2026-06-06T18:00Z to 2026-06-07T12:00+02:00 = 2026-06-07T10:00Z
+    expect(decoded).toContain("DTSTART:20260606T180000Z");
+    expect(decoded).toContain("DTEND:20260607T100000Z");
   });
 });

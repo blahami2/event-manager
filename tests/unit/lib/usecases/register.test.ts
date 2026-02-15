@@ -132,6 +132,7 @@ describe("registerGuest", () => {
         emailType: "manage-link",
         eventName: "Triple Threat",
         eventDate: "Saturday, March 28, 2026",
+        stay: "FRI_SUN",
       }),
     );
 

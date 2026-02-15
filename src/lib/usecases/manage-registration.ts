@@ -128,6 +128,7 @@ export async function updateRegistrationByToken(
     guestName: updatedRegistration.name,
     registrationId: updatedRegistration.id,
     emailType: "manage-link",
+    stay: updatedRegistration.stay as StayOption,
     eventName: EVENT_NAME,
     eventDate: EVENT_DATE,
   });

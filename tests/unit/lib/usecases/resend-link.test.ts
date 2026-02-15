@@ -129,6 +129,7 @@ describe("resendManageLink", () => {
         guestName: "Alice Johnson",
         registrationId: "reg-1",
         emailType: "manage-link",
+        stay: "FRI_SUN",
       }),
     );
     expect(result).toEqual({ success: true });

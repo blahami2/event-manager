@@ -34,6 +34,7 @@ vi.mock("@/lib/email/templates/manage-link-template", () => ({
 }));
 
 import { sendManageLink } from "@/lib/email/send-manage-link";
+import { StayOption } from "@/types/registration";
 
 describe("sendManageLink", () => {
   const baseParams = {
@@ -44,6 +45,7 @@ describe("sendManageLink", () => {
     emailType: "manage-link" as const,
     eventName: "Triple Threat",
     eventDate: "2026-03-15",
+    stay: StayOption.FRI_SUN,
   } as const;
 
   beforeEach(() => {

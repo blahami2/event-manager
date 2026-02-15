@@ -1887,7 +1887,38 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 | T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022    |
 | T-055 | Visual Redesign – v1 Design System | 11    | T-021..T-024, T-036           |
 
-**Total tickets: 54** (37 original + 8 Phase 1-10 additions + 9 Phase 11)
+**Total tickets: 55** (37 original + 8 Phase 1-10 additions + 10 Phase 11)
+
+---
+
+## M05: Dynamic ICS Calendar Dates Based on Stay Option
+
+**Type:** Minor fix
+**Date:** 2026-02-15
+**Status:** Done
+
+**Problem:** The `sendManageLink` function in `src/lib/email/send-manage-link.ts` had hardcoded (and incorrect) event start/end dates for the ICS calendar invite attachment.
+
+**Solution:**
+- Added `EVENT_DATES_BY_STAY` mapping to `src/config/event.ts` that maps each `StayOption` (FRI_SAT, SAT_SUN, FRI_SUN) to the correct start/end dates
+- Added `stay: StayOption` to `SendManageLinkParams` interface in `send-manage-link.ts`
+- Replaced hardcoded dates with dynamic lookup: `EVENT_DATES_BY_STAY[stay]`
+- Updated `register.ts`, `resend-link.ts`, and `manage-registration.ts` to pass `stay` to `sendManageLink`
+- Updated all affected tests to include `stay` parameter and verify correct ICS dates per stay option
+
+**Files changed:**
+- `src/config/event.ts` (added `EVENT_DATES_BY_STAY`)
+- `src/lib/email/send-manage-link.ts` (added `stay` param, dynamic date lookup)
+- `src/lib/usecases/register.ts` (pass `stay` to `sendManageLink`)
+- `src/lib/usecases/resend-link.ts` (pass `stay` to `sendManageLink`)
+- `src/lib/usecases/manage-registration.ts` (pass `stay` to `sendManageLink`)
+- `tests/unit/lib/email/send-manage-link.test.ts` (added `stay` to test params)
+- `tests/unit/lib/email/ics-attachment.test.ts` (added `stay` to test params, added per-stay-option date verification tests)
+- `tests/unit/lib/usecases/register.test.ts` (added `stay` assertion on `sendManageLink` call)
+- `tests/unit/lib/usecases/resend-link.test.ts` (added `stay` assertion on `sendManageLink` call)
+- `tests/unit/lib/usecases/manage-registration.test.ts` (added `stay` assertion on `sendManageLink` call)
+
+**Verification:** `npx tsc --noEmit`, `npm run lint`, `npx vitest run` -- all pass (400 tests).
 
 ---
 

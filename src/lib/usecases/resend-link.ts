@@ -5,7 +5,7 @@ import { sendManageLink } from "@/lib/email/send-manage-link";
 import { logger, maskEmail } from "@/lib/logger";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
 import { EVENT_NAME, EVENT_DATE } from "@/config/event";
-import { RegistrationStatus } from "@/types/registration";
+import { RegistrationStatus, StayOption } from "@/types/registration";
 
 /**
  * Resend manage link use case.
@@ -67,6 +67,7 @@ export async function resendManageLink(
     guestName: registration.name,
     registrationId: registration.id,
     emailType: "manage-link",
+    stay: registration.stay as StayOption,
     eventName: EVENT_NAME,
     eventDate: EVENT_DATE,
   });

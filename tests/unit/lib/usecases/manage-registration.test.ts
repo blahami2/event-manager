@@ -253,6 +253,7 @@ describe("updateRegistrationByToken", () => {
         guestName: "Alice Updated",
         registrationId: "reg-1",
         emailType: "manage-link",
+        stay: "FRI_SAT",
       }),
     );
   });

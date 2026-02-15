@@ -76,6 +76,7 @@ export async function registerGuest(
     guestName: name,
     registrationId: registration.id,
     emailType: "manage-link",
+    stay: stay as StayOption,
     eventName: EVENT_NAME,
     eventDate: EVENT_DATE,
   });
