@@ -1,7 +1,8 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 
-const { mockSend } = vi.hoisted(() => ({
+const { mockSend, mockRenderManageLinkEmail } = vi.hoisted(() => ({
   mockSend: vi.fn(),
+  mockRenderManageLinkEmail: vi.fn(),
 }));
 
 vi.mock("resend", () => ({
@@ -24,12 +25,16 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
+vi.mock("@/lib/email/templates/manage-link-template", () => ({
+  renderManageLinkEmail: mockRenderManageLinkEmail,
+}));
+
 import { sendManageLink } from "@/lib/email/send-manage-link";
 
 describe("ICS calendar attachment in registration email", () => {
   const baseParams = {
     to: "bob@example.com",
-    manageUrl: "https://example.com/manage/token-abc",
+    manageUrl: "https://example.com/manage/test-token-12345678",
     guestName: "Bob Smith",
     registrationId: "00000000-0000-0000-0000-000000000002",
     emailType: "manage-link" as const,
@@ -41,6 +46,10 @@ describe("ICS calendar attachment in registration email", () => {
     vi.clearAllMocks();
     process.env["RESEND_API_KEY"] = "re_test_key";
     mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+    mockRenderManageLinkEmail.mockResolvedValue({
+      subject: "Your Registration Manage Link",
+      html: "<p>Hi Bob Smith,</p><p>A calendar invite is attached to this email.</p>",
+    });
   });
 
   test("should include attachments array in Resend API call", async () => {
@@ -55,7 +64,7 @@ describe("ICS calendar attachment in registration email", () => {
     await sendManageLink(baseParams);
 
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
-    const attachments = callArgs["attachments"] as Array<Record<string, unknown>>;
+    const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
     expect(attachments).toHaveLength(1);
     expect(attachments[0]?.["filename"]).toBe("event.ics");
   });
@@ -64,7 +73,7 @@ describe("ICS calendar attachment in registration email", () => {
     await sendManageLink(baseParams);
 
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
-    const attachments = callArgs["attachments"] as Array<Record<string, unknown>>;
+    const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
     expect(attachments[0]?.["contentType"]).toBe("text/calendar; method=REQUEST");
   });
 
@@ -72,7 +81,7 @@ describe("ICS calendar attachment in registration email", () => {
     await sendManageLink(baseParams);
 
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
-    const attachments = callArgs["attachments"] as Array<Record<string, unknown>>;
+    const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
     const content = attachments[0]?.["content"] as string;
 
     // Decode base64 and verify ICS content
