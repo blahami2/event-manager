@@ -42,10 +42,11 @@ describe("LanguageSwitcher", () => {
     const button = screen.getByRole("button", { name: /language/i });
     fireEvent.click(button);
 
-    // Then all three language options should be visible
-    expect(screen.getByText("English")).toBeDefined();
-    expect(screen.getByText("Čeština")).toBeDefined();
-    expect(screen.getByText("Slovenčina")).toBeDefined();
+    // Then all three language options should be visible in the listbox
+    const listbox = screen.getByRole("listbox");
+    expect(listbox.textContent).toContain("English");
+    expect(listbox.textContent).toContain("Čeština");
+    expect(listbox.textContent).toContain("Slovenčina");
   });
 
   it("should set NEXT_LOCALE cookie and reload when selecting Czech", () => {
@@ -97,13 +98,13 @@ describe("LanguageSwitcher", () => {
     render(<LanguageSwitcher />);
     const button = screen.getByRole("button", { name: /language/i });
     fireEvent.click(button);
-    expect(screen.getByText("English")).toBeDefined();
+    expect(screen.getByRole("listbox")).toBeDefined();
 
     // When clicking outside
     fireEvent.mouseDown(document.body);
 
     // Then the dropdown should close
-    expect(screen.queryByText("English")).toBeNull();
+    expect(screen.queryByRole("listbox")).toBeNull();
   });
 
   it("should close dropdown after selecting a language", () => {
@@ -112,8 +113,10 @@ describe("LanguageSwitcher", () => {
     const button = screen.getByRole("button", { name: /language/i });
     fireEvent.click(button);
 
-    // When selecting English
-    fireEvent.click(screen.getByText("English"));
+    // When selecting English from the dropdown list
+    const listbox = screen.getByRole("listbox");
+    const englishOption = listbox.querySelector('[role="option"]') as HTMLElement;
+    fireEvent.click(englishOption);
 
     // Then cookie is set and reload called
     expect(document.cookie).toContain("NEXT_LOCALE=en");
