@@ -21,7 +21,11 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 export const prisma: PrismaClient =
-  globalForPrisma.prisma ?? new PrismaClient();
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    datasourceUrl: process.env.DATABASE_URL,
+    log: ["error", "warn"],
+  });
 
 // Cache in ALL environments – critical for serverless production
 globalForPrisma.prisma = prisma;
