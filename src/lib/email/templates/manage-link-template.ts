@@ -49,7 +49,9 @@ export async function renderManageLinkEmail(
 
   const subject = t("subject");
   const greeting = t("greeting", { guestName });
-  const thankYou = t("thankYou", { eventName, eventDate });
+  const boldEventName = `<strong>${eventName}</strong>`;
+  const boldEventDate = `<strong>${eventDate}</strong>`;
+  const thankYou = t("thankYou", { eventName: boldEventName, eventDate: boldEventDate });
   const manageInstruction = t("manageInstruction");
   const manageButton = t("manageButton");
   const fallbackText = t("fallbackText");

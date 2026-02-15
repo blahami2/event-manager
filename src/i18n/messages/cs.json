@@ -90,7 +90,7 @@
   "email": {
     "subject": "Odkaz pro správu vaší registrace",
     "greeting": "Dobrý den, {guestName},",
-    "thankYou": "Děkujeme za registraci na akci <strong>{eventName}</strong> dne <strong>{eventDate}</strong>.",
+    "thankYou": "Děkujeme za registraci na akci {eventName} dne {eventDate}.",
     "manageInstruction": "Pomocí tlačítka níže můžete kdykoli spravovat údaje své registrace:",
     "manageButton": "Spravovat registraci",
     "fallbackText": "Pokud tlačítko výše nefunguje, zkopírujte a vložte tento odkaz do prohlížeče:",
