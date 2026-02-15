@@ -82,5 +82,69 @@
     "sendButton": "Send Manage Link",
     "success": "If this email is registered, a manage link has been sent.",
     "backToEvent": "Back to Event"
+  },
+  "admin": {
+    "nav": {
+      "title": "Admin",
+      "dashboard": "Dashboard",
+      "registrations": "Registrations",
+      "logout": "Logout"
+    },
+    "login": {
+      "title": "Admin Login",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "error": "Invalid credentials"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "totalRegistrations": "Total Registrations",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "totalGuests": "Total Guests",
+      "viewRegistrations": "View Registrations",
+      "exportCsv": "Export CSV"
+    },
+    "registrations": {
+      "title": "Registrations",
+      "downloadCsv": "Download CSV",
+      "loading": "Loading…",
+      "errorLoad": "Failed to load registrations",
+      "errorCancel": "Failed to cancel registration",
+      "errorUpdate": "Failed to update registration",
+      "noResults": "No registrations found.",
+      "filters": {
+        "statusLabel": "Filter by status",
+        "all": "All",
+        "confirmed": "Confirmed",
+        "cancelled": "Cancelled",
+        "searchPlaceholder": "Search by name or email…",
+        "searchLabel": "Search by name or email"
+      },
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "guests": "Guests",
+        "status": "Status",
+        "created": "Created",
+        "actions": "Actions",
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "confirmCancel": "Cancel this registration?",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "edit": {
+        "title": "Edit Registration",
+        "name": "Name",
+        "email": "Email",
+        "guestCount": "Guest Count",
+        "dietaryNotes": "Dietary Notes",
+        "cancel": "Cancel",
+        "save": "Save"
+      }
+    }
   }
 }

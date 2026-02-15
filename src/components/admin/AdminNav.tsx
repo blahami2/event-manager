@@ -2,16 +2,18 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { createBrowserClient } from "@/lib/auth/supabase-client";
 
 const navItems = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/registrations", label: "Registrations" },
+  { href: "/admin", labelKey: "dashboard" },
+  { href: "/admin/registrations", labelKey: "registrations" },
 ] as const;
 
 export function AdminNav(): React.ReactElement {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("admin.nav");
 
   async function handleLogout(): Promise<void> {
     const supabase = createBrowserClient();
@@ -24,7 +26,7 @@ export function AdminNav(): React.ReactElement {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-4">
-            <span className="text-lg font-bold">Admin</span>
+            <span className="text-lg font-bold">{t("title")}</span>
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -35,7 +37,7 @@ export function AdminNav(): React.ReactElement {
                     : "text-gray-300 hover:bg-gray-700 hover:text-white"
                 }`}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
           </div>
@@ -43,7 +45,7 @@ export function AdminNav(): React.ReactElement {
             onClick={handleLogout}
             className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
           >
-            Logout
+            {t("logout")}
           </button>
         </div>
       </div>

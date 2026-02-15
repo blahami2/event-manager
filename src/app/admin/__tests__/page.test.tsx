@@ -4,6 +4,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
+// Mock next-intl/server
+vi.mock("next-intl/server", () => ({
+  getTranslations: () => Promise.resolve((key: string) => key),
+}));
+
 // Mock admin-actions use case
 const mockGetRegistrationStats = vi.fn();
 vi.mock("@/lib/usecases/admin-actions", () => ({
@@ -18,7 +23,7 @@ describe("AdminDashboardPage", () => {
     vi.clearAllMocks();
   });
 
-  it("renders dashboard heading", async () => {
+  it("should render dashboard heading when page loads", async () => {
     mockGetRegistrationStats.mockResolvedValue({
       total: 10,
       confirmed: 7,
@@ -29,10 +34,10 @@ describe("AdminDashboardPage", () => {
     const page = await AdminDashboardPage();
     render(page);
 
-    expect(screen.getByText("Dashboard")).toBeDefined();
+    expect(screen.getByText("title")).toBeDefined();
   });
 
-  it("displays registration statistics", async () => {
+  it("should display registration statistics when stats loaded", async () => {
     mockGetRegistrationStats.mockResolvedValue({
       total: 15,
       confirmed: 10,
@@ -49,7 +54,7 @@ describe("AdminDashboardPage", () => {
     expect(screen.getByText("30")).toBeDefined();
   });
 
-  it("displays stat labels", async () => {
+  it("should display translated stat labels when page loads", async () => {
     mockGetRegistrationStats.mockResolvedValue({
       total: 0,
       confirmed: 0,
@@ -60,13 +65,13 @@ describe("AdminDashboardPage", () => {
     const page = await AdminDashboardPage();
     render(page);
 
-    expect(screen.getByText("Total Registrations")).toBeDefined();
-    expect(screen.getByText("Confirmed")).toBeDefined();
-    expect(screen.getByText("Cancelled")).toBeDefined();
-    expect(screen.getByText("Total Guests")).toBeDefined();
+    expect(screen.getByText("totalRegistrations")).toBeDefined();
+    expect(screen.getByText("confirmed")).toBeDefined();
+    expect(screen.getByText("cancelled")).toBeDefined();
+    expect(screen.getByText("totalGuests")).toBeDefined();
   });
 
-  it("renders quick links", async () => {
+  it("should render quick links when page loads", async () => {
     mockGetRegistrationStats.mockResolvedValue({
       total: 0,
       confirmed: 0,
@@ -77,11 +82,11 @@ describe("AdminDashboardPage", () => {
     const page = await AdminDashboardPage();
     render(page);
 
-    const regLink = screen.getByRole("link", { name: /registrations/i });
+    const regLink = screen.getByRole("link", { name: "viewRegistrations" });
     expect(regLink).toBeDefined();
     expect(regLink.getAttribute("href")).toBe("/admin/registrations");
 
-    const exportLink = screen.getByRole("link", { name: /export csv/i });
+    const exportLink = screen.getByRole("link", { name: "exportCsv" });
     expect(exportLink).toBeDefined();
     expect(exportLink.getAttribute("href")).toBe("/api/admin/registrations/export");
   });

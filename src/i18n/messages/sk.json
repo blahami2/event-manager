@@ -82,5 +82,69 @@
     "sendButton": "Odoslať odkaz na správu",
     "success": "Ak je tento e-mail zaregistrovaný, odkaz na správu bol odoslaný.",
     "backToEvent": "Späť na akciu"
+  },
+  "admin": {
+    "nav": {
+      "title": "Admin",
+      "dashboard": "Prehľad",
+      "registrations": "Registrácie",
+      "logout": "Odhlásiť sa"
+    },
+    "login": {
+      "title": "Prihlásenie administrátora",
+      "email": "E-mail",
+      "password": "Heslo",
+      "submit": "Prihlásiť sa",
+      "submitting": "Prihlasovanie…",
+      "error": "Neplatné prihlasovacie údaje"
+    },
+    "dashboard": {
+      "title": "Prehľad",
+      "totalRegistrations": "Celkom registrácií",
+      "confirmed": "Potvrdené",
+      "cancelled": "Zrušené",
+      "totalGuests": "Celkom hostí",
+      "viewRegistrations": "Zobraziť registrácie",
+      "exportCsv": "Exportovať CSV"
+    },
+    "registrations": {
+      "title": "Registrácie",
+      "downloadCsv": "Stiahnuť CSV",
+      "loading": "Načítava sa…",
+      "errorLoad": "Nepodarilo sa načítať registrácie",
+      "errorCancel": "Nepodarilo sa zrušiť registráciu",
+      "errorUpdate": "Nepodarilo sa aktualizovať registráciu",
+      "noResults": "Žiadne registrácie nenájdené.",
+      "filters": {
+        "statusLabel": "Filtrovať podľa stavu",
+        "all": "Všetko",
+        "confirmed": "Potvrdené",
+        "cancelled": "Zrušené",
+        "searchPlaceholder": "Hľadať podľa mena alebo e-mailu…",
+        "searchLabel": "Hľadať podľa mena alebo e-mailu"
+      },
+      "table": {
+        "name": "Meno",
+        "email": "E-mail",
+        "guests": "Hostia",
+        "status": "Stav",
+        "created": "Vytvorené",
+        "actions": "Akcie",
+        "edit": "Upraviť",
+        "cancel": "Zrušiť",
+        "confirmCancel": "Zrušiť túto registráciu?",
+        "yes": "Áno",
+        "no": "Nie"
+      },
+      "edit": {
+        "title": "Upraviť registráciu",
+        "name": "Meno",
+        "email": "E-mail",
+        "guestCount": "Počet hostí",
+        "dietaryNotes": "Poznámky k stravovaniu",
+        "cancel": "Zrušiť",
+        "save": "Uložiť"
+      }
+    }
   }
 }
