@@ -1,15 +1,11 @@
 import { Resend } from "resend";
+import { getTranslations } from "next-intl/server";
 import { logger, maskEmail } from "@/lib/logger";
 import { generateIcsEvent } from "@/lib/email/ics-generator";
 import { renderManageLinkEmail } from "@/lib/email/templates/manage-link-template";
-import {
-  EVENT_NAME,
-  EVENT_LOCATION,
-  EVENT_DESCRIPTION,
-  EVENT_DATES_BY_STAY,
-} from "@/config/event";
+import { EVENT_DATES_BY_STAY } from "@/config/event";
+import { defaultLocale, type Locale } from "@/i18n/config";
 import type { StayOption } from "@/types/registration";
-import type { Locale } from "@/i18n/config";
 
 interface SendManageLinkParams {
   /** Recipient email address. */
@@ -24,10 +20,6 @@ interface SendManageLinkParams {
   readonly emailType: "manage-link";
   /** Guest's selected stay option, determines ICS calendar dates. */
   readonly stay: StayOption;
-  /** Name of the event. */
-  readonly eventName: string;
-  /** Date of the event (display string). */
-  readonly eventDate: string;
   /** Locale for email content. Defaults to 'en'. */
   readonly locale?: Locale;
 }
@@ -40,6 +32,7 @@ interface SendManageLinkResult {
 /**
  * Sends a manage-link email to a guest.
  *
+ * Event details (name, location, description) are resolved from i18n translations.
  * Uses the `RESEND_API_KEY` environment variable (never hardcoded).
  */
 export async function sendManageLink(
@@ -52,7 +45,7 @@ export async function sendManageLink(
   }
 
   const resend = new Resend(apiKey);
-  const { to, manageUrl, guestName, registrationId, emailType, stay, eventName, eventDate, locale } = params;
+  const { to, manageUrl, guestName, registrationId, emailType, stay, locale } = params;
 
   const logContext = {
     registrationId,
@@ -60,20 +53,21 @@ export async function sendManageLink(
     to: maskEmail(to),
   };
 
+  const resolvedLocale = locale ?? defaultLocale;
+  const t = await getTranslations({ locale: resolvedLocale, namespace: "email" });
+
   const { start: eventStart, end: eventEnd } = EVENT_DATES_BY_STAY[stay];
   const icsContent = generateIcsEvent({
-    eventName: EVENT_NAME,
+    eventName: t("eventName"),
     eventDate: eventStart,
     eventEndDate: eventEnd,
-    eventLocation: EVENT_LOCATION,
-    eventDescription: EVENT_DESCRIPTION,
+    eventLocation: t("eventLocation"),
+    eventDescription: t("eventDescription"),
     organizerEmail: "noreply@resend.dev",
   });
 
   const { subject, html } = await renderManageLinkEmail({
     guestName,
-    eventName,
-    eventDate,
     manageUrl,
     locale,
   });

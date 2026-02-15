@@ -1,8 +1,9 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 
-const { mockSend, mockRenderManageLinkEmail } = vi.hoisted(() => ({
+const { mockSend, mockRenderManageLinkEmail, mockGetTranslations } = vi.hoisted(() => ({
   mockSend: vi.fn(),
   mockRenderManageLinkEmail: vi.fn(),
+  mockGetTranslations: vi.fn(),
 }));
 
 vi.mock("resend", () => ({
@@ -29,6 +30,10 @@ vi.mock("@/lib/email/templates/manage-link-template", () => ({
   renderManageLinkEmail: mockRenderManageLinkEmail,
 }));
 
+vi.mock("next-intl/server", () => ({
+  getTranslations: mockGetTranslations,
+}));
+
 import { sendManageLink } from "@/lib/email/send-manage-link";
 import { StayOption } from "@/types/registration";
 
@@ -39,10 +44,18 @@ describe("ICS calendar attachment in registration email", () => {
     guestName: "Bob Smith",
     registrationId: "00000000-0000-0000-0000-000000000002",
     emailType: "manage-link" as const,
-    eventName: "Triple Threat",
-    eventDate: "2026-03-28",
     stay: StayOption.FRI_SUN,
   } as const;
+
+  const mockTranslator = vi.fn((key: string) => {
+    const translations: Record<string, string> = {
+      eventName: "Triple threat",
+      eventDate: "Saturday, June 6, 2026",
+      eventLocation: "Penzión Huncokár - Žltý Dom, Piesok, 900 01 Modra, Slovakia",
+      eventDescription: "3 headliners / one event / a unique experience",
+    };
+    return translations[key] ?? key;
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -52,6 +65,7 @@ describe("ICS calendar attachment in registration email", () => {
       subject: "Your Registration Manage Link",
       html: "<p>Hi Bob Smith,</p><p>A calendar invite is attached to this email.</p>",
     });
+    mockGetTranslations.mockResolvedValue(mockTranslator);
   });
 
   test("should include attachments array in Resend API call", async () => {
@@ -79,19 +93,19 @@ describe("ICS calendar attachment in registration email", () => {
     expect(attachments[0]?.["contentType"]).toBe("text/calendar; method=REQUEST");
   });
 
-  test("should include base64-encoded ICS content with event details", async () => {
+  test("should include base64-encoded ICS content with localized event details", async () => {
     await sendManageLink(baseParams);
 
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
     const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
     const content = attachments[0]?.["content"] as string;
 
-    // Decode base64 and verify ICS content
+    // Decode base64 and verify ICS content uses i18n-resolved values
     const decoded = Buffer.from(content, "base64").toString("utf-8");
     expect(decoded).toContain("BEGIN:VCALENDAR");
     expect(decoded).toContain("END:VCALENDAR");
-    expect(decoded).toContain("Triple Threat");
-    expect(decoded).toContain("123 Party Lane");
+    expect(decoded).toContain("Triple threat");
+    expect(decoded).toContain("Penzión Huncokár");
     expect(decoded).toContain("METHOD:REQUEST");
   });
 

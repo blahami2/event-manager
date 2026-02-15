@@ -37,8 +37,6 @@ function createMockTranslator(messages: EmailMessages) {
 describe("renderManageLinkEmail", () => {
   const defaultParams = {
     guestName: "Alice Johnson",
-    eventName: "Triple Threat",
-    eventDate: "March 15, 2026",
     manageUrl: "https://example.com/manage?token=test-token-12345678",
   } as const;
 
@@ -70,7 +68,7 @@ describe("renderManageLinkEmail", () => {
     expect(html).toContain("Alice Johnson");
   });
 
-  test("should contain event name in output HTML", async () => {
+  test("should contain event name from i18n translations in output HTML", async () => {
     // given
     setupMockTranslator(enMessages.email);
 
@@ -78,10 +76,10 @@ describe("renderManageLinkEmail", () => {
     const { html } = await renderManageLinkEmail(defaultParams);
 
     // then
-    expect(html).toContain("Triple Threat");
+    expect(html).toContain("Triple threat");
   });
 
-  test("should contain event date in output HTML", async () => {
+  test("should contain event date from i18n translations in output HTML", async () => {
     // given
     setupMockTranslator(enMessages.email);
 
@@ -89,7 +87,7 @@ describe("renderManageLinkEmail", () => {
     const { html } = await renderManageLinkEmail(defaultParams);
 
     // then
-    expect(html).toContain("March 15, 2026");
+    expect(html).toContain("Saturday, June 6, 2026");
   });
 
   test("should contain manage URL as a clickable anchor tag", async () => {
@@ -143,22 +141,6 @@ describe("renderManageLinkEmail", () => {
     // then
     expect(html).not.toContain("<script>");
     expect(html).toContain("&lt;script&gt;");
-  });
-
-  test("should escape HTML characters in event name", async () => {
-    // given
-    setupMockTranslator(enMessages.email);
-    const params = {
-      ...defaultParams,
-      eventName: 'Party & "Fun" <Night>',
-    };
-
-    // when
-    const { html } = await renderManageLinkEmail(params);
-
-    // then
-    expect(html).toContain("&amp;");
-    expect(html).toContain("&quot;");
   });
 
   test("should return translated subject line", async () => {
@@ -216,6 +198,8 @@ describe("renderManageLinkEmail", () => {
     expect(subject).toBe("Your Registration Manage Link");
     expect(html).toContain("Hi Alice Johnson,");
     expect(html).toContain("Thank you for registering");
+    expect(html).toContain("Triple threat");
+    expect(html).toContain("Saturday, June 6, 2026");
     expect(html).toContain("Use the button below");
     expect(html).toContain("Manage Registration");
     expect(html).toContain("copy and paste this link");
@@ -237,6 +221,8 @@ describe("renderManageLinkEmail", () => {
     expect(subject).toBe("Odkaz pro správu vaší registrace");
     expect(html).toContain("Dobrý den, Alice Johnson,");
     expect(html).toContain("Děkujeme za registraci");
+    expect(html).toContain("Triple threat");
+    expect(html).toContain("Sobota 6. června 2026");
     expect(html).toContain("Pomocí tlačítka níže");
     expect(html).toContain("Spravovat registraci");
     expect(html).toContain("zkopírujte a vložte tento odkaz");
@@ -258,6 +244,8 @@ describe("renderManageLinkEmail", () => {
     expect(subject).toBe("Odkaz na správu vašej registrácie");
     expect(html).toContain("Dobrý deň, Alice Johnson,");
     expect(html).toContain("Ďakujeme za registráciu");
+    expect(html).toContain("Triple threat");
+    expect(html).toContain("Sobota 6. júna 2026");
     expect(html).toContain("Pomocou tlačidla nižšie");
     expect(html).toContain("Spravovať registráciu");
     expect(html).toContain("skopírujte a vložte tento odkaz");

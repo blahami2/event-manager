@@ -7,7 +7,6 @@ import { NotFoundError, ValidationError } from "@/lib/errors/app-errors";
 import { registrationSchema } from "@/lib/validation/registration";
 import { StayOption } from "@/types/registration";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
-import { EVENT_NAME, EVENT_DATE } from "@/config/event";
 import type { RegistrationOutput } from "@/types/registration";
 
 /**
@@ -129,8 +128,6 @@ export async function updateRegistrationByToken(
     registrationId: updatedRegistration.id,
     emailType: "manage-link",
     stay: updatedRegistration.stay as StayOption,
-    eventName: EVENT_NAME,
-    eventDate: EVENT_DATE,
   });
 
   logger.info("Registration updated", {

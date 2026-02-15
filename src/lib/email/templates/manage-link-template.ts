@@ -9,8 +9,6 @@ import { defaultLocale, type Locale } from "@/i18n/config";
 
 interface ManageLinkEmailParams {
   readonly guestName: string;
-  readonly eventName: string;
-  readonly eventDate: string;
   readonly manageUrl: string;
   readonly locale?: Locale;
 }
@@ -33,7 +31,9 @@ function escapeHtml(text: string): string {
 /**
  * Renders a responsive HTML email for the manage-link flow.
  *
- * @param params - Guest name, event name, event date, manage URL, and optional locale.
+ * Event name and date are resolved from i18n translations (email namespace).
+ *
+ * @param params - Guest name, manage URL, and optional locale.
  * @returns A promise resolving to subject and HTML string ready to be sent as an email.
  */
 export async function renderManageLinkEmail(
@@ -43,8 +43,8 @@ export async function renderManageLinkEmail(
   const t = await getTranslations({ locale, namespace: "email" });
 
   const guestName = escapeHtml(params.guestName);
-  const eventName = escapeHtml(params.eventName);
-  const eventDate = escapeHtml(params.eventDate);
+  const eventName = escapeHtml(t("eventName"));
+  const eventDate = escapeHtml(t("eventDate"));
   const { manageUrl } = params;
 
   const subject = t("subject");

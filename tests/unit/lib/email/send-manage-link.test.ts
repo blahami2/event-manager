@@ -2,11 +2,12 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 
 const TEST_REGISTRATION_ID = "00000000-0000-0000-0000-000000000001";
 
-const { mockSend, mockLoggerInfo, mockLoggerError, mockRenderManageLinkEmail } = vi.hoisted(() => ({
+const { mockSend, mockLoggerInfo, mockLoggerError, mockRenderManageLinkEmail, mockGetTranslations } = vi.hoisted(() => ({
   mockSend: vi.fn(),
   mockLoggerInfo: vi.fn(),
   mockLoggerError: vi.fn(),
   mockRenderManageLinkEmail: vi.fn(),
+  mockGetTranslations: vi.fn(),
 }));
 
 vi.mock("resend", () => ({
@@ -33,6 +34,10 @@ vi.mock("@/lib/email/templates/manage-link-template", () => ({
   renderManageLinkEmail: mockRenderManageLinkEmail,
 }));
 
+vi.mock("next-intl/server", () => ({
+  getTranslations: mockGetTranslations,
+}));
+
 import { sendManageLink } from "@/lib/email/send-manage-link";
 import { StayOption } from "@/types/registration";
 
@@ -43,10 +48,18 @@ describe("sendManageLink", () => {
     guestName: "Alice Johnson",
     registrationId: TEST_REGISTRATION_ID,
     emailType: "manage-link" as const,
-    eventName: "Triple Threat",
-    eventDate: "2026-03-15",
     stay: StayOption.FRI_SUN,
   } as const;
+
+  const mockTranslator = vi.fn((key: string) => {
+    const translations: Record<string, string> = {
+      eventName: "Triple threat",
+      eventDate: "Saturday, June 6, 2026",
+      eventLocation: "Penzion Huncokar, Slovakia",
+      eventDescription: "3 headliners / one event",
+    };
+    return translations[key] ?? key;
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -55,6 +68,7 @@ describe("sendManageLink", () => {
       subject: "Your Registration Manage Link",
       html: "<p>rendered email</p>",
     });
+    mockGetTranslations.mockResolvedValue(mockTranslator);
   });
 
   test("should return success true when Resend API sends successfully", async () => {
@@ -68,7 +82,7 @@ describe("sendManageLink", () => {
     expect(result).toEqual({ success: true });
   });
 
-  test("should call renderManageLinkEmail with correct params", async () => {
+  test("should call renderManageLinkEmail without eventName and eventDate params", async () => {
     // given
     mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
 
@@ -78,8 +92,6 @@ describe("sendManageLink", () => {
     // then
     expect(mockRenderManageLinkEmail).toHaveBeenCalledWith({
       guestName: "Alice Johnson",
-      eventName: "Triple Threat",
-      eventDate: "2026-03-15",
       manageUrl: "https://example.com/manage/test-token-12345678",
       locale: undefined,
     });
@@ -96,6 +108,39 @@ describe("sendManageLink", () => {
     expect(mockRenderManageLinkEmail).toHaveBeenCalledWith(
       expect.objectContaining({ locale: "cs" }),
     );
+  });
+
+  test("should resolve event details from i18n for ICS generation", async () => {
+    // given
+    mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+
+    // when
+    await sendManageLink(baseParams);
+
+    // then
+    expect(mockGetTranslations).toHaveBeenCalledWith({
+      locale: "en",
+      namespace: "email",
+    });
+    // - ICS content should use translated eventName
+    const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
+    const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
+    const decoded = Buffer.from(attachments[0]?.["content"] as string, "base64").toString("utf-8");
+    expect(decoded).toContain("Triple threat");
+  });
+
+  test("should use provided locale for i18n translations when resolving ICS details", async () => {
+    // given
+    mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
+
+    // when
+    await sendManageLink({ ...baseParams, locale: "cs" });
+
+    // then
+    expect(mockGetTranslations).toHaveBeenCalledWith({
+      locale: "cs",
+      namespace: "email",
+    });
   });
 
   test("should call Resend API with rendered subject and html", async () => {

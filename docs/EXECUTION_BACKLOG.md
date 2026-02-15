@@ -1611,14 +1611,14 @@ The iCalendar format (.ics, RFC 5545) is the universal standard for calendar eve
 - `src/i18n/messages/sk.json` (add email-specific keys)
 
 **Acceptance criteria:**
-- [ ] `renderManageLinkEmail` accepts a `locale` parameter
-- [ ] Email subject line is translated
-- [ ] Email body text is translated (greeting, instructions, event details labels)
-- [ ] The manage link itself is language-independent (URL doesn't change)
-- [ ] Calendar invite note text is translated (if T-048 is completed)
-- [ ] Locale is determined from the user's session/cookie at the time of registration
-- [ ] Fallback to English if locale is not available
-- [ ] Unit test: email rendered in each of the three languages contains correct translated strings
+- [x] `renderManageLinkEmail` accepts a `locale` parameter
+- [x] Email subject line is translated
+- [x] Email body text is translated (greeting, instructions, event details labels)
+- [x] The manage link itself is language-independent (URL doesn't change)
+- [x] Calendar invite note text is translated (if T-048 is completed)
+- [x] Locale is determined from the user's session/cookie at the time of registration
+- [x] Fallback to English if locale is not available
+- [x] Unit test: email rendered in each of the three languages contains correct translated strings
 
 **Non-goals:**
 - Do not create separate HTML templates per language (use translation keys within single template)
@@ -1919,6 +1919,44 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 - `tests/unit/lib/usecases/manage-registration.test.ts` (added `stay` assertion on `sendManageLink` call)
 
 **Verification:** `npx tsc --noEmit`, `npm run lint`, `npx vitest run` -- all pass (400 tests).
+
+---
+
+## M06: Localize Email Event Details via i18n
+
+**Type:** Enhancement
+**Date:** 2026-02-15
+**Status:** Done
+
+**Problem:** The email system used hardcoded `EVENT_NAME`, `EVENT_DATE`, `EVENT_LOCATION`, `EVENT_DESCRIPTION` constants from `src/config/event.ts`. These values were not localized, meaning all emails were sent with English-only event details regardless of the recipient's locale.
+
+**Solution:**
+- Added `eventName`, `eventDate`, `eventLocation`, `eventDescription` keys to the `email` namespace in all three locale files (`en.json`, `cs.json`, `sk.json`)
+- Updated `renderManageLinkEmail()` to resolve `eventName` and `eventDate` from i18n translations instead of accepting them as parameters
+- Updated `sendManageLink()` to resolve `eventName`, `eventLocation`, `eventDescription` from i18n for ICS generation, removing imports of `EVENT_NAME`, `EVENT_LOCATION`, `EVENT_DESCRIPTION`
+- Removed `eventName` and `eventDate` from `SendManageLinkParams` and `ManageLinkEmailParams` interfaces
+- Updated all three use cases (`register.ts`, `resend-link.ts`, `manage-registration.ts`) to stop passing `eventName`/`eventDate` to `sendManageLink()`
+- Cleaned up `src/config/event.ts`: removed `EVENT_NAME`, `EVENT_DATE`, `EVENT_LOCATION`, `EVENT_DESCRIPTION` constants and the TODO comment; only `EVENT_DATES_BY_STAY` remains
+- Updated all affected tests to reflect the new interfaces
+
+**Files changed:**
+- `src/i18n/messages/en.json` (added email event detail keys)
+- `src/i18n/messages/cs.json` (added email event detail keys)
+- `src/i18n/messages/sk.json` (added email event detail keys)
+- `src/config/event.ts` (removed unused constants, kept `EVENT_DATES_BY_STAY`)
+- `src/lib/email/templates/manage-link-template.ts` (removed `eventName`/`eventDate` params, resolve from i18n)
+- `src/lib/email/send-manage-link.ts` (removed `eventName`/`eventDate` params, resolve ICS details from i18n)
+- `src/lib/usecases/register.ts` (removed `EVENT_NAME`/`EVENT_DATE` import and usage)
+- `src/lib/usecases/resend-link.ts` (removed `EVENT_NAME`/`EVENT_DATE` import and usage)
+- `src/lib/usecases/manage-registration.ts` (removed `EVENT_NAME`/`EVENT_DATE` import and usage)
+- `tests/unit/lib/email/templates/manage-link-template.test.ts` (updated for new interface)
+- `tests/unit/lib/email/send-manage-link.test.ts` (updated for new interface, added i18n mock)
+- `tests/unit/lib/email/ics-attachment.test.ts` (updated for new interface, added i18n mock)
+- `tests/unit/lib/usecases/register.test.ts` (removed `eventName`/`eventDate` assertions)
+- `tests/unit/lib/usecases/resend-link.test.ts` (removed `eventName`/`eventDate` assertions)
+- `tests/unit/lib/usecases/manage-registration.test.ts` (removed `eventName`/`eventDate` assertions)
+
+**Verification:** `npx tsc --noEmit`, `npm run lint`, `npx vitest run` -- all pass (401 tests).
 
 ---
 
