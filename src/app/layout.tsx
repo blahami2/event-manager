@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import "./globals.css";
 
@@ -9,13 +11,16 @@ export const metadata: Metadata = {
   description: "Manage your event attendance and preferences",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>): React.ReactElement {
+}>): Promise<React.ReactElement> {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         {/* Load fonts from Google CDN — same as the v1 design template */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,10 +35,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div className="fixed right-4 top-4 z-50">
-          <LanguageSwitcher />
-        </div>
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <div className="fixed right-4 top-4 z-50">
+            <LanguageSwitcher />
+          </div>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
