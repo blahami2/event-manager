@@ -18,6 +18,6 @@ describe("Input", () => {
 
   it("applies error border class", () => {
     render(<Input aria-label="test" error="Bad" />);
-    expect(screen.getByLabelText("test").className).toContain("border-red-500");
+    expect(screen.getByLabelText("test").className).toContain("border-accent");
   });
 });

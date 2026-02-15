@@ -6,6 +6,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   test: {
+    env: {
+      NODE_ENV: "test",
+    },
     environment: "node",
     globals: true,
     setupFiles: [],

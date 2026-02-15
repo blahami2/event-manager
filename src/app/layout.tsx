@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Anton, Montserrat } from "next/font/google";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const anton = Anton({
+  weight: "400",
+  variable: "--font-anton",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["400", "700", "900"],
 });
 
 export const dynamic = "force-dynamic";
@@ -27,7 +29,7 @@ export default function RootLayout({
 }>): React.ReactElement {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${anton.variable} ${montserrat.variable} font-body bg-dark-primary text-white`}>
         <div className="fixed right-4 top-4 z-50">
           <LanguageSwitcher />
         </div>

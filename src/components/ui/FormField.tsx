@@ -12,16 +12,16 @@ export function FormField({
   children,
 }: FormFieldProps): React.ReactElement {
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       <label
         htmlFor={htmlFor}
-        className="block text-sm font-medium text-gray-700"
+        className="block text-sm font-bold uppercase tracking-wide text-text-gray"
       >
         {label}
       </label>
       {children}
       {error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-accent" role="alert">
           {error}
         </p>
       )}

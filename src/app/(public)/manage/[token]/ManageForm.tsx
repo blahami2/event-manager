@@ -149,10 +149,10 @@ export function ManageForm({
   if (isCancelled) {
     return (
       <div role="status" className="text-center">
-        <p className="text-lg font-medium text-red-700">
+        <p className="text-lg font-bold uppercase tracking-wide text-accent">
           {t("cancelled")}
         </p>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-text-gray">
           {t("cancelledDescription")}
         </p>
       </div>
@@ -162,7 +162,7 @@ export function ManageForm({
   if (successMessage) {
     return (
       <div role="status" className="text-center">
-        <p className="text-lg font-medium text-green-700">{successMessage}</p>
+        <p className="text-lg font-bold uppercase tracking-wide text-accent">{successMessage}</p>
       </div>
     );
   }
@@ -201,7 +201,7 @@ export function ManageForm({
             id="stay"
             value={stay}
             onChange={(e) => setStay(e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:text-sm"
+            className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
           >
             <option value="">{tForm("stayPlaceholder")}</option>
             <option value="FRI_SAT">{tForm("stayFriSat")}</option>
@@ -219,7 +219,7 @@ export function ManageForm({
             id="adultsCount"
             value={adultsCount}
             onChange={(e) => setAdultsCount(e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:text-sm"
+            className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
           >
             {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
@@ -238,7 +238,7 @@ export function ManageForm({
             id="childrenCount"
             value={childrenCount}
             onChange={(e) => setChildrenCount(e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 sm:text-sm"
+            className="block w-full rounded-lg border border-2 border-border-dark bg-input-bg px-4 py-3 text-white font-body focus:outline-none focus:border-accent transition-colors sm:text-sm"
           >
             {Array.from({ length: 11 }, (_, i) => i).map((n) => (
               <option key={n} value={n}>
@@ -263,7 +263,7 @@ export function ManageForm({
         </FormField>
 
         {submitError && (
-          <p className="text-sm text-red-600" role="alert">
+          <p className="text-sm text-accent" role="alert">
             {submitError}
           </p>
         )}
@@ -271,18 +271,18 @@ export function ManageForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full bg-accent px-4 py-4 font-heading text-lg uppercase tracking-wide text-white border-3 border-accent transition-all duration-300 hover:bg-transparent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? t("saving") : t("saveChanges")}
         </button>
       </form>
 
-      <div className="mt-6 border-t border-gray-200 pt-6">
+      <div className="mt-6 border-t border-border-dark pt-6">
         <button
           type="button"
           onClick={handleCancel}
           disabled={isCancelling}
-          className="w-full rounded-lg border border-red-300 px-4 py-3 font-semibold text-red-600 transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full border-2 border-border-dark bg-transparent px-4 py-3 font-heading uppercase tracking-wide text-text-gray transition-all duration-300 hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isCancelling ? t("cancelling") : t("cancel")}
         </button>

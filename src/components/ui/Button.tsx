@@ -12,12 +12,12 @@ export function Button({
   children,
 }: ButtonProps): React.ReactElement {
   const base =
-    "inline-block rounded-lg font-semibold text-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "inline-block font-heading text-center uppercase tracking-wide transition-all duration-300";
   const variants = {
     primary:
-      "bg-indigo-600 text-white px-8 py-3 text-lg hover:bg-indigo-700 focus:ring-indigo-500",
+      "bg-accent text-white px-10 py-4 text-lg border-3 border-accent hover:bg-transparent hover:text-accent",
     secondary:
-      "text-indigo-600 px-6 py-2 text-sm hover:text-indigo-800 underline underline-offset-4 focus:ring-indigo-500",
+      "text-text-gray px-6 py-2 text-sm hover:text-accent underline underline-offset-4",
   };
 
   return (
