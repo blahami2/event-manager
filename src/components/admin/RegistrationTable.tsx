@@ -19,6 +19,19 @@ function formatDate(date: Date): string {
   });
 }
 
+function formatStay(stay: string): string {
+  switch (stay) {
+    case "FRI_SAT":
+      return "Fri–Sat";
+    case "SAT_SUN":
+      return "Sat–Sun";
+    case "FRI_SUN":
+      return "Fri–Sun";
+    default:
+      return stay;
+  }
+}
+
 function StatusBadge({ status }: { readonly status: RegistrationStatus }): React.ReactElement {
   const styles =
     status === RegistrationStatus.CONFIRMED
@@ -72,7 +85,9 @@ export function RegistrationTable({
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("name")}</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("email")}</th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("guests")}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("stay")}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("adults")}</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("children")}</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("status")}</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("created")}</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t("actions")}</th>
@@ -83,7 +98,9 @@ export function RegistrationTable({
             <tr key={reg.id}>
               <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{reg.name}</td>
               <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{reg.email}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{reg.guestCount}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{formatStay(reg.stay)}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{reg.adultsCount}</td>
+              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{reg.childrenCount}</td>
               <td className="whitespace-nowrap px-6 py-4 text-sm">
                 <StatusBadge status={reg.status} />
               </td>

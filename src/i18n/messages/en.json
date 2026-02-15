@@ -34,8 +34,14 @@
   "form": {
     "email": "Email",
     "name": "Name",
-    "guestCount": "Number of Guests",
-    "dietaryNotes": "Dietary Notes (optional)",
+    "stay": "Stay",
+    "stayPlaceholder": "Select your stay…",
+    "stayFriSat": "Friday – Saturday",
+    "staySatSun": "Saturday – Sunday",
+    "stayFriSun": "Friday – Sunday",
+    "adultsCount": "Number of Adults",
+    "childrenCount": "Number of Children",
+    "notes": "Notes (optional)",
     "submit": "Submit registration"
   },
   "landing": {
@@ -103,9 +109,10 @@
       "totalRegistrations": "Total Registrations",
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",
-      "totalGuests": "Total Guests",
       "viewRegistrations": "View Registrations",
-      "exportCsv": "Export CSV"
+      "exportCsv": "Export CSV",
+      "totalAdults": "Total Adults",
+      "totalChildren": "Total Children"
     },
     "registrations": {
       "title": "Registrations",
@@ -126,7 +133,6 @@
       "table": {
         "name": "Name",
         "email": "Email",
-        "guests": "Guests",
         "status": "Status",
         "created": "Created",
         "actions": "Actions",
@@ -134,16 +140,24 @@
         "cancel": "Cancel",
         "confirmCancel": "Cancel this registration?",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "stay": "Stay",
+        "adults": "Adults",
+        "children": "Children"
       },
       "edit": {
         "title": "Edit Registration",
         "name": "Name",
         "email": "Email",
-        "guestCount": "Guest Count",
-        "dietaryNotes": "Dietary Notes",
         "cancel": "Cancel",
-        "save": "Save"
+        "save": "Save",
+        "stay": "Stay",
+        "stayFriSat": "Fri–Sat",
+        "staySatSun": "Sat–Sun",
+        "stayFriSun": "Fri–Sun",
+        "adultsCount": "Adults",
+        "childrenCount": "Children",
+        "notes": "Notes"
       }
     }
   }

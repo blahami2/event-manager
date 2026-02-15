@@ -93,7 +93,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   const handleSave = useCallback(
     async (
       id: string,
-      data: { name: string; email: string; guestCount: number; dietaryNotes?: string },
+      data: { name: string; email: string; stay: string; adultsCount: number; childrenCount: number; notes?: string },
     ) => {
       try {
         const res = await fetch("/api/admin/registrations", {

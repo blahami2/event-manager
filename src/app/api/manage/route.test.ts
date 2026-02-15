@@ -38,7 +38,6 @@ function makeRequest(method: string, body: Record<string, unknown>): NextRequest
 describe("PUT /api/manage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset rate limiter to allow by default
     vi.mocked(createRateLimiter).mockReturnValue({
       check: vi.fn(() => ({ allowed: true, remaining: 9, resetAt: new Date() })),
     });
@@ -53,8 +52,10 @@ describe("PUT /api/manage", () => {
       token: "valid-token",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 2,
-      dietaryNotes: "vegan",
+      stay: "FRI_SAT",
+      adultsCount: 2,
+      childrenCount: 0,
+      notes: "vegan",
     });
 
     const res = await PUT(req);
@@ -65,8 +66,10 @@ describe("PUT /api/manage", () => {
     expect(updateRegistrationByToken).toHaveBeenCalledWith("valid-token", {
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 2,
-      dietaryNotes: "vegan",
+      stay: "FRI_SAT",
+      adultsCount: 2,
+      childrenCount: 0,
+      notes: "vegan",
     });
   });
 
@@ -79,7 +82,9 @@ describe("PUT /api/manage", () => {
       token: "bad-token",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
+      stay: "FRI_SAT",
+      adultsCount: 1,
+      childrenCount: 0,
     });
 
     const res = await PUT(req);
@@ -87,23 +92,11 @@ describe("PUT /api/manage", () => {
   });
 
   it("returns 429 when rate limited", async () => {
-    vi.mocked(createRateLimiter).mockReturnValue({
-      check: vi.fn(() => ({ allowed: false, remaining: 0, resetAt: new Date() })),
-    });
-
-    // Re-import to pick up new rate limiter - instead, let's just test the behavior
-    // The rate limiter is module-level, so we need a different approach
-    // We'll test via the route's behavior by checking if the limiter's check returns false
-
-    // Actually since createRateLimiter is called at module level and already mocked,
-    // we need to get a handle on the check function
     const mockCheck = vi.fn(() => ({ allowed: false, remaining: 0, resetAt: new Date() }));
     vi.mocked(createRateLimiter).mockReturnValue({ check: mockCheck });
 
-    // Need to re-import the module to pick up the new mock
     vi.resetModules();
 
-    // Re-mock all dependencies
     vi.doMock("@/lib/usecases/manage-registration", () => ({
       updateRegistrationByToken: vi.fn(),
       cancelRegistrationByToken: vi.fn(),
@@ -125,7 +118,9 @@ describe("PUT /api/manage", () => {
       token: "valid-token",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
+      stay: "FRI_SAT",
+      adultsCount: 1,
+      childrenCount: 0,
     });
 
     const res = await PUT2(req);
@@ -136,7 +131,9 @@ describe("PUT /api/manage", () => {
     const req = makeRequest("PUT", {
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
+      stay: "FRI_SAT",
+      adultsCount: 1,
+      childrenCount: 0,
     });
 
     const res = await PUT(req);

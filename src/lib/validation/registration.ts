@@ -1,13 +1,20 @@
 import { z } from "zod";
 
 /**
+ * Stay option values matching the Prisma StayOption enum.
+ */
+const STAY_OPTIONS = ["FRI_SAT", "SAT_SUN", "FRI_SUN"] as const;
+
+/**
  * Zod validation schema for guest registration input.
  *
  * Enforces the domain constraints defined in docs/ARCHITECTURE.md Section 8.1:
  * - name: 1-200 characters
  * - email: valid email format
- * - guestCount: integer, 1-10
- * - dietaryNotes: optional, max 500 characters
+ * - stay: one of FRI_SAT, SAT_SUN, FRI_SUN
+ * - adultsCount: integer, 1-10
+ * - childrenCount: integer, 0-10
+ * - notes: optional, max 500 characters
  */
 export const registrationSchema = z.object({
   name: z
@@ -17,14 +24,21 @@ export const registrationSchema = z.object({
   email: z
     .string()
     .email("Invalid email format"),
-  guestCount: z
+  stay: z
+    .enum(STAY_OPTIONS, { error: "Please select a stay option" }),
+  adultsCount: z
     .number()
-    .int("Guest count must be a whole number")
-    .min(1, "At least 1 guest required")
-    .max(10, "Maximum 10 guests allowed"),
-  dietaryNotes: z
+    .int("Adults count must be a whole number")
+    .min(1, "At least 1 adult required")
+    .max(10, "Maximum 10 adults allowed"),
+  childrenCount: z
+    .number()
+    .int("Children count must be a whole number")
+    .min(0, "Children count cannot be negative")
+    .max(10, "Maximum 10 children allowed"),
+  notes: z
     .string()
-    .max(500, "Dietary notes must be at most 500 characters")
+    .max(500, "Notes must be at most 500 characters")
     .optional(),
 });
 

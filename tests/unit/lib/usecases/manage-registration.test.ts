@@ -65,8 +65,10 @@ const registrationData = {
   id: "reg-1",
   name: "Alice Johnson",
   email: "alice@example.com",
-  guestCount: 2,
-  dietaryNotes: "Vegetarian",
+  stay: "FRI_SUN",
+  adultsCount: 2,
+  childrenCount: 1,
+  notes: "Vegetarian",
   status: "CONFIRMED" as const,
   createdAt: now,
   updatedAt: now,
@@ -75,15 +77,19 @@ const registrationData = {
 const validUpdateInput = {
   name: "Alice Updated",
   email: "alice@example.com",
-  guestCount: 3,
-  dietaryNotes: "Vegan",
+  stay: "FRI_SAT",
+  adultsCount: 3,
+  childrenCount: 0,
+  notes: "Vegan",
 };
 
 const updatedRegistration = {
   ...registrationData,
   name: "Alice Updated",
-  guestCount: 3,
-  dietaryNotes: "Vegan",
+  stay: "FRI_SAT",
+  adultsCount: 3,
+  childrenCount: 0,
+  notes: "Vegan",
   updatedAt: new Date("2026-02-13T13:00:00.000Z"),
 };
 
@@ -128,17 +134,11 @@ describe("getRegistrationByToken", () => {
   });
 
   it("should hash token, look up, and return registration data", async () => {
-    // given
-    // - valid raw token and matching token/registration records
     setupTokenLookupMocks();
 
-    // when
-    const { getRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
+    const { getRegistrationByToken } = await import("@/lib/usecases/manage-registration");
     const result = await getRegistrationByToken("raw-token-abc123");
 
-    // then
     expect(mockHashToken).toHaveBeenCalledWith("raw-token-abc123");
     expect(mockFindByTokenHash).toHaveBeenCalledWith("hashed-token-abc123");
     expect(mockFindRegistrationById).toHaveBeenCalledWith("reg-1");
@@ -146,79 +146,39 @@ describe("getRegistrationByToken", () => {
   });
 
   it("should throw NotFoundError when token is not found (invalid)", async () => {
-    // given
-    // - hashToken returns a hash
-    // - findByTokenHash returns null (token not found)
     mockHashToken.mockReturnValue("hashed-unknown");
     mockFindByTokenHash.mockResolvedValue(null);
 
-    // when
-    const { getRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-
-    // then
-    await expect(getRegistrationByToken("unknown-token")).rejects.toThrow(
-      NotFoundError,
-    );
+    const { getRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await expect(getRegistrationByToken("unknown-token")).rejects.toThrow(NotFoundError);
     expect(mockFindRegistrationById).not.toHaveBeenCalled();
   });
 
   it("should throw NotFoundError when token is expired (findByTokenHash returns null)", async () => {
-    // given
-    // - hashToken returns a hash
-    // - findByTokenHash returns null (expired tokens are filtered by the repository)
     mockHashToken.mockReturnValue("hashed-expired");
     mockFindByTokenHash.mockResolvedValue(null);
 
-    // when
-    const { getRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-
-    // then
-    await expect(getRegistrationByToken("expired-token")).rejects.toThrow(
-      NotFoundError,
-    );
+    const { getRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await expect(getRegistrationByToken("expired-token")).rejects.toThrow(NotFoundError);
     expect(mockFindRegistrationById).not.toHaveBeenCalled();
   });
 
   it('should throw NotFoundError with generic message "Link not found or expired"', async () => {
-    // given
-    // - token not found
     mockHashToken.mockReturnValue("hashed-any");
     mockFindByTokenHash.mockResolvedValue(null);
 
-    // when
-    const { getRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-
-    // then
-    await expect(getRegistrationByToken("any-token")).rejects.toThrow(
-      "Link not found or expired",
-    );
+    const { getRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await expect(getRegistrationByToken("any-token")).rejects.toThrow("Link not found or expired");
   });
 
   it("should throw NotFoundError when registration is not found (defensive)", async () => {
-    // given
-    // - token found but registration is missing (orphaned token)
     mockHashToken.mockReturnValue("hashed-token-abc123");
     mockFindByTokenHash.mockResolvedValue(validTokenData);
     mockFindRegistrationById.mockResolvedValue(null);
 
-    // when
-    const { getRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-
-    // then
-    await expect(
-      getRegistrationByToken("raw-token-abc123"),
-    ).rejects.toThrow(NotFoundError);
-    await expect(
-      getRegistrationByToken("raw-token-abc123"),
-    ).rejects.toThrow("Link not found or expired");
+    const { getRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await expect(getRegistrationByToken("raw-token-abc123")).rejects.toThrow(NotFoundError);
+    await expect(getRegistrationByToken("raw-token-abc123")).rejects.toThrow("Link not found or expired");
   });
 });
 
@@ -229,27 +189,20 @@ describe("updateRegistrationByToken", () => {
   });
 
   it("should validate input, update registration, rotate token, send email, and return new manage URL", async () => {
-    // given
-    // - valid token, registration, and update data
     setupUpdateMocks();
 
-    // when
-    const { updateRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-    const result = await updateRegistrationByToken(
-      "raw-token-abc123",
-      validUpdateInput,
-    );
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    const result = await updateRegistrationByToken("raw-token-abc123", validUpdateInput);
 
-    // then
     expect(mockHashToken).toHaveBeenCalledWith("raw-token-abc123");
     expect(mockFindByTokenHash).toHaveBeenCalledWith("hashed-token-abc123");
     expect(mockUpdateRegistration).toHaveBeenCalledWith("reg-1", {
       name: "Alice Updated",
       email: "alice@example.com",
-      guestCount: 3,
-      dietaryNotes: "Vegan",
+      stay: "FRI_SAT",
+      adultsCount: 3,
+      childrenCount: 0,
+      notes: "Vegan",
     });
     expect(result).toEqual({
       newManageUrl: "https://example.com/manage/new-raw-token-xyz789",
@@ -257,82 +210,41 @@ describe("updateRegistrationByToken", () => {
   });
 
   it("should revoke old token and create new token on update (token rotation)", async () => {
-    // given
-    // - valid token and update data
     setupUpdateMocks();
 
-    // when
-    const { updateRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
     await updateRegistrationByToken("raw-token-abc123", validUpdateInput);
 
-    // then
-    // - old token revoked
     expect(mockRevokeToken).toHaveBeenCalledWith("tok-1");
-
-    // - new token generated
     expect(mockGenerateToken).toHaveBeenCalledOnce();
-
-    // - new token stored with correct registration ID and hash
-    expect(mockCreateToken).toHaveBeenCalledWith(
-      "reg-1",
-      "new-hashed-token-xyz789",
-      expect.any(Date),
-    );
+    expect(mockCreateToken).toHaveBeenCalledWith("reg-1", "new-hashed-token-xyz789", expect.any(Date));
   });
 
   it("should throw NotFoundError when token is not found", async () => {
-    // given
-    // - token not found
     mockHashToken.mockReturnValue("hashed-unknown");
     mockFindByTokenHash.mockResolvedValue(null);
 
-    // when
-    const { updateRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-
-    // then
-    await expect(
-      updateRegistrationByToken("unknown-token", validUpdateInput),
-    ).rejects.toThrow(NotFoundError);
-    await expect(
-      updateRegistrationByToken("unknown-token", validUpdateInput),
-    ).rejects.toThrow("Link not found or expired");
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await expect(updateRegistrationByToken("unknown-token", validUpdateInput)).rejects.toThrow(NotFoundError);
+    await expect(updateRegistrationByToken("unknown-token", validUpdateInput)).rejects.toThrow("Link not found or expired");
     expect(mockUpdateRegistration).not.toHaveBeenCalled();
   });
 
   it("should throw ValidationError when update data is invalid", async () => {
-    // given
-    // - valid token but invalid update data (empty name)
     setupTokenLookupMocks();
     const invalidData = { ...validUpdateInput, name: "" };
 
-    // when
-    const { updateRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-
-    // then
-    await expect(
-      updateRegistrationByToken("raw-token-abc123", invalidData),
-    ).rejects.toThrow(ValidationError);
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await expect(updateRegistrationByToken("raw-token-abc123", invalidData)).rejects.toThrow(ValidationError);
     expect(mockUpdateRegistration).not.toHaveBeenCalled();
   });
 
   it("should send email with new manage URL after update", async () => {
-    // given
-    // - valid token and update data
     setupUpdateMocks();
 
-    // when
-    const { updateRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
     await updateRegistrationByToken("raw-token-abc123", validUpdateInput);
 
-    // then
     expect(mockSendManageLink).toHaveBeenCalledOnce();
     expect(mockSendManageLink).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -346,24 +258,13 @@ describe("updateRegistrationByToken", () => {
   });
 
   it("should build new manage URL with BASE_URL and new raw token", async () => {
-    // given
-    // - specific BASE_URL configured
     vi.stubEnv("BASE_URL", "https://my-party.com");
     setupUpdateMocks();
 
-    // when
-    const { updateRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-    const result = await updateRegistrationByToken(
-      "raw-token-abc123",
-      validUpdateInput,
-    );
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    const result = await updateRegistrationByToken("raw-token-abc123", validUpdateInput);
 
-    // then
-    expect(result.newManageUrl).toBe(
-      "https://my-party.com/manage/new-raw-token-xyz789",
-    );
+    expect(result.newManageUrl).toBe("https://my-party.com/manage/new-raw-token-xyz789");
   });
 });
 
@@ -374,71 +275,40 @@ describe("cancelRegistrationByToken", () => {
   });
 
   it("should cancel registration and revoke all tokens", async () => {
-    // given
-    // - valid token and registration
     setupTokenLookupMocks();
-    mockCancelRegistration.mockResolvedValue({
-      ...registrationData,
-      status: "CANCELLED",
-    });
+    mockCancelRegistration.mockResolvedValue({ ...registrationData, status: "CANCELLED" });
     mockRevokeAllTokensForRegistration.mockResolvedValue(2);
 
-    // when
-    const { cancelRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
+    const { cancelRegistrationByToken } = await import("@/lib/usecases/manage-registration");
     await cancelRegistrationByToken("raw-token-abc123");
 
-    // then
     expect(mockHashToken).toHaveBeenCalledWith("raw-token-abc123");
     expect(mockCancelRegistration).toHaveBeenCalledWith("reg-1");
     expect(mockRevokeAllTokensForRegistration).toHaveBeenCalledWith("reg-1");
   });
 
   it("should throw NotFoundError when token is not found", async () => {
-    // given
-    // - token not found
     mockHashToken.mockReturnValue("hashed-unknown");
     mockFindByTokenHash.mockResolvedValue(null);
 
-    // when
-    const { cancelRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
-
-    // then
-    await expect(
-      cancelRegistrationByToken("unknown-token"),
-    ).rejects.toThrow(NotFoundError);
-    await expect(
-      cancelRegistrationByToken("unknown-token"),
-    ).rejects.toThrow("Link not found or expired");
+    const { cancelRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await expect(cancelRegistrationByToken("unknown-token")).rejects.toThrow(NotFoundError);
+    await expect(cancelRegistrationByToken("unknown-token")).rejects.toThrow("Link not found or expired");
     expect(mockCancelRegistration).not.toHaveBeenCalled();
     expect(mockRevokeAllTokensForRegistration).not.toHaveBeenCalled();
   });
 
   it("should log the cancellation", async () => {
-    // given
-    // - valid token and registration
     setupTokenLookupMocks();
-    mockCancelRegistration.mockResolvedValue({
-      ...registrationData,
-      status: "CANCELLED",
-    });
+    mockCancelRegistration.mockResolvedValue({ ...registrationData, status: "CANCELLED" });
     mockRevokeAllTokensForRegistration.mockResolvedValue(1);
 
-    // when
-    const { cancelRegistrationByToken } = await import(
-      "@/lib/usecases/manage-registration"
-    );
+    const { cancelRegistrationByToken } = await import("@/lib/usecases/manage-registration");
     await cancelRegistrationByToken("raw-token-abc123");
 
-    // then
     expect(mockLogger.info).toHaveBeenCalledWith(
       "Registration cancelled",
-      expect.objectContaining({
-        registrationId: "reg-1",
-      }),
+      expect.objectContaining({ registrationId: "reg-1" }),
     );
   });
 });

@@ -19,7 +19,8 @@ export default async function AdminDashboardPage(): Promise<React.ReactElement> 
         <StatsCard label={t("totalRegistrations")} value={stats.total} />
         <StatsCard label={t("confirmed")} value={stats.confirmed} />
         <StatsCard label={t("cancelled")} value={stats.cancelled} />
-        <StatsCard label={t("totalGuests")} value={stats.totalGuests} />
+        <StatsCard label={t("totalAdults")} value={stats.totalAdults} />
+        <StatsCard label={t("totalChildren")} value={stats.totalChildren} />
       </div>
 
       <div className="mt-8 flex gap-4">

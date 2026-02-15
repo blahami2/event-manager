@@ -67,7 +67,7 @@ describe("Rate Limiting Integration", () => {
         const req = buildRequest("/api/register", "POST", {
           name: "Test",
           email: `test${i}@example.com`,
-          guestCount: 1,
+          stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
         });
         const res = await POST(req);
         expect(res.status).not.toBe(429);
@@ -77,7 +77,7 @@ describe("Rate Limiting Integration", () => {
       const req = buildRequest("/api/register", "POST", {
         name: "Test",
         email: "test@example.com",
-        guestCount: 1,
+        stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
       });
       const res = await POST(req);
 
@@ -104,7 +104,7 @@ describe("Rate Limiting Integration", () => {
           buildRequest("/api/register", "POST", {
             name: "Test",
             email: `t${i}@example.com`,
-            guestCount: 1,
+            stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
           }, "10.0.0.1"),
         );
       }
@@ -114,7 +114,7 @@ describe("Rate Limiting Integration", () => {
         buildRequest("/api/register", "POST", {
           name: "Test",
           email: "t@example.com",
-          guestCount: 1,
+          stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
         }, "10.0.0.1"),
       );
       expect(blocked.status).toBe(429);
@@ -124,7 +124,7 @@ describe("Rate Limiting Integration", () => {
         buildRequest("/api/register", "POST", {
           name: "Test",
           email: "t@example.com",
-          guestCount: 1,
+          stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
         }, "10.0.0.2"),
       );
       expect(allowed.status).not.toBe(429);
@@ -148,7 +148,7 @@ describe("Rate Limiting Integration", () => {
           token: "valid-token",
           name: "Test",
           email: "test@example.com",
-          guestCount: 1,
+          stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
         });
         const res = await PUT(req);
         expect(res.status).not.toBe(429);
@@ -159,7 +159,7 @@ describe("Rate Limiting Integration", () => {
         token: "valid-token",
         name: "Test",
         email: "test@example.com",
-        guestCount: 1,
+        stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
       });
       const res = await PUT(req);
 
@@ -190,7 +190,7 @@ describe("Rate Limiting Integration", () => {
             token: "valid-token",
             name: "Test",
             email: "test@example.com",
-            guestCount: 1,
+            stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
           }),
         );
       }
@@ -356,7 +356,7 @@ describe("Rate Limiting Integration", () => {
           buildRequest("/api/register", "POST", {
             name: "Test",
             email: `t${i}@example.com`,
-            guestCount: 1,
+            stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
           }),
         );
       }
@@ -366,7 +366,7 @@ describe("Rate Limiting Integration", () => {
         buildRequest("/api/register", "POST", {
           name: "Test",
           email: "t@example.com",
-          guestCount: 1,
+          stay: "FRI_SAT", adultsCount: 1, childrenCount: 0,
         }),
       );
 

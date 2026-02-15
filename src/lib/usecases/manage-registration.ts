@@ -5,6 +5,7 @@ import { sendManageLink } from "@/lib/email/send-manage-link";
 import { logger, maskEmail } from "@/lib/logger";
 import { NotFoundError, ValidationError } from "@/lib/errors/app-errors";
 import { registrationSchema } from "@/lib/validation/registration";
+import { StayOption } from "@/types/registration";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
 import { EVENT_NAME, EVENT_DATE } from "@/config/event";
 import type { RegistrationOutput } from "@/types/registration";
@@ -97,14 +98,16 @@ export async function updateRegistrationByToken(
     throw new ValidationError("Validation failed", fields);
   }
 
-  const { name, email, guestCount, dietaryNotes } = parsed.data;
+  const { name, email, stay, adultsCount, childrenCount, notes } = parsed.data;
 
   // Update the registration record
   const updatedRegistration = await updateRegistration(tokenData.registrationId, {
     name,
     email,
-    guestCount,
-    dietaryNotes,
+    stay: stay as StayOption,
+    adultsCount,
+    childrenCount,
+    notes,
   });
 
   // Token rotation: revoke old, generate new

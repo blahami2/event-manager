@@ -4,7 +4,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RegistrationTable } from "../RegistrationTable";
-import { RegistrationStatus } from "@/types/registration";
+import { RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 
 // Mock next-intl
@@ -17,8 +17,10 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
     id: "reg-1",
     name: "John Doe",
     email: "john@example.com",
-    guestCount: 2,
-    dietaryNotes: null,
+    stay: StayOption.FRI_SUN,
+    adultsCount: 2,
+    childrenCount: 0,
+    notes: null,
     status: RegistrationStatus.CONFIRMED,
     createdAt: new Date("2026-01-15"),
     updatedAt: new Date("2026-01-15"),
@@ -42,7 +44,9 @@ describe("RegistrationTable", () => {
     render(<RegistrationTable {...defaultProps} />);
     expect(screen.getByText("name")).toBeDefined();
     expect(screen.getByText("email")).toBeDefined();
-    expect(screen.getByText("guests")).toBeDefined();
+    expect(screen.getByText("stay")).toBeDefined();
+    expect(screen.getByText("adults")).toBeDefined();
+    expect(screen.getByText("children")).toBeDefined();
     expect(screen.getByText("status")).toBeDefined();
     expect(screen.getByText("created")).toBeDefined();
     expect(screen.getByText("actions")).toBeDefined();
@@ -52,6 +56,7 @@ describe("RegistrationTable", () => {
     render(<RegistrationTable {...defaultProps} />);
     expect(screen.getByText("John Doe")).toBeDefined();
     expect(screen.getByText("john@example.com")).toBeDefined();
+    expect(screen.getByText("Fri–Sun")).toBeDefined();
     expect(screen.getByText("2")).toBeDefined();
     expect(screen.getByText("CONFIRMED")).toBeDefined();
   });

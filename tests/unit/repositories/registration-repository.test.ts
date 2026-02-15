@@ -8,7 +8,7 @@ import {
   listRegistrations,
   countRegistrations,
 } from "@/repositories/registration-repository";
-import { RegistrationStatus } from "@/types/registration";
+import { RegistrationStatus, StayOption } from "@/types/registration";
 
 // ── Mock Prisma ──
 
@@ -35,8 +35,10 @@ const dbRegistration = {
   id: "reg-1",
   name: "Alice Johnson",
   email: "alice@example.com",
-  guestCount: 2,
-  dietaryNotes: null,
+  stay: "FRI_SUN" as const,
+  adultsCount: 2,
+  childrenCount: 0,
+  notes: null,
   status: "CONFIRMED" as const,
   createdAt: now,
   updatedAt: now,
@@ -55,7 +57,9 @@ describe("createRegistration", () => {
     const result = await createRegistration({
       name: "Alice Johnson",
       email: "alice@example.com",
-      guestCount: 2,
+      stay: StayOption.FRI_SUN,
+      adultsCount: 2,
+      childrenCount: 0,
     });
 
     // then
@@ -64,8 +68,10 @@ describe("createRegistration", () => {
       data: {
         name: "Alice Johnson",
         email: "alice@example.com",
-        guestCount: 2,
-        dietaryNotes: undefined,
+        stay: "FRI_SUN",
+        adultsCount: 2,
+        childrenCount: 0,
+        notes: undefined,
         status: "CONFIRMED",
       },
     });
@@ -73,32 +79,36 @@ describe("createRegistration", () => {
       id: "reg-1",
       name: "Alice Johnson",
       email: "alice@example.com",
-      guestCount: 2,
-      dietaryNotes: null,
+      stay: StayOption.FRI_SUN,
+      adultsCount: 2,
+      childrenCount: 0,
+      notes: null,
       status: RegistrationStatus.CONFIRMED,
       createdAt: now,
       updatedAt: now,
     });
   });
 
-  it("should pass dietary notes when provided", async () => {
+  it("should pass notes when provided", async () => {
     // given
     mockRegistration.create.mockResolvedValue({
       ...dbRegistration,
-      dietaryNotes: "Vegetarian",
+      notes: "Vegetarian",
     });
 
     // when
     await createRegistration({
       name: "Alice Johnson",
       email: "alice@example.com",
-      guestCount: 2,
-      dietaryNotes: "Vegetarian",
+      stay: StayOption.FRI_SUN,
+      adultsCount: 2,
+      childrenCount: 0,
+      notes: "Vegetarian",
     });
 
     // then
     expect(mockRegistration.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({ dietaryNotes: "Vegetarian" }),
+      data: expect.objectContaining({ notes: "Vegetarian" }),
     });
   });
 });
@@ -172,14 +182,16 @@ describe("updateRegistration", () => {
 
   it("should update and return the registration", async () => {
     // given
-    const updated = { ...dbRegistration, name: "Alice Smith", guestCount: 3 };
+    const updated = { ...dbRegistration, name: "Alice Smith", adultsCount: 3 };
     mockRegistration.update.mockResolvedValue(updated);
 
     // when
     const result = await updateRegistration("reg-1", {
       name: "Alice Smith",
       email: "alice@example.com",
-      guestCount: 3,
+      stay: StayOption.FRI_SUN,
+      adultsCount: 3,
+      childrenCount: 0,
     });
 
     // then
@@ -188,12 +200,14 @@ describe("updateRegistration", () => {
       data: {
         name: "Alice Smith",
         email: "alice@example.com",
-        guestCount: 3,
-        dietaryNotes: undefined,
+        stay: "FRI_SUN",
+        adultsCount: 3,
+        childrenCount: 0,
+        notes: undefined,
       },
     });
     expect(result.name).toBe("Alice Smith");
-    expect(result.guestCount).toBe(3);
+    expect(result.adultsCount).toBe(3);
   });
 });
 

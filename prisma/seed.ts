@@ -41,7 +41,7 @@ async function main(): Promise<void> {
     },
   });
 
-  // Registration 1: confirmed, no dietary notes
+  // Registration 1: confirmed, no notes
   await prisma.registration.upsert({
     where: { id: SEED_REGISTRATION_1_ID },
     update: {},
@@ -49,13 +49,15 @@ async function main(): Promise<void> {
       id: SEED_REGISTRATION_1_ID,
       name: "Alice Johnson",
       email: "alice@example.com",
-      guestCount: 2,
-      dietaryNotes: null,
+      stay: "FRI_SUN",
+      adultsCount: 2,
+      childrenCount: 0,
+      notes: null,
       status: "CONFIRMED",
     },
   });
 
-  // Registration 2: confirmed, with dietary notes
+  // Registration 2: confirmed, with notes
   await prisma.registration.upsert({
     where: { id: SEED_REGISTRATION_2_ID },
     update: {},
@@ -63,8 +65,10 @@ async function main(): Promise<void> {
       id: SEED_REGISTRATION_2_ID,
       name: "Bob Smith",
       email: "bob@example.com",
-      guestCount: 4,
-      dietaryNotes: "Vegetarian, nut allergy",
+      stay: "FRI_SAT",
+      adultsCount: 2,
+      childrenCount: 2,
+      notes: "Vegetarian, nut allergy",
       status: "CONFIRMED",
     },
   });
@@ -77,8 +81,10 @@ async function main(): Promise<void> {
       id: SEED_REGISTRATION_3_ID,
       name: "Carol Davis",
       email: "carol@example.com",
-      guestCount: 1,
-      dietaryNotes: null,
+      stay: "SAT_SUN",
+      adultsCount: 1,
+      childrenCount: 0,
+      notes: null,
       status: "CANCELLED",
     },
   });

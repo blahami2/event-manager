@@ -3,10 +3,11 @@
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import type { RegistrationOutput } from "@/types/registration";
+import type { StayOption } from "@/types/registration";
 
 export interface EditRegistrationModalProps {
   readonly registration: RegistrationOutput;
-  readonly onSave: (id: string, data: { name: string; email: string; guestCount: number; dietaryNotes?: string }) => void;
+  readonly onSave: (id: string, data: { name: string; email: string; stay: StayOption; adultsCount: number; childrenCount: number; notes?: string }) => void;
   readonly onClose: () => void;
 }
 
@@ -18,8 +19,10 @@ export function EditRegistrationModal({
   const t = useTranslations("admin.registrations.edit");
   const [name, setName] = useState(registration.name);
   const [email, setEmail] = useState(registration.email);
-  const [guestCount, setGuestCount] = useState(String(registration.guestCount));
-  const [dietaryNotes, setDietaryNotes] = useState(registration.dietaryNotes ?? "");
+  const [stay, setStay] = useState(registration.stay as string);
+  const [adultsCount, setAdultsCount] = useState(String(registration.adultsCount));
+  const [childrenCount, setChildrenCount] = useState(String(registration.childrenCount));
+  const [notes, setNotes] = useState(registration.notes ?? "");
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -27,11 +30,13 @@ export function EditRegistrationModal({
       onSave(registration.id, {
         name,
         email,
-        guestCount: Number(guestCount),
-        ...(dietaryNotes ? { dietaryNotes } : {}),
+        stay: stay as StayOption,
+        adultsCount: Number(adultsCount),
+        childrenCount: Number(childrenCount),
+        ...(notes ? { notes } : {}),
       });
     },
-    [registration.id, name, email, guestCount, dietaryNotes, onSave],
+    [registration.id, name, email, stay, adultsCount, childrenCount, notes, onSave],
   );
 
   return (
@@ -48,12 +53,24 @@ export function EditRegistrationModal({
             <input id="edit-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
           </div>
           <div>
-            <label htmlFor="edit-guest-count" className="block text-sm font-medium text-gray-700">{t("guestCount")}</label>
-            <input id="edit-guest-count" type="number" min="1" value={guestCount} onChange={(e) => setGuestCount(e.target.value)} required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+            <label htmlFor="edit-stay" className="block text-sm font-medium text-gray-700">{t("stay")}</label>
+            <select id="edit-stay" value={stay} onChange={(e) => setStay(e.target.value)} required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+              <option value="FRI_SAT">{t("stayFriSat")}</option>
+              <option value="SAT_SUN">{t("staySatSun")}</option>
+              <option value="FRI_SUN">{t("stayFriSun")}</option>
+            </select>
           </div>
           <div>
-            <label htmlFor="edit-dietary" className="block text-sm font-medium text-gray-700">{t("dietaryNotes")}</label>
-            <textarea id="edit-dietary" value={dietaryNotes} onChange={(e) => setDietaryNotes(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" rows={2} />
+            <label htmlFor="edit-adults-count" className="block text-sm font-medium text-gray-700">{t("adultsCount")}</label>
+            <input id="edit-adults-count" type="number" min="1" value={adultsCount} onChange={(e) => setAdultsCount(e.target.value)} required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label htmlFor="edit-children-count" className="block text-sm font-medium text-gray-700">{t("childrenCount")}</label>
+            <input id="edit-children-count" type="number" min="0" value={childrenCount} onChange={(e) => setChildrenCount(e.target.value)} required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label htmlFor="edit-notes" className="block text-sm font-medium text-gray-700">{t("notes")}</label>
+            <textarea id="edit-notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" rows={2} />
           </div>
           <div className="flex justify-end gap-3">
             <button type="button" onClick={onClose} className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">

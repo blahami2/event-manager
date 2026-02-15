@@ -50,7 +50,7 @@ function extractToken(body: Record<string, unknown>): string {
  * PUT /api/manage
  *
  * Update a registration via capability token.
- * Body: { token, name, email, guestCount, dietaryNotes? }
+ * Body: { token, name, email, stay, adultsCount, childrenCount, notes? }
  */
 export async function PUT(req: NextRequest): Promise<Response> {
   try {
@@ -59,12 +59,14 @@ export async function PUT(req: NextRequest): Promise<Response> {
     const body = (await req.json()) as Record<string, unknown>;
     const token = extractToken(body);
 
-    const { name, email, guestCount, dietaryNotes } = body;
+    const { name, email, stay, adultsCount, childrenCount, notes } = body;
     const result = await updateRegistrationByToken(token, {
       name,
       email,
-      guestCount,
-      dietaryNotes,
+      stay,
+      adultsCount,
+      childrenCount,
+      notes,
     });
 
     return successResponse({ newManageUrl: result.newManageUrl }, "Registration updated");

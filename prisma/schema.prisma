@@ -18,18 +18,26 @@ enum RegistrationStatus {
   CANCELLED
 }
 
+enum StayOption {
+  FRI_SAT
+  SAT_SUN
+  FRI_SUN
+}
+
 // ---------- Models ----------
 
 /// Guest registration for the birthday celebration event.
 model Registration {
-  id           String             @id @default(uuid()) @db.Uuid
-  name         String             @db.VarChar(200)
-  email        String             @db.VarChar(320)
-  guestCount   Int
-  dietaryNotes String?            @db.VarChar(500)
-  status       RegistrationStatus @default(CONFIRMED)
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  id            String             @id @default(uuid()) @db.Uuid
+  name          String             @db.VarChar(200)
+  email         String             @db.VarChar(320)
+  stay          StayOption
+  adultsCount   Int
+  childrenCount Int
+  notes         String?            @db.VarChar(500)
+  status        RegistrationStatus @default(CONFIRMED)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
   tokens RegistrationToken[]
 }

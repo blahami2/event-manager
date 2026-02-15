@@ -28,7 +28,8 @@ describe("AdminDashboardPage", () => {
       total: 10,
       confirmed: 7,
       cancelled: 3,
-      totalGuests: 25,
+      totalAdults: 20,
+      totalChildren: 5,
     });
 
     const page = await AdminDashboardPage();
@@ -42,7 +43,8 @@ describe("AdminDashboardPage", () => {
       total: 15,
       confirmed: 10,
       cancelled: 5,
-      totalGuests: 30,
+      totalAdults: 25,
+      totalChildren: 5,
     });
 
     const page = await AdminDashboardPage();
@@ -51,7 +53,7 @@ describe("AdminDashboardPage", () => {
     expect(screen.getByText("15")).toBeDefined();
     expect(screen.getByText("10")).toBeDefined();
     expect(screen.getByText("5")).toBeDefined();
-    expect(screen.getByText("30")).toBeDefined();
+    expect(screen.getByText("25")).toBeDefined();
   });
 
   it("should display translated stat labels when page loads", async () => {
@@ -59,7 +61,8 @@ describe("AdminDashboardPage", () => {
       total: 0,
       confirmed: 0,
       cancelled: 0,
-      totalGuests: 0,
+      totalAdults: 0,
+      totalChildren: 0,
     });
 
     const page = await AdminDashboardPage();
@@ -68,7 +71,8 @@ describe("AdminDashboardPage", () => {
     expect(screen.getByText("totalRegistrations")).toBeDefined();
     expect(screen.getByText("confirmed")).toBeDefined();
     expect(screen.getByText("cancelled")).toBeDefined();
-    expect(screen.getByText("totalGuests")).toBeDefined();
+    expect(screen.getByText("totalAdults")).toBeDefined();
+    expect(screen.getByText("totalChildren")).toBeDefined();
   });
 
   it("should render quick links when page loads", async () => {
@@ -76,7 +80,8 @@ describe("AdminDashboardPage", () => {
       total: 0,
       confirmed: 0,
       cancelled: 0,
-      totalGuests: 0,
+      totalAdults: 0,
+      totalChildren: 0,
     });
 
     const page = await AdminDashboardPage();

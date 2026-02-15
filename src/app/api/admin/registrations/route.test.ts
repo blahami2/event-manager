@@ -27,7 +27,7 @@ import {
   AuthorizationError,
   NotFoundError,
 } from "@/lib/errors/app-errors";
-import { RegistrationStatus } from "@/types/registration";
+import { RegistrationStatus, StayOption } from "@/types/registration";
 
 const ADMIN_RESULT = { authenticated: true as const, adminId: "admin-1" };
 
@@ -98,14 +98,12 @@ describe("GET /api/admin/registrations", () => {
 
   it("returns 401 for unauthenticated requests", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthenticationError());
-
     const res = await GET(makeGetRequest());
     expect(res.status).toBe(401);
   });
 
   it("returns 403 for non-admin users", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthorizationError());
-
     const res = await GET(makeGetRequest());
     expect(res.status).toBe(403);
   });
@@ -122,8 +120,10 @@ describe("PUT /api/admin/registrations", () => {
       id: "reg-1",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 2,
-      dietaryNotes: null,
+      stay: StayOption.FRI_SAT,
+      adultsCount: 2,
+      childrenCount: 0,
+      notes: null,
       status: RegistrationStatus.CONFIRMED,
       createdAt: new Date("2026-01-01"),
       updatedAt: new Date("2026-01-02"),
@@ -134,7 +134,9 @@ describe("PUT /api/admin/registrations", () => {
       registrationId: "reg-1",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 2,
+      stay: "FRI_SAT",
+      adultsCount: 2,
+      childrenCount: 0,
     }));
     const json = await res.json();
 
@@ -142,18 +144,20 @@ describe("PUT /api/admin/registrations", () => {
     expect(json.data).toBeDefined();
     expect(adminEditRegistration).toHaveBeenCalledWith(
       "reg-1",
-      { name: "Jane", email: "jane@example.com", guestCount: 2 },
+      { name: "Jane", email: "jane@example.com", stay: "FRI_SAT", adultsCount: 2, childrenCount: 0 },
       "admin-1",
     );
   });
 
-  it("passes dietaryNotes when provided", async () => {
+  it("passes notes when provided", async () => {
     const mockReg = {
       id: "reg-1",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
-      dietaryNotes: "vegan",
+      stay: StayOption.FRI_SAT,
+      adultsCount: 1,
+      childrenCount: 0,
+      notes: "vegan",
       status: RegistrationStatus.CONFIRMED,
       createdAt: new Date("2026-01-01"),
       updatedAt: new Date("2026-01-02"),
@@ -164,50 +168,55 @@ describe("PUT /api/admin/registrations", () => {
       registrationId: "reg-1",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
-      dietaryNotes: "vegan",
+      stay: "FRI_SAT",
+      adultsCount: 1,
+      childrenCount: 0,
+      notes: "vegan",
     }));
 
     expect(res.status).toBe(200);
     expect(adminEditRegistration).toHaveBeenCalledWith(
       "reg-1",
-      { name: "Jane", email: "jane@example.com", guestCount: 1, dietaryNotes: "vegan" },
+      { name: "Jane", email: "jane@example.com", stay: "FRI_SAT", adultsCount: 1, childrenCount: 0, notes: "vegan" },
       "admin-1",
     );
   });
 
   it("returns 401 for unauthenticated requests", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthenticationError());
-
     const res = await PUT(makeMutationRequest("PUT", {
       registrationId: "reg-1",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
+      stay: "FRI_SAT",
+      adultsCount: 1,
+      childrenCount: 0,
     }));
     expect(res.status).toBe(401);
   });
 
   it("returns 403 for non-admin users", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthorizationError());
-
     const res = await PUT(makeMutationRequest("PUT", {
       registrationId: "reg-1",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
+      stay: "FRI_SAT",
+      adultsCount: 1,
+      childrenCount: 0,
     }));
     expect(res.status).toBe(403);
   });
 
   it("returns 404 when registration not found", async () => {
     vi.mocked(adminEditRegistration).mockRejectedValue(new NotFoundError("Registration"));
-
     const res = await PUT(makeMutationRequest("PUT", {
       registrationId: "nonexistent",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
+      stay: "FRI_SAT",
+      adultsCount: 1,
+      childrenCount: 0,
     }));
     expect(res.status).toBe(404);
   });
@@ -224,17 +233,17 @@ describe("DELETE /api/admin/registrations", () => {
       id: "reg-1",
       name: "Jane",
       email: "jane@example.com",
-      guestCount: 1,
-      dietaryNotes: null,
+      stay: StayOption.FRI_SAT,
+      adultsCount: 1,
+      childrenCount: 0,
+      notes: null,
       status: RegistrationStatus.CANCELLED,
       createdAt: new Date("2026-01-01"),
       updatedAt: new Date("2026-01-02"),
     };
     vi.mocked(adminCancelRegistration).mockResolvedValue(mockReg);
 
-    const res = await DELETE(makeMutationRequest("DELETE", {
-      registrationId: "reg-1",
-    }));
+    const res = await DELETE(makeMutationRequest("DELETE", { registrationId: "reg-1" }));
     const json = await res.json();
 
     expect(res.status).toBe(200);
@@ -244,21 +253,18 @@ describe("DELETE /api/admin/registrations", () => {
 
   it("returns 401 for unauthenticated requests", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthenticationError());
-
     const res = await DELETE(makeMutationRequest("DELETE", { registrationId: "reg-1" }));
     expect(res.status).toBe(401);
   });
 
   it("returns 403 for non-admin users", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthorizationError());
-
     const res = await DELETE(makeMutationRequest("DELETE", { registrationId: "reg-1" }));
     expect(res.status).toBe(403);
   });
 
   it("returns 404 when registration not found", async () => {
     vi.mocked(adminCancelRegistration).mockRejectedValue(new NotFoundError("Registration"));
-
     const res = await DELETE(makeMutationRequest("DELETE", { registrationId: "reg-1" }));
     expect(res.status).toBe(404);
   });
