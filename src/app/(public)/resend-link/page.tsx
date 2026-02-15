@@ -12,23 +12,21 @@ export default function ResendLinkPage(): React.ReactElement {
   const t = useTranslations("resend");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-dark-secondary px-4 py-12">
-      <Card className="mx-auto w-full max-w-md border-2 border-accent">
-        <h1 className="mb-2 text-center font-heading text-3xl uppercase tracking-wider text-white sm:text-4xl">
+    <main className="bg-dark-secondary py-20 text-center">
+      <div className="mx-auto w-[90%] max-w-[1200px]">
+        <h2 className="font-heading text-4xl uppercase tracking-wider text-white">
           {t("title")}
-        </h1>
-        <p className="mb-6 text-center text-sm text-text-gray">
-          {t("description")}
-        </p>
-
-        <ResendLinkForm />
-
-        <div className="mt-6 text-center">
-          <Button href="/" variant="secondary">
-            {t("backToEvent")}
-          </Button>
-        </div>
-      </Card>
+        </h2>
+        <p className="mt-4 text-text-gray">{t("description")}</p>
+        <Card className="mx-auto mt-[50px] w-full max-w-[600px] border-2 border-accent text-left">
+          <ResendLinkForm />
+          <div className="mt-6 text-center">
+            <Button href="/" variant="secondary">
+              {t("backToEvent")}
+            </Button>
+          </div>
+        </Card>
+      </div>
     </main>
   );
 }

@@ -9,7 +9,7 @@ export function Card({
 }: CardProps): React.ReactElement {
   return (
     <div
-      className={`border-2 border-border-dark bg-dark-primary p-6 sm:p-8 lg:p-10 ${className}`}
+      className={`border-2 border-border-dark bg-dark-primary p-10 ${className}`}
     >
       {children}
     </div>

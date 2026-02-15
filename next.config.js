@@ -35,9 +35,9 @@ const nextConfig = {
         value: [
           "default-src 'self'",
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-          "style-src 'self' 'unsafe-inline'",
-          "img-src 'self' data: https://*.supabase.co https://*.resend.com",
-          "font-src 'self'",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "img-src 'self' data: https://*.supabase.co https://*.resend.com https://images.unsplash.com",
+          "font-src 'self' https://fonts.gstatic.com",
           "connect-src 'self' https://*.supabase.co https://*.resend.com",
           "frame-ancestors 'none'",
         ].join("; "),

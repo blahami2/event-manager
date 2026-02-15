@@ -15,7 +15,7 @@ export function Button({
     "inline-block font-heading text-center uppercase tracking-wide transition-all duration-300";
   const variants = {
     primary:
-      "bg-accent text-white px-10 py-4 text-lg border-3 border-accent hover:bg-transparent hover:text-accent",
+      "bg-accent text-white px-10 py-[15px] text-2xl border-3 border-accent hover:bg-transparent hover:text-accent",
     secondary:
       "text-text-gray px-6 py-2 text-sm hover:text-accent underline underline-offset-4",
   };

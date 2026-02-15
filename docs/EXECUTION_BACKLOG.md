@@ -1802,27 +1802,27 @@ The registration form is changing from `{ name, email, guestCount, dietaryNotes?
 - `src/components/layout/PublicLayout.tsx` – Shared layout wrapper for all public pages (includes footer, consistent spacing).
 
 **Acceptance criteria:**
-- [ ] Tailwind config extends theme with design tokens: `colors.accent` (`#c71f1f`), `colors.bg.main` (`#0a0a0a`), `colors.bg.secondary` (`#141414`), `colors.text.gray` (`#a1a1a1`)
-- [ ] Google Fonts (Anton + Montserrat) loaded via `next/font/google` or `globals.css` `@import`
-- [ ] Font families configured in Tailwind: `fontFamily.heading` (Anton), `fontFamily.body` (Montserrat)
-- [ ] Landing page has full-viewport hero with `main.jpg` background image, gradient overlay, event title in Anton, red subtitle, and CTA button
-- [ ] Hero heading uses responsive sizing: `clamp(4rem, 10vw, 8rem)` or equivalent Tailwind classes
-- [ ] Event details section uses flex/grid layout with dark bordered boxes, label/value pairs
-- [ ] Registration form is contained in a dark card with red border, dark inputs, red focus states
-- [ ] All buttons use Anton font, uppercase, red background with hover-to-outline transition
-- [ ] All form inputs use dark background, gray border, red focus border
-- [ ] Manage page and resend-link page follow the same visual language
-- [ ] Error boundary and 404 pages styled consistently with dark theme
-- [ ] Footer on all public pages with red top border
-- [ ] Responsive: all pages look correct at 320px, 768px, and 1280px widths
-- [ ] No inline styles in React components – all styling via Tailwind utility classes
-- [ ] All UI components are properly typed with TypeScript props interfaces
-- [ ] Components accept `className` prop for composition (using `clsx` or `cn` utility)
-- [ ] Background image (`main.jpg`) served from `public/images/` directory (copied from design reference)
-- [ ] No external CDN image dependencies (unlike the HTML reference which uses Unsplash URLs)
-- [ ] Dark theme applied globally – no white/light backgrounds on any public page
-- [ ] `npm run build` succeeds
-- [ ] Existing functionality unchanged – form submissions, validation, error handling all still work
+- [x] Tailwind config extends theme with design tokens: `colors.accent` (`#c71f1f`), `colors.bg.main` (`#0a0a0a`), `colors.bg.secondary` (`#141414`), `colors.text.gray` (`#a1a1a1`)
+- [x] Google Fonts (Anton + Montserrat) loaded via `next/font/google` or `globals.css` `@import`
+- [x] Font families configured in Tailwind: `fontFamily.heading` (Anton), `fontFamily.body` (Montserrat)
+- [x] Landing page has full-viewport hero with `main.jpg` background image, gradient overlay, event title in Anton, red subtitle, and CTA button
+- [x] Hero heading uses responsive sizing: `clamp(4rem, 10vw, 8rem)` or equivalent Tailwind classes
+- [x] Event details section uses flex/grid layout with dark bordered boxes, label/value pairs
+- [x] Registration form is contained in a dark card with red border, dark inputs, red focus states
+- [x] All buttons use Anton font, uppercase, red background with hover-to-outline transition
+- [x] All form inputs use dark background, gray border, red focus border
+- [x] Manage page and resend-link page follow the same visual language
+- [x] Error boundary and 404 pages styled consistently with dark theme
+- [x] Footer on all public pages with red top border
+- [x] Responsive: all pages look correct at 320px, 768px, and 1280px widths
+- [x] No inline styles in React components – all styling via Tailwind utility classes
+- [x] All UI components are properly typed with TypeScript props interfaces
+- [x] Components accept `className` prop for composition (using `clsx` or `cn` utility)
+- [x] Background image (`main.jpg`) served from `public/images/` directory (copied from design reference)
+- [x] No external CDN image dependencies (unlike the HTML reference which uses Unsplash URLs)
+- [x] Dark theme applied globally – no white/light backgrounds on any public page
+- [x] `npm run build` succeeds
+- [x] Existing functionality unchanged – form submissions, validation, error handling all still work
 
 **Non-goals:**
 - Do not implement the "headliners" photo grid section from the design reference (that's specific to the design example, not the registration app)

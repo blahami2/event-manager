@@ -37,7 +37,7 @@ function createMockTranslator(messages: EmailMessages) {
 describe("renderManageLinkEmail", () => {
   const defaultParams = {
     guestName: "Alice Johnson",
-    eventName: "Birthday Celebration",
+    eventName: "Triple Threat",
     eventDate: "March 15, 2026",
     manageUrl: "https://example.com/manage?token=test-token-12345678",
   } as const;
@@ -78,7 +78,7 @@ describe("renderManageLinkEmail", () => {
     const { html } = await renderManageLinkEmail(defaultParams);
 
     // then
-    expect(html).toContain("Birthday Celebration");
+    expect(html).toContain("Triple Threat");
   });
 
   test("should contain event date in output HTML", async () => {

@@ -130,7 +130,7 @@ describe("registerGuest", () => {
         guestName: "Alice Johnson",
         registrationId: "reg-1",
         emailType: "manage-link",
-        eventName: "Birthday Celebration",
+        eventName: "Triple Threat",
         eventDate: "Saturday, March 28, 2026",
       }),
     );

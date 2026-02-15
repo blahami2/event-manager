@@ -35,22 +35,26 @@ export default async function ManagePage({
 
   if (result.error !== null) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-dark-secondary px-4 py-12">
-        <Card className="mx-auto w-full max-w-md text-center">
-          <p className="text-lg font-medium text-text-gray">{result.error}</p>
-        </Card>
+      <main className="bg-dark-secondary py-20 text-center">
+        <div className="mx-auto w-[90%] max-w-[1200px]">
+          <Card className="mx-auto mt-[50px] w-full max-w-[600px]">
+            <p className="text-lg font-medium text-text-gray">{result.error}</p>
+          </Card>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-dark-secondary px-4 py-12">
-      <Card className="mx-auto w-full max-w-md border-2 border-accent">
-        <h1 className="mb-6 text-center font-heading text-3xl uppercase tracking-wider text-white sm:text-4xl">
+    <main className="bg-dark-secondary py-20 text-center">
+      <div className="mx-auto w-[90%] max-w-[1200px]">
+        <h2 className="font-heading text-4xl uppercase tracking-wider text-white">
           {t("title")}
-        </h1>
-        <ManageForm registration={result.registration} token={token} />
-      </Card>
+        </h2>
+        <Card className="mx-auto mt-[50px] w-full max-w-[600px] border-2 border-accent text-left">
+          <ManageForm registration={result.registration} token={token} />
+        </Card>
+      </div>
     </main>
   );
 }

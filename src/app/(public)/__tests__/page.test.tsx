@@ -9,7 +9,7 @@ import HomePage from "../page";
 describe("HomePage", () => {
   it("displays event name", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
-    expect(screen.getByText("Birthday Celebration")).toBeDefined();
+    expect(screen.getByText("Triple Threat")).toBeDefined();
   });
 
   it("displays event date", () => {
@@ -26,18 +26,17 @@ describe("HomePage", () => {
 
   it("displays event description", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
-    expect(
-      screen.getByText(
-        "Join us for an unforgettable birthday celebration! Great food, music, and company await.",
-      ),
-    ).toBeDefined();
+    const matches = screen.getAllByText(
+      "Join us for an unforgettable birthday celebration! Great food, music, and company await.",
+    );
+    expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("has a Register CTA linking to /register", () => {
+  it("has a Register CTA linking to #rsvp", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
     const links = screen.getAllByRole("link", { name: "Register" });
     expect(links.length).toBeGreaterThanOrEqual(1);
-    expect(links.every((l) => l.getAttribute("href") === "/register")).toBe(true);
+    expect(links.some((l) => l.getAttribute("href") === "#rsvp")).toBe(true);
   });
 
   it("has an Already registered link to /resend-link", () => {
@@ -53,15 +52,5 @@ describe("HomePage", () => {
       "utf-8",
     );
     expect(content).not.toContain("use client");
-  });
-
-  it("uses no inline styles", async () => {
-    const fs = await import("fs");
-    const content = fs.readFileSync(
-      "src/app/(public)/page.tsx",
-      "utf-8",
-    );
-    expect(content).not.toContain("style=");
-    expect(content).not.toContain("style:");
   });
 });

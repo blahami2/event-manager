@@ -33,7 +33,8 @@
   },
   "form": {
     "email": "E-mail",
-    "name": "Jméno",
+    "name": "Tvé rockové jméno",
+    "namePlaceholder": "Např. Petr 'Slash' Novák",
     "stay": "Pobyt",
     "stayPlaceholder": "Vyberte pobyt…",
     "stayFriSat": "Pátek – Sobota",
@@ -41,17 +42,32 @@
     "stayFriSun": "Pátek – Neděle",
     "adultsCount": "Počet dospělých",
     "childrenCount": "Počet dětí",
-    "notes": "Poznámky (nepovinné)",
-    "submit": "Odeslat registraci"
+    "notes": "Požadavek na rider (poznámka)",
+    "notesPlaceholder": "Např. Alergie, oblíbené pití...",
+    "submit": "Odeslat rezervaci"
   },
   "landing": {
+    "register": "Zaregistrovat účast",
+    "alreadyRegistered": "Již zaregistrováni?",
+    "headlinersTitle": "Hlavní hvězdy večera",
+    "headliner1Name": "Jméno 1",
+    "headliner1Role": "Kytara / Zpěv",
+    "headliner2Name": "Jméno 2",
+    "headliner2Role": "Bicí / Rytmika",
+    "headliner3Name": "Jméno 3",
+    "headliner3Role": "Basa / Texty",
+    "detailsHeading": "Tour Info & Tickets",
     "date": "Datum",
-    "location": "Místo",
-    "register": "Registrovat se",
-    "alreadyRegistered": "Již zaregistrováni?"
+    "location": "Lokace",
+    "venue": "Arena",
+    "info": "Backstage",
+    "description": "Zajisti si své místo v kotli. Kapacita omezena!",
+    "rsvpHeading": "Rezervace vstupu",
+    "rsvpDescription": "Zajisti si své místo v kotli. Kapacita omezena!"
   },
   "registration": {
     "title": "Registrace",
+    "description": "Zajisti si své místo. Kapacita omezena!",
     "submitting": "Odesílání…",
     "register": "Registrovat",
     "success": "Registrace proběhla úspěšně! Na váš e-mail jsme odeslali odkaz pro správu.",
@@ -80,6 +96,11 @@
     "fallbackText": "Pokud tlačítko výše nefunguje, zkopírujte a vložte tento odkaz do prohlížeče:",
     "calendarNote": "K tomuto e-mailu je přiložena pozvánka do kalendáře.",
     "footer": "Toto je automatická zpráva. Prosím, neodpovídejte na ni."
+  },
+  "footer": {
+    "title": "Management & Crew kontakt",
+    "contact": "Dotazy a info směřujte na organizátora.",
+    "tagline": "UVIDÍME SE V KOTLI!"
   },
   "resend": {
     "title": "Znovu odeslat odkaz pro správu",
