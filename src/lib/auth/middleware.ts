@@ -17,7 +17,7 @@ export function adminMiddleware(request: NextRequest): NextResponse {
     .getAll()
     .some(
       (cookie) =>
-        cookie.name.startsWith("sb-") && cookie.name.endsWith("-auth-token"),
+        cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token"),
     );
 
   if (!hasAuthHeader && !hasAuthCookie) {
