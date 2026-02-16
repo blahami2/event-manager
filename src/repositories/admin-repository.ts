@@ -52,3 +52,22 @@ export async function listAdmins(): Promise<ReadonlyArray<AdminData>> {
   const rows = await prisma.adminUser.findMany();
   return rows.map(toOutput);
 }
+
+/**
+ * Ensure an admin user record exists with the correct Supabase user ID.
+ *
+ * If a record with this supabaseUserId already exists, update its email.
+ * Otherwise create a new record. This keeps the AdminUser table in sync
+ * with Supabase Auth, fixing the mismatch caused by seed placeholder IDs.
+ */
+export async function ensureAdminUser(
+  supabaseUserId: string,
+  email: string,
+): Promise<AdminData> {
+  const row = await prisma.adminUser.upsert({
+    where: { supabaseUserId },
+    update: { email },
+    create: { supabaseUserId, email },
+  });
+  return toOutput(row);
+}
