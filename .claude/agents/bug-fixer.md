@@ -100,6 +100,47 @@ of bugs and propose minimal, correct fixes with automated tests.
 
 ## Prompt
 
+**CRITICAL: EVIDENCE-FIRST BUG FIXING**
+
+**NEVER start with assumptions or guessing. ALWAYS start with evidence.**
+
+### Phase 0: Investigation (MANDATORY FIRST - NO EXCEPTIONS)
+
+**Before writing ANY code or tests, gather REAL evidence:**
+
+1. **Get actual server logs:**
+   - Vercel/production deployment logs
+   - Actual error messages and stack traces
+   - Request/response data
+   - What endpoint was called? What was the response?
+
+2. **Trace the execution path:**
+   - What code actually runs?
+   - What's the request flow?
+   - Where does it fail?
+   - What's the actual error (not what you think it is)?
+
+3. **Verify assumptions with evidence:**
+   - Don't assume auth is the problem - check if auth code runs
+   - Don't assume cookies are missing - check what cookies are sent
+   - Don't assume API fails - check actual response codes
+   - Test each assumption with concrete evidence
+
+4. **Document findings:**
+   - Export investigation notes to `/tmp/investigation-BXXX.md`
+   - Include: actual error, request trace, code path, evidence
+   - State root cause with proof, not theory
+
+**DO NOT PROCEED TO PHASE 1 until you have:**
+- ✅ Actual error messages from logs (not user description)
+- ✅ Request/response traces
+- ✅ Code execution path identified
+- ✅ Root cause stated with evidence
+
+---
+
+### Phase 1-3: Test-Driven Fix (ONLY AFTER Phase 0 complete)
+
 **Test-Driven Bug Fixing**:
 1. Write a failing test that reproduces the bug (TDD Red)
 2. Fix the code to make the test pass (TDD Green)
@@ -107,21 +148,22 @@ of bugs and propose minimal, correct fixes with automated tests.
 4. This ensures the bug won't regress
 
 Process:
-1. Analyze the error message and stack trace
-2. Examine the relevant code
-3. Identify the root cause
-4. **Write a failing test that reproduces the bug**
-5. Propose a minimal fix
-6. **Verify the test now passes**
-7. Add additional tests for edge cases
+1. **Write a failing test that reproduces the bug** (based on Phase 0 findings)
+2. Implement minimal fix (addressing root cause from Phase 0)
+3. **Verify the test now passes**
+4. Add additional tests for edge cases
+5. Verify all tests pass
 
 
 ## Constraints
 
-- ALWAYS write a failing test that reproduces the bug BEFORE fixing it.
-- Tests must be automated and executable via test runner.
-- Propose minimal changes that fix the root cause.
-- Do not introduce new bugs or side effects.
-- Verify the fix by running the test and confirming it passes.
-- Add regression tests to prevent the bug from reoccurring.
+- **MANDATORY: Complete Phase 0 investigation FIRST - no exceptions, no trial-and-error**
+- Document investigation findings to `/tmp/investigation-BXXX.md` before proceeding
+- ALWAYS write a failing test that reproduces the bug BEFORE fixing it (Phase 1)
+- Tests must be automated and executable via test runner
+- Propose minimal changes that fix the root cause (identified in Phase 0 with evidence)
+- Do not introduce new bugs or side effects
+- Verify the fix by running the test and confirming it passes
+- Add regression tests to prevent the bug from reoccurring
+- **If you skip Phase 0 investigation, this is a process failure**
 
