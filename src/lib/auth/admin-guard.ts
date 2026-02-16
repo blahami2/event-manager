@@ -29,8 +29,13 @@ interface VerifyAdminResult {
 export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResult> {
   const authHeader = request.headers.get("authorization");
 
+  console.log("[verifyAdmin] Starting verification");
+  console.log("[verifyAdmin] Has auth header:", !!authHeader);
+  console.log("[verifyAdmin] All cookies:", request.cookies.getAll().map(c => ({ name: c.name, valueLength: c.value.length })));
+
   // Try Bearer token first (for API clients)
   if (authHeader?.startsWith("Bearer ")) {
+    console.log("[verifyAdmin] Using Bearer token");
     const token = authHeader.substring(7);
     
     const supabase = createServerClient(
@@ -45,6 +50,8 @@ export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResu
     );
     
     const { data, error } = await supabase.auth.getUser(token);
+
+    console.log("[verifyAdmin] Bearer auth result:", { hasUser: !!data.user, error: error?.message });
 
     if (error || !data.user) {
       throw new AuthenticationError();
@@ -62,10 +69,15 @@ export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResu
     };
   }
 
+  console.log("[verifyAdmin] Trying cookie-based auth");
+
   // Use NextRequest's .cookies API (same as middleware)
   const cookies = request.cookies.getAll();
   
+  console.log("[verifyAdmin] Cookie count:", cookies.length);
+
   if (cookies.length === 0) {
+    console.log("[verifyAdmin] No cookies found - throwing AuthenticationError");
     throw new AuthenticationError();
   }
 
@@ -85,17 +97,33 @@ export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResu
     }
   );
 
+  console.log("[verifyAdmin] Created Supabase client, calling getUser()");
+
   const { data, error } = await supabase.auth.getUser();
 
+  console.log("[verifyAdmin] Cookie auth result:", { 
+    hasUser: !!data.user, 
+    userId: data.user?.id,
+    error: error?.message 
+  });
+
   if (error || !data.user) {
+    console.log("[verifyAdmin] Auth failed - throwing AuthenticationError");
     throw new AuthenticationError();
   }
 
+  console.log("[verifyAdmin] Checking if user is admin:", data.user.id);
+
   const admin = await findAdminBySupabaseId(data.user.id);
 
+  console.log("[verifyAdmin] Admin lookup result:", { found: !!admin, adminId: admin?.id });
+
   if (!admin) {
+    console.log("[verifyAdmin] User not in AdminUser table - throwing AuthorizationError");
     throw new AuthorizationError();
   }
+
+  console.log("[verifyAdmin] Success!");
 
   return {
     authenticated: true,
