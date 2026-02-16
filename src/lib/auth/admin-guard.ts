@@ -44,7 +44,10 @@ export async function verifyAdmin(request: Request): Promise<VerifyAdminResult> 
   const admin = await findAdminBySupabaseId(data.user.id);
 
   if (!admin) {
-    throw new AuthorizationError();
+    // Development helper: include Supabase ID in error for easier debugging
+    const error = new AuthorizationError();
+    error.message = `Insufficient permissions. Supabase user ID: ${data.user.id}`;
+    throw error;
   }
 
   logger.info("Admin authenticated", { adminUserId: admin.id });

@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "add-admin": "tsx scripts/add-admin-user.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",
