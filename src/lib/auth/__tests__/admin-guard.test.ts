@@ -1,122 +1,141 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { extractTokenFromCookies, verifyAdmin } from "../admin-guard";
+import { verifyAdmin } from "../admin-guard";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Mock dependencies
-vi.mock("@/lib/auth/supabase-client", () => ({
-  createAdminClient: vi.fn(),
+vi.mock("@supabase/ssr", () => ({
+  createServerClient: vi.fn(),
 }));
 
 vi.mock("@/repositories/admin-repository", () => ({
   findAdminBySupabaseId: vi.fn(),
 }));
 
-vi.mock("@/lib/logger", () => ({
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
-}));
-
-import { createAdminClient } from "@/lib/auth/supabase-client";
+import { createServerClient } from "@supabase/ssr";
 import { findAdminBySupabaseId } from "@/repositories/admin-repository";
 
-describe("extractTokenFromCookies", () => {
-  it("returns null for null cookie header", () => {
-    expect(extractTokenFromCookies(null)).toBeNull();
-  });
-
-  it("returns null for empty cookie header", () => {
-    expect(extractTokenFromCookies("")).toBeNull();
-  });
-
-  it("returns null when no supabase auth cookie present", () => {
-    expect(extractTokenFromCookies("other=value; foo=bar")).toBeNull();
-  });
-
-  it("extracts token from base64-encoded JSON array cookie", () => {
-    const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.sig";
-    const cookieValue = btoa(JSON.stringify([token, "refresh-token"]));
-    const header = `sb-abc-auth-token=${cookieValue}`;
-    expect(extractTokenFromCookies(header)).toBe(token);
-  });
-
-  it("extracts token from base64-encoded JSON object cookie", () => {
-    const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.sig";
-    const cookieValue = btoa(JSON.stringify({ access_token: token }));
-    const header = `sb-abc-auth-token=${cookieValue}`;
-    expect(extractTokenFromCookies(header)).toBe(token);
-  });
-
-  it("extracts token from chunked cookies", () => {
-    const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.sig";
-    const fullValue = btoa(JSON.stringify([token, "refresh"]));
-    const mid = Math.floor(fullValue.length / 2);
-    const chunk0 = fullValue.substring(0, mid);
-    const chunk1 = fullValue.substring(mid);
-    const header = `sb-abc-auth-token.0=${chunk0}; sb-abc-auth-token.1=${chunk1}`;
-    expect(extractTokenFromCookies(header)).toBe(token);
-  });
-
-  it("extracts raw JWT token from cookie value", () => {
-    const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.signature";
-    const header = `sb-abc-auth-token=${token}`;
-    expect(extractTokenFromCookies(header)).toBe(token);
-  });
-});
+// Set required environment variables
+process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
 
 describe("verifyAdmin", () => {
-  const mockGetUser = vi.fn();
-  const mockSupabase = { auth: { getUser: mockGetUser } };
-
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(createAdminClient).mockReturnValue(mockSupabase as never);
   });
 
   it("authenticates via Bearer header", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
-    vi.mocked(findAdminBySupabaseId).mockResolvedValue({ id: "admin-1" } as never);
+    const mockSupabase = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: "user123", email: "admin@example.com" } },
+          error: null,
+        }),
+      },
+    } as unknown as SupabaseClient;
 
-    const req = new Request("http://localhost/api/admin/test", {
-      headers: { Authorization: "Bearer valid-token" },
+    vi.mocked(createServerClient).mockReturnValue(mockSupabase);
+    vi.mocked(findAdminBySupabaseId).mockResolvedValue({
+      id: "admin-id",
+      supabaseUserId: "user123",
+      email: "admin@example.com",
+      createdAt: new Date(),
     });
-    const result = await verifyAdmin(req);
-    expect(result).toEqual({ authenticated: true, adminId: "admin-1" });
-    expect(mockGetUser).toHaveBeenCalledWith("valid-token");
+
+    const request = new Request("https://example.com/api/admin/test", {
+      headers: {
+        authorization: "Bearer test-token",
+      },
+    });
+
+    const result = await verifyAdmin(request);
+
+    expect(result).toEqual({
+      authenticated: true,
+      adminId: "admin-id",
+    });
+    expect(mockSupabase.auth.getUser).toHaveBeenCalledWith("test-token");
   });
 
   it("authenticates via Supabase auth cookie when no Bearer header", async () => {
-    const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.sig";
-    const cookieValue = btoa(JSON.stringify([token, "refresh"]));
-    mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
-    vi.mocked(findAdminBySupabaseId).mockResolvedValue({ id: "admin-1" } as never);
+    const mockSupabase = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: "user123", email: "admin@example.com" } },
+          error: null,
+        }),
+      },
+    } as unknown as SupabaseClient;
 
-    const req = new Request("http://localhost/api/admin/test", {
-      headers: { Cookie: `sb-abc-auth-token=${cookieValue}` },
+    vi.mocked(createServerClient).mockReturnValue(mockSupabase);
+    vi.mocked(findAdminBySupabaseId).mockResolvedValue({
+      id: "admin-id",
+      supabaseUserId: "user123",
+      email: "admin@example.com",
+      createdAt: new Date(),
     });
-    const result = await verifyAdmin(req);
-    expect(result).toEqual({ authenticated: true, adminId: "admin-1" });
-    expect(mockGetUser).toHaveBeenCalledWith(token);
-  });
 
-  it("throws AuthenticationError when no token available", async () => {
-    const req = new Request("http://localhost/api/admin/test");
-    await expect(verifyAdmin(req)).rejects.toThrow();
-  });
-
-  it("throws AuthenticationError when supabase rejects token", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: null }, error: new Error("invalid") });
-
-    const req = new Request("http://localhost/api/admin/test", {
-      headers: { Authorization: "Bearer bad-token" },
+    const request = new Request("https://example.com/api/admin/test", {
+      headers: {
+        cookie: "sb-test-auth-token=base64encodedtoken",
+      },
     });
-    await expect(verifyAdmin(req)).rejects.toThrow();
+
+    const result = await verifyAdmin(request);
+
+    expect(result).toEqual({
+      authenticated: true,
+      adminId: "admin-id",
+    });
+    // Should call getUser without explicit token (relies on SSR cookie parsing)
+    expect(mockSupabase.auth.getUser).toHaveBeenCalledWith();
   });
 
-  it("throws AuthorizationError when user is not admin", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
+  it("throws AuthenticationError when no auth header or cookie", async () => {
+    const request = new Request("https://example.com/api/admin/test");
+
+    await expect(verifyAdmin(request)).rejects.toThrow("Authentication required");
+  });
+
+  it("throws AuthenticationError when Supabase auth fails", async () => {
+    const mockSupabase = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: null },
+          error: { message: "Invalid token" },
+        }),
+      },
+    } as unknown as SupabaseClient;
+
+    vi.mocked(createServerClient).mockReturnValue(mockSupabase);
+
+    const request = new Request("https://example.com/api/admin/test", {
+      headers: {
+        authorization: "Bearer invalid-token",
+      },
+    });
+
+    await expect(verifyAdmin(request)).rejects.toThrow("Authentication required");
+  });
+
+  it("throws AuthorizationError when user is not an admin", async () => {
+    const mockSupabase = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: "user123", email: "user@example.com" } },
+          error: null,
+        }),
+      },
+    } as unknown as SupabaseClient;
+
+    vi.mocked(createServerClient).mockReturnValue(mockSupabase);
     vi.mocked(findAdminBySupabaseId).mockResolvedValue(null);
 
-    const req = new Request("http://localhost/api/admin/test", {
-      headers: { Authorization: "Bearer valid-token" },
+    const request = new Request("https://example.com/api/admin/test", {
+      headers: {
+        authorization: "Bearer test-token",
+      },
     });
-    await expect(verifyAdmin(req)).rejects.toThrow();
+
+    await expect(verifyAdmin(request)).rejects.toThrow("Insufficient permissions");
   });
 });
