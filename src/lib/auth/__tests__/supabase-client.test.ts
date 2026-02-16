@@ -6,6 +6,12 @@ vi.mock("@supabase/supabase-js", () => ({
   createClient: mockCreateClient,
 }));
 
+// Mock @supabase/ssr for browser client (stores auth in cookies, not localStorage)
+const mockSSRCreateBrowserClient = vi.fn();
+vi.mock("@supabase/ssr", () => ({
+  createBrowserClient: mockSSRCreateBrowserClient,
+}));
+
 describe("supabase-client", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -20,7 +26,7 @@ describe("supabase-client", () => {
     it("should return the same instance when called multiple times", async () => {
       // given
       const mockClient = { auth: {} };
-      mockCreateClient.mockReturnValue(mockClient);
+      mockSSRCreateBrowserClient.mockReturnValue(mockClient);
       const { createBrowserClient } = await import("../supabase-client");
 
       // when
@@ -29,19 +35,19 @@ describe("supabase-client", () => {
 
       // then
       expect(client1).toBe(client2);
-      expect(mockCreateClient).toHaveBeenCalledTimes(1);
+      expect(mockSSRCreateBrowserClient).toHaveBeenCalledTimes(1);
     });
 
-    it("should create client with correct URL and anon key when called", async () => {
+    it("should create client with correct URL and anon key via @supabase/ssr", async () => {
       // given
-      mockCreateClient.mockReturnValue({ auth: {} });
+      mockSSRCreateBrowserClient.mockReturnValue({ auth: {} });
       const { createBrowserClient } = await import("../supabase-client");
 
       // when
       createBrowserClient();
 
-      // then
-      expect(mockCreateClient).toHaveBeenCalledWith(
+      // then — uses @supabase/ssr's createBrowserClient which stores auth in cookies
+      expect(mockSSRCreateBrowserClient).toHaveBeenCalledWith(
         "https://test.supabase.co",
         "test-anon-key",
       );
@@ -62,7 +68,7 @@ describe("supabase-client", () => {
       // given
       const mockClient1 = { auth: {}, id: 1 };
       const mockClient2 = { auth: {}, id: 2 };
-      mockCreateClient
+      mockSSRCreateBrowserClient
         .mockReturnValueOnce(mockClient1)
         .mockReturnValueOnce(mockClient2);
       const { createBrowserClient, resetBrowserClient } = await import(
@@ -76,7 +82,7 @@ describe("supabase-client", () => {
 
       // then
       expect(client1).not.toBe(client2);
-      expect(mockCreateClient).toHaveBeenCalledTimes(2);
+      expect(mockSSRCreateBrowserClient).toHaveBeenCalledTimes(2);
     });
   });
 
