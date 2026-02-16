@@ -253,8 +253,13 @@ describe("updateRegistrationByToken", () => {
         guestName: "Alice Updated",
         registrationId: "reg-1",
         emailType: "manage-link",
+        stay: "FRI_SAT",
       }),
     );
+    // eventName and eventDate should NOT be passed - they are resolved from i18n
+    const sendCall = mockSendManageLink.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(sendCall).not.toHaveProperty("eventName");
+    expect(sendCall).not.toHaveProperty("eventDate");
   });
 
   it("should build new manage URL with BASE_URL and new raw token", async () => {

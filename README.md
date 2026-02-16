@@ -46,6 +46,49 @@ npm run dev
 
 The app will be available at [http://localhost:3000](http://localhost:3000).
 
+## Database Migrations
+
+The project uses [Prisma Migrate](https://www.prisma.io/docs/concepts/components/prisma-migrate) to manage database schema changes. All migration files live in `prisma/migrations/` and are committed to version control.
+
+| Environment | Command | Description |
+|-------------|---------|-------------|
+| Development | `npx prisma migrate dev` | Apply pending migrations, regenerate Prisma client |
+| Development | `npx prisma migrate dev --name describe_change` | Create a new migration after editing `prisma/schema.prisma` |
+| Production | `npx prisma migrate deploy` | Apply pending migrations (safe for CI/CD, no client generation) |
+| Any | `npx prisma migrate reset` | Drop database, re-apply all migrations, re-seed (destroys all data) |
+
+See [docs/ARCHITECTURE.md, Section 11](docs/ARCHITECTURE.md) for the full migration policy.
+
+## Creating an Admin User
+
+Admin access requires both a **Supabase Auth account** and a matching row in the **AdminUser** database table. This two-step process ensures that only explicitly allowlisted users can access admin features.
+
+### 1. Create a Supabase Auth user
+
+- **Local development:** Open Supabase Studio at [http://127.0.0.1:54323](http://127.0.0.1:54323) (started automatically by `npm run dev`), navigate to **Authentication > Users**, and create a new user with email and password.
+- **Production:** Create the user in your Supabase project dashboard under **Authentication > Users**.
+
+### 2. Add the user to the AdminUser table
+
+Copy the new user's Supabase UUID from the Auth dashboard, then insert a row into the `AdminUser` table using one of these methods:
+
+**Option A -- SQL** (via Supabase Studio SQL Editor or `psql`):
+
+```sql
+INSERT INTO "AdminUser" (id, "supabaseUserId", email, "createdAt")
+VALUES (gen_random_uuid(), 'your-supabase-user-uuid', 'admin@example.com', now());
+```
+
+**Option B -- Prisma Studio:**
+
+```bash
+npx prisma studio
+```
+
+Open the `AdminUser` table and add a new record with the Supabase user UUID and email.
+
+> **Note:** For local development, `npx prisma db seed` automatically creates a test admin user (`admin@example.com`). You still need to create the matching Supabase Auth user in Studio for login to work.
+
 ## Available Scripts
 
 | Script | Command | Description |

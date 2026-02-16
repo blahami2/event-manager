@@ -129,8 +129,13 @@ describe("resendManageLink", () => {
         guestName: "Alice Johnson",
         registrationId: "reg-1",
         emailType: "manage-link",
+        stay: "FRI_SUN",
       }),
     );
+    // eventName and eventDate should NOT be passed - they are resolved from i18n
+    const sendCall = mockSendManageLink.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(sendCall).not.toHaveProperty("eventName");
+    expect(sendCall).not.toHaveProperty("eventDate");
     expect(result).toEqual({ success: true });
   });
 

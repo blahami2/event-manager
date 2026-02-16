@@ -7,7 +7,6 @@ import { ValidationError } from "@/lib/errors/app-errors";
 import { registrationSchema } from "@/lib/validation/registration";
 import { StayOption } from "@/types/registration";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
-import { EVENT_NAME, EVENT_DATE } from "@/config/event";
 
 /**
  * Result returned by {@link registerGuest}.
@@ -76,8 +75,7 @@ export async function registerGuest(
     guestName: name,
     registrationId: registration.id,
     emailType: "manage-link",
-    eventName: EVENT_NAME,
-    eventDate: EVENT_DATE,
+    stay: stay as StayOption,
   });
 
   // Step 6: Log registration creation (with masked email)

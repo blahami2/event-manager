@@ -102,6 +102,10 @@
     "tooManyRequests": "Príliš veľa požiadaviek. Skúste to prosím neskôr."
   },
   "email": {
+    "eventName": "Triple threat",
+    "eventDate": "Sobota 6. júna 2026",
+    "eventLocation": "Penzión Huncokár - Žltý Dom, Piesok, 900 01 Modra, Slovensko",
+    "eventDescription": "3 headlineri / jedna udalosť / jedinečný zážitok",
     "subject": "Odkaz na správu vašej registrácie",
     "greeting": "Dobrý deň, {guestName},",
     "thankYou": "Ďakujeme za registráciu na akciu {eventName} dňa {eventDate}.",

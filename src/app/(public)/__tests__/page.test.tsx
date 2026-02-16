@@ -44,12 +44,5 @@ describe("HomePage", () => {
     expect(link.getAttribute("href")).toBe("/resend-link");
   });
 
-  it("is a Server Component (no use client directive)", async () => {
-    const fs = await import("fs");
-    const content = fs.readFileSync(
-      "src/app/(public)/page.tsx",
-      "utf-8",
-    );
-    expect(content).not.toContain("use client");
-  });
+  // Moved to page-server-component.test.ts (needs @vitest-environment node for fs access)
 });
