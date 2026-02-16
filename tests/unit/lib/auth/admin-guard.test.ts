@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AuthenticationError, AuthorizationError } from "@/lib/errors/app-errors";
+import { NextRequest } from "next/server";
+import { AuthenticationError } from "@/lib/errors/app-errors";
 
 // ── Mock Setup (vi.hoisted) ──
 
-const mockCreateAdminClient = vi.hoisted(() => vi.fn());
+const mockCreateServerClient = vi.hoisted(() => vi.fn());
 const mockFindAdminBySupabaseId = vi.hoisted(() => vi.fn());
+const mockEnsureAdminUser = vi.hoisted(() => vi.fn());
 const mockGetUser = vi.hoisted(() => vi.fn());
 const mockLogger = vi.hoisted(() => ({
   debug: vi.fn(),
@@ -19,12 +21,13 @@ const mockSupabaseClient = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@/lib/auth/supabase-client", () => ({
-  createAdminClient: mockCreateAdminClient,
+vi.mock("@supabase/ssr", () => ({
+  createServerClient: mockCreateServerClient,
 }));
 
 vi.mock("@/repositories/admin-repository", () => ({
   findAdminBySupabaseId: mockFindAdminBySupabaseId,
+  ensureAdminUser: mockEnsureAdminUser,
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -42,19 +45,29 @@ const ADMIN_DATA = {
 
 const VALID_TOKEN = "valid-jwt-token";
 
-function createRequestWithAuth(token: string): Request {
-  return new Request("http://localhost/api/admin/test", {
+// Set required environment variables
+process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
+
+function createRequestWithAuth(token: string): NextRequest {
+  return new NextRequest("http://localhost/api/admin/test", {
     headers: { authorization: `Bearer ${token}` },
   });
 }
 
-function createRequestWithoutAuth(): Request {
-  return new Request("http://localhost/api/admin/test");
+function createRequestWithoutAuth(): NextRequest {
+  return new NextRequest("http://localhost/api/admin/test");
 }
 
-function createRequestWithBasicAuth(): Request {
-  return new Request("http://localhost/api/admin/test", {
+function createRequestWithBasicAuth(): NextRequest {
+  return new NextRequest("http://localhost/api/admin/test", {
     headers: { authorization: "Basic abc123" },
+  });
+}
+
+function createRequestWithCookie(): NextRequest {
+  return new NextRequest("http://localhost/api/admin/test", {
+    headers: { cookie: "sb-test-auth-token=base64encodedtoken" },
   });
 }
 
@@ -63,133 +76,124 @@ function createRequestWithBasicAuth(): Request {
 describe("verifyAdmin", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCreateAdminClient.mockReturnValue(mockSupabaseClient);
+    mockCreateServerClient.mockReturnValue(mockSupabaseClient);
   });
 
   it("should return authenticated result with adminId for valid admin session", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns a valid user
     mockGetUser.mockResolvedValue({
-      data: { user: { id: "supabase-uid-1" } },
+      data: { user: { id: "supabase-uid-1", email: "admin@example.com" } },
       error: null,
     });
-    // - the user is in the AdminUser table
     mockFindAdminBySupabaseId.mockResolvedValue(ADMIN_DATA);
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const result = await verifyAdmin(request);
 
-    // then
     expect(result).toEqual({
       authenticated: true,
       adminId: "admin-1",
     });
   });
 
-  it("should throw AuthenticationError when no Authorization header", async () => {
-    // given
-    // - a request without an Authorization header
+  it("should throw AuthenticationError when no Authorization header or cookies", async () => {
     const request = createRequestWithoutAuth();
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
-  it("should throw AuthenticationError when Authorization header is not Bearer", async () => {
-    // given
-    // - a request with a Basic auth header instead of Bearer
+  it("should throw AuthenticationError when Authorization header is not Bearer and no cookies", async () => {
     const request = createRequestWithBasicAuth();
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
   it("should throw AuthenticationError when Supabase getUser fails", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns an error
     mockGetUser.mockResolvedValue({
       data: { user: null },
       error: { message: "Invalid token" },
     });
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
   it("should throw AuthenticationError when Supabase returns no user", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns null user without an error
     mockGetUser.mockResolvedValue({
       data: { user: null },
       error: null,
     });
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
-  it("should throw AuthorizationError when user is not in AdminUser table", async () => {
-    // given
-    // - a request with a valid Bearer token
+  it("should auto-provision admin when user is not in AdminUser table", async () => {
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns a valid user
     mockGetUser.mockResolvedValue({
-      data: { user: { id: "supabase-uid-non-admin" } },
+      data: { user: { id: "supabase-uid-new", email: "new@example.com" } },
       error: null,
     });
-    // - the user is NOT in the AdminUser table
     mockFindAdminBySupabaseId.mockResolvedValue(null);
+    mockEnsureAdminUser.mockResolvedValue({
+      id: "new-admin-id",
+      supabaseUserId: "supabase-uid-new",
+      email: "new@example.com",
+      createdAt: new Date(),
+    });
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
-    const act = verifyAdmin(request);
+    const result = await verifyAdmin(request);
 
-    // then
-    await expect(act).rejects.toThrow(AuthorizationError);
+    expect(result).toEqual({
+      authenticated: true,
+      adminId: "new-admin-id",
+    });
+    expect(mockEnsureAdminUser).toHaveBeenCalledWith("supabase-uid-new", "new@example.com");
+  });
+
+  it("should authenticate via cookies when no Bearer header", async () => {
+    const request = createRequestWithCookie();
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "supabase-uid-1", email: "admin@example.com" } },
+      error: null,
+    });
+    mockFindAdminBySupabaseId.mockResolvedValue(ADMIN_DATA);
+
+    const { verifyAdmin } = await import("@/lib/auth/admin-guard");
+    const result = await verifyAdmin(request);
+
+    expect(result).toEqual({
+      authenticated: true,
+      adminId: "admin-1",
+    });
   });
 
   it("should log admin authentication on success", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns a valid user
     mockGetUser.mockResolvedValue({
-      data: { user: { id: "supabase-uid-1" } },
+      data: { user: { id: "supabase-uid-1", email: "admin@example.com" } },
       error: null,
     });
-    // - the user is in the AdminUser table
     mockFindAdminBySupabaseId.mockResolvedValue(ADMIN_DATA);
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     await verifyAdmin(request);
 
-    // then
     expect(mockLogger.info).toHaveBeenCalledWith(
-      "Admin authenticated",
+      "Admin authenticated via Bearer token",
       { adminUserId: "admin-1" },
     );
   });
