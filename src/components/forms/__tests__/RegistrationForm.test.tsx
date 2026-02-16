@@ -205,10 +205,11 @@ describe("RegistrationForm", () => {
   it("stay dropdown has correct options", () => {
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     const select = screen.getByLabelText("Stay") as HTMLSelectElement;
-    // placeholder + 3 options
-    expect(select.options.length).toBe(4);
+    // placeholder + 4 options
+    expect(select.options.length).toBe(5);
     expect(select.options[1]?.value).toBe("FRI_SAT");
     expect(select.options[2]?.value).toBe("SAT_SUN");
     expect(select.options[3]?.value).toBe("FRI_SUN");
+    expect(select.options[4]?.value).toBe("SAT_ONLY");
   });
 });

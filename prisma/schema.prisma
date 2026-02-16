@@ -22,6 +22,7 @@ enum StayOption {
   FRI_SAT
   SAT_SUN
   FRI_SUN
+  SAT_ONLY
 }
 
 // ---------- Models ----------

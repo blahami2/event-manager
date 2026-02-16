@@ -40,6 +40,7 @@
     "stayFriSat": "Pátek – Sobota",
     "staySatSun": "Sobota – Neděle",
     "stayFriSun": "Pátek – Neděle",
+    "staySatOnly": "Pouze sobota",
     "adultsCount": "Počet dospělých",
     "childrenCount": "Počet dětí",
     "notes": "Poznámka (co se jinam nevešlo)",
@@ -195,6 +196,7 @@
         "stayFriSat": "Pá–So",
         "staySatSun": "So–Ne",
         "stayFriSun": "Pá–Ne",
+        "staySatOnly": "So",
         "adultsCount": "Dospělí",
         "childrenCount": "Děti",
         "notes": "Poznámky"

@@ -16,6 +16,7 @@ export enum StayOption {
   FRI_SAT = "FRI_SAT",
   SAT_SUN = "SAT_SUN",
   FRI_SUN = "FRI_SUN",
+  SAT_ONLY = "SAT_ONLY",
 }
 
 /** Input data for creating or updating a registration. */

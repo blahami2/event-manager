@@ -20,4 +20,5 @@ export const EVENT_DATES_BY_STAY: Readonly<Record<StayOption, { readonly start: 
   FRI_SAT: { start: new Date("2026-06-05T20:00:00+02:00"), end: new Date("2026-06-06T20:00:00+02:00") },
   SAT_SUN: { start: new Date("2026-06-06T20:00:00+02:00"), end: new Date("2026-06-07T12:00:00+02:00") },
   FRI_SUN: { start: new Date("2026-06-05T20:00:00+02:00"), end: new Date("2026-06-07T12:00:00+02:00") },
+  SAT_ONLY: { start: new Date("2026-06-06T13:00:00+02:00"), end: new Date("2026-06-06T22:00:00+02:00") },
 };

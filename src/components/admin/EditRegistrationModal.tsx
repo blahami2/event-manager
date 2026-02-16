@@ -58,6 +58,7 @@ export function EditRegistrationModal({
               <option value="FRI_SAT">{t("stayFriSat")}</option>
               <option value="SAT_SUN">{t("staySatSun")}</option>
               <option value="FRI_SUN">{t("stayFriSun")}</option>
+              <option value="SAT_ONLY">{t("staySatOnly")}</option>
             </select>
           </div>
           <div>

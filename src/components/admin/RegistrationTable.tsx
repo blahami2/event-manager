@@ -27,6 +27,8 @@ function formatStay(stay: string): string {
       return "Sat–Sun";
     case "FRI_SUN":
       return "Fri–Sun";
+    case "SAT_ONLY":
+      return "Sat";
     default:
       return stay;
   }
