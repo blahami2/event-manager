@@ -71,18 +71,6 @@ function createRequestWithCookie(cookieName: string, cookieValue: string): Reque
   });
 }
 
-function createRequestWithChunkedCookies(
-  baseName: string,
-  chunks: string[],
-): Request {
-  const cookieHeader = chunks
-    .map((chunk, i) => `${baseName}.${i}=${chunk}`)
-    .join("; ");
-  return new Request("http://localhost/api/admin/test", {
-    headers: { cookie: cookieHeader },
-  });
-}
-
 // ── Tests ──
 
 describe("extractTokenFromCookies", () => {
