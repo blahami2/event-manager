@@ -58,7 +58,81 @@ function createRequestWithBasicAuth(): Request {
   });
 }
 
+/** Create a base64url-encoded cookie value like @supabase/ssr v0.8+ does */
+function createBase64Cookie(session: Record<string, unknown>): string {
+  const json = JSON.stringify(session);
+  const b64 = btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return `base64-${b64}`;
+}
+
+function createRequestWithCookie(cookieName: string, cookieValue: string): Request {
+  return new Request("http://localhost/api/admin/test", {
+    headers: { cookie: `${cookieName}=${cookieValue}` },
+  });
+}
+
 // ── Tests ──
+
+describe("extractTokenFromCookies", () => {
+  it("should return null for null cookie header", async () => {
+    const { extractTokenFromCookies } = await import("@/lib/auth/admin-guard");
+    expect(extractTokenFromCookies(null)).toBeNull();
+  });
+
+  it("should return null for empty cookie header", async () => {
+    const { extractTokenFromCookies } = await import("@/lib/auth/admin-guard");
+    expect(extractTokenFromCookies("")).toBeNull();
+  });
+
+  it("should return null when no supabase auth cookie exists", async () => {
+    const { extractTokenFromCookies } = await import("@/lib/auth/admin-guard");
+    expect(extractTokenFromCookies("other-cookie=value")).toBeNull();
+  });
+
+  it("should extract token from base64url-encoded cookie (supabase/ssr v0.8+ format)", async () => {
+    const { extractTokenFromCookies } = await import("@/lib/auth/admin-guard");
+    const session = { access_token: "my-jwt-token", refresh_token: "refresh" };
+    const cookieValue = createBase64Cookie(session);
+    const header = `sb-myref-auth-token=${cookieValue}`;
+    expect(extractTokenFromCookies(header)).toBe("my-jwt-token");
+  });
+
+  it("should extract token from chunked base64url-encoded cookies", async () => {
+    const { extractTokenFromCookies } = await import("@/lib/auth/admin-guard");
+    const session = { access_token: "chunked-jwt-token", refresh_token: "refresh", extra: "x".repeat(200) };
+    const fullValue = createBase64Cookie(session);
+    // Split into chunks
+    const mid = Math.floor(fullValue.length / 2);
+    const chunk0 = fullValue.substring(0, mid);
+    const chunk1 = fullValue.substring(mid);
+    const header = `sb-ref-auth-token.0=${chunk0}; sb-ref-auth-token.1=${chunk1}`;
+    expect(extractTokenFromCookies(header)).toBe("chunked-jwt-token");
+  });
+
+  it("should extract token from plain JSON object cookie (legacy format)", async () => {
+    const { extractTokenFromCookies } = await import("@/lib/auth/admin-guard");
+    const session = { access_token: "legacy-token", refresh_token: "r" };
+    // Plain base64 (no "base64-" prefix)
+    const b64 = btoa(JSON.stringify(session));
+    const header = `sb-ref-auth-token=${b64}`;
+    expect(extractTokenFromCookies(header)).toBe("legacy-token");
+  });
+
+  it("should extract token from JSON array cookie (older format)", async () => {
+    const { extractTokenFromCookies } = await import("@/lib/auth/admin-guard");
+    const arr = ["array-token", "refresh"];
+    const b64 = btoa(JSON.stringify(arr));
+    const header = `sb-ref-auth-token=${b64}`;
+    expect(extractTokenFromCookies(header)).toBe("array-token");
+  });
+
+  it("should extract raw JWT token when cookie value is a JWT", async () => {
+    const { extractTokenFromCookies } = await import("@/lib/auth/admin-guard");
+    const jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.sigs";
+    const header = `sb-ref-auth-token=${jwt}`;
+    expect(extractTokenFromCookies(header)).toBe(jwt);
+  });
+});
 
 describe("verifyAdmin", () => {
   beforeEach(() => {
@@ -67,127 +141,109 @@ describe("verifyAdmin", () => {
   });
 
   it("should return authenticated result with adminId for valid admin session", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns a valid user
     mockGetUser.mockResolvedValue({
       data: { user: { id: "supabase-uid-1" } },
       error: null,
     });
-    // - the user is in the AdminUser table
     mockFindAdminBySupabaseId.mockResolvedValue(ADMIN_DATA);
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const result = await verifyAdmin(request);
 
-    // then
     expect(result).toEqual({
       authenticated: true,
       adminId: "admin-1",
     });
   });
 
-  it("should throw AuthenticationError when no Authorization header", async () => {
-    // given
-    // - a request without an Authorization header
+  it("should throw AuthenticationError when no Authorization header and no cookies", async () => {
     const request = createRequestWithoutAuth();
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
   it("should throw AuthenticationError when Authorization header is not Bearer", async () => {
-    // given
-    // - a request with a Basic auth header instead of Bearer
     const request = createRequestWithBasicAuth();
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
+  it("should authenticate via cookie when no Bearer token", async () => {
+    const session = { access_token: "cookie-jwt", refresh_token: "r" };
+    const cookieValue = createBase64Cookie(session);
+    const request = createRequestWithCookie("sb-ref-auth-token", cookieValue);
+
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "supabase-uid-1" } },
+      error: null,
+    });
+    mockFindAdminBySupabaseId.mockResolvedValue(ADMIN_DATA);
+
+    const { verifyAdmin } = await import("@/lib/auth/admin-guard");
+    const result = await verifyAdmin(request);
+
+    expect(result).toEqual({ authenticated: true, adminId: "admin-1" });
+    expect(mockGetUser).toHaveBeenCalledWith("cookie-jwt");
+  });
+
   it("should throw AuthenticationError when Supabase getUser fails", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns an error
     mockGetUser.mockResolvedValue({
       data: { user: null },
       error: { message: "Invalid token" },
     });
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
   it("should throw AuthenticationError when Supabase returns no user", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns null user without an error
     mockGetUser.mockResolvedValue({
       data: { user: null },
       error: null,
     });
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
   it("should throw AuthorizationError when user is not in AdminUser table", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns a valid user
     mockGetUser.mockResolvedValue({
       data: { user: { id: "supabase-uid-non-admin" } },
       error: null,
     });
-    // - the user is NOT in the AdminUser table
     mockFindAdminBySupabaseId.mockResolvedValue(null);
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     const act = verifyAdmin(request);
 
-    // then
     await expect(act).rejects.toThrow(AuthorizationError);
   });
 
   it("should log admin authentication on success", async () => {
-    // given
-    // - a request with a valid Bearer token
     const request = createRequestWithAuth(VALID_TOKEN);
-    // - supabase getUser returns a valid user
     mockGetUser.mockResolvedValue({
       data: { user: { id: "supabase-uid-1" } },
       error: null,
     });
-    // - the user is in the AdminUser table
     mockFindAdminBySupabaseId.mockResolvedValue(ADMIN_DATA);
 
-    // when
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
     await verifyAdmin(request);
 
-    // then
     expect(mockLogger.info).toHaveBeenCalledWith(
       "Admin authenticated",
       { adminUserId: "admin-1" },
