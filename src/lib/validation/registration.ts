@@ -3,7 +3,7 @@ import { z } from "zod";
 /**
  * Stay option values matching the Prisma StayOption enum.
  */
-const STAY_OPTIONS = ["FRI_SAT", "SAT_SUN", "FRI_SUN"] as const;
+const STAY_OPTIONS = ["FRI_SAT", "SAT_SUN", "FRI_SUN", "SAT_ONLY"] as const;
 
 /**
  * Zod validation schema for guest registration input.
@@ -11,7 +11,7 @@ const STAY_OPTIONS = ["FRI_SAT", "SAT_SUN", "FRI_SUN"] as const;
  * Enforces the domain constraints defined in docs/ARCHITECTURE.md Section 8.1:
  * - name: 1-200 characters
  * - email: valid email format
- * - stay: one of FRI_SAT, SAT_SUN, FRI_SUN
+ * - stay: one of FRI_SAT, SAT_SUN, FRI_SUN, SAT_ONLY
  * - adultsCount: integer, 1-10
  * - childrenCount: integer, 0-10
  * - notes: optional, max 500 characters

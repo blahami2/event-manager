@@ -40,6 +40,7 @@
     "stayFriSat": "Friday – Saturday",
     "staySatSun": "Saturday – Sunday",
     "stayFriSun": "Friday – Sunday",
+    "staySatOnly": "Saturday only",
     "adultsCount": "Number of Adults",
     "childrenCount": "Number of Children",
     "notes": "Notes (anything else)",
@@ -195,6 +196,7 @@
         "stayFriSat": "Fri–Sat",
         "staySatSun": "Sat–Sun",
         "stayFriSun": "Fri–Sun",
+        "staySatOnly": "Sat",
         "adultsCount": "Adults",
         "childrenCount": "Children",
         "notes": "Notes"
