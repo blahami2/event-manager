@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 import { verifyAdmin } from "../admin-guard";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -41,7 +42,7 @@ describe("verifyAdmin", () => {
       createdAt: new Date(),
     });
 
-    const request = new Request("https://example.com/api/admin/test", {
+    const request = new NextRequest("https://example.com/api/admin/test", {
       headers: {
         authorization: "Bearer test-token",
       },
@@ -74,7 +75,7 @@ describe("verifyAdmin", () => {
       createdAt: new Date(),
     });
 
-    const request = new Request("https://example.com/api/admin/test", {
+    const request = new NextRequest("https://example.com/api/admin/test", {
       headers: {
         cookie: "sb-test-auth-token=base64encodedtoken",
       },
@@ -86,12 +87,11 @@ describe("verifyAdmin", () => {
       authenticated: true,
       adminId: "admin-id",
     });
-    // Should call getUser without explicit token (relies on SSR cookie parsing)
     expect(mockSupabase.auth.getUser).toHaveBeenCalledWith();
   });
 
   it("throws AuthenticationError when no auth header or cookie", async () => {
-    const request = new Request("https://example.com/api/admin/test");
+    const request = new NextRequest("https://example.com/api/admin/test");
 
     await expect(verifyAdmin(request)).rejects.toThrow("Authentication required");
   });
@@ -108,7 +108,7 @@ describe("verifyAdmin", () => {
 
     vi.mocked(createServerClient).mockReturnValue(mockSupabase);
 
-    const request = new Request("https://example.com/api/admin/test", {
+    const request = new NextRequest("https://example.com/api/admin/test", {
       headers: {
         authorization: "Bearer invalid-token",
       },
@@ -130,7 +130,7 @@ describe("verifyAdmin", () => {
     vi.mocked(createServerClient).mockReturnValue(mockSupabase);
     vi.mocked(findAdminBySupabaseId).mockResolvedValue(null);
 
-    const request = new Request("https://example.com/api/admin/test", {
+    const request = new NextRequest("https://example.com/api/admin/test", {
       headers: {
         authorization: "Bearer test-token",
       },

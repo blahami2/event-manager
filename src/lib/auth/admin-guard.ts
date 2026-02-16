@@ -1,4 +1,5 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import { findAdminBySupabaseId } from "@/repositories/admin-repository";
 import {
   AuthenticationError,
@@ -25,14 +26,13 @@ interface VerifyAdminResult {
  * @throws {AuthenticationError} if no valid session (401)
  * @throws {AuthorizationError} if session valid but user is not admin (403)
  */
-export async function verifyAdmin(request: Request): Promise<VerifyAdminResult> {
+export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResult> {
   const authHeader = request.headers.get("authorization");
 
   // Try Bearer token first (for API clients)
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.substring(7);
     
-    // Use @supabase/ssr with empty cookies since we have a Bearer token
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -62,20 +62,14 @@ export async function verifyAdmin(request: Request): Promise<VerifyAdminResult> 
     };
   }
 
-  // Fall back to cookie-based authentication (for browser requests)
-  const cookieHeader = request.headers.get("cookie");
+  // Use NextRequest's .cookies API (same as middleware)
+  const cookies = request.cookies.getAll();
   
-  if (!cookieHeader) {
+  if (cookies.length === 0) {
     throw new AuthenticationError();
   }
 
-  // Parse Cookie header into individual cookies
-  const cookies = cookieHeader.split(";").map((cookie) => {
-    const [name, ...valueParts] = cookie.trim().split("=");
-    return { name, value: valueParts.join("=") };
-  });
-
-  // Create Supabase client with parsed cookies
+  // Create Supabase client with NextRequest cookies
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -84,14 +78,13 @@ export async function verifyAdmin(request: Request): Promise<VerifyAdminResult> 
         getAll() {
           return cookies;
         },
-        setAll(cookiesToSet) {
-          // No-op: we're only reading auth state, not modifying it
+        setAll() {
+          // No-op: read-only
         },
       },
     }
   );
 
-  // Let @supabase/ssr handle cookie parsing and session extraction
   const { data, error } = await supabase.auth.getUser();
 
   if (error || !data.user) {
