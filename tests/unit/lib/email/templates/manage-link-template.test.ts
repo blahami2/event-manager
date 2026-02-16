@@ -263,7 +263,7 @@ describe("renderManageLinkEmail", () => {
     const { html } = await renderManageLinkEmail(defaultParams);
 
     // then
-    expect(html).toContain("<strong>Triple Threat</strong>");
+    expect(html).toContain("<strong>Triple threat</strong>");
   });
 
   test("should render event date wrapped in <strong> tags in the HTML body", async () => {
@@ -274,7 +274,7 @@ describe("renderManageLinkEmail", () => {
     const { html } = await renderManageLinkEmail(defaultParams);
 
     // then
-    expect(html).toContain("<strong>March 15, 2026</strong>");
+    expect(html).toContain("<strong>Saturday, June 6, 2026</strong>");
   });
 
   test("should not contain literal ICU tag syntax in rendered thankYou text", async () => {
@@ -293,14 +293,14 @@ describe("renderManageLinkEmail", () => {
 
   test("should escape HTML in event name even when wrapped in bold tags", async () => {
     // given
-    setupMockTranslator(enMessages.email);
-    const params = {
-      ...defaultParams,
+    const maliciousMessages = {
+      ...enMessages.email,
       eventName: 'Party & "Fun" <Night>',
     };
+    setupMockTranslator(maliciousMessages);
 
     // when
-    const { html } = await renderManageLinkEmail(params);
+    const { html } = await renderManageLinkEmail(defaultParams);
 
     // then
     expect(html).toContain("<strong>Party &amp; &quot;Fun&quot; &lt;Night&gt;</strong>");
