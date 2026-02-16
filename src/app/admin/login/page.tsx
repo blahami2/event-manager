@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createBrowserClient } from "@/lib/auth/supabase-client";
 
 export default function LoginPage(): React.ReactElement {
-  const router = useRouter();
   const t = useTranslations("admin.login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,7 +30,10 @@ export default function LoginPage(): React.ReactElement {
         return;
       }
 
-      router.push("/admin");
+      // Full page reload ensures middleware sees fresh auth cookies.
+      // router.push() does client-side navigation which skips middleware,
+      // causing a redirect loop back to /admin/login.
+      window.location.href = "/admin";
     } catch {
       setError(t("error"));
     } finally {

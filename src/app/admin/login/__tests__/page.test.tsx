@@ -1,19 +1,13 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LoginPage from "../page";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
-}));
-
-// Mock next/navigation
-const mockPush = vi.fn();
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
 }));
 
 // Mock supabase client
@@ -27,8 +21,22 @@ vi.mock("@/lib/auth/supabase-client", () => ({
 }));
 
 describe("LoginPage", () => {
+  const originalLocation = window.location;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    // Mock window.location.href
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: { ...originalLocation, href: "" },
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: originalLocation,
+    });
   });
 
   it("should render email and password fields when page loads", () => {
@@ -65,7 +73,7 @@ describe("LoginPage", () => {
     });
   });
 
-  it("should redirect to /admin on successful login when credentials valid", async () => {
+  it("should redirect to /admin via full page reload on successful login", async () => {
     mockSignInWithPassword.mockResolvedValue({
       data: { session: { access_token: "test" } },
       error: null,
@@ -81,7 +89,7 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "submit" }));
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/admin");
+      expect(window.location.href).toBe("/admin");
     });
   });
 
@@ -103,7 +111,7 @@ describe("LoginPage", () => {
     await waitFor(() => {
       expect(screen.getByText("error")).toBeDefined();
     });
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(window.location.href).not.toBe("/admin");
   });
 
   it("should render page title when page loads", () => {

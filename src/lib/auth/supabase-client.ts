@@ -1,10 +1,16 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient as createSSRBrowserClient } from "@supabase/ssr";
 
 /**
  * Creates a Supabase client for browser-side use with the anon key.
  *
- * Uses NEXT_PUBLIC_* env vars which are available in the browser bundle.
- * Persists session in browser storage for cookie-based auth.
+ * Uses @supabase/ssr's createBrowserClient which stores auth tokens
+ * in **cookies** (not localStorage). This is critical because the
+ * Next.js middleware reads cookies to check authentication.
+ *
+ * Without this, signInWithPassword succeeds but the session is only
+ * in localStorage, so the middleware never sees it and redirects
+ * back to /admin/login on every navigation.
  */
 let browserClientInstance: SupabaseClient | undefined;
 
@@ -22,7 +28,7 @@ export function createBrowserClient(): SupabaseClient {
     );
   }
 
-  browserClientInstance = createClient(url, anonKey);
+  browserClientInstance = createSSRBrowserClient(url, anonKey);
   return browserClientInstance;
 }
 
