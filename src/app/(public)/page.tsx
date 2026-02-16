@@ -6,9 +6,9 @@ const HEADING_FONT = "'Anton', sans-serif";
 const BODY_FONT = "'Montserrat', sans-serif";
 
 const HEADLINER_IMAGES = [
-  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-  "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+  "/images/milos_03.jpg",
+  "/images/soso_01.png",
+  "/images/misa_01.png",
 ];
 
 export default function HomePage(): React.ReactElement {
@@ -306,6 +306,27 @@ export default function HomePage(): React.ReactElement {
                     {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
                     <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
                   {t("detailsLineup3")}
+                </span>
+                </div>
+
+                {/* .detail-item { margin-bottom:25px } */}
+                <div style={{ marginBottom: "25px" }}>
+                    {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
+                    <span
+                        style={{
+                            fontFamily: BODY_FONT,
+                            fontWeight: 900,
+                            display: "block",
+                            textTransform: "uppercase",
+                            marginBottom: "5px",
+                            color: "var(--color-text-gray)",
+                        }}
+                    >
+                  22:00
+                </span>
+                    {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
+                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                  {t("detailsLineup4")}
                 </span>
                 </div>
             </div>
