@@ -2,8 +2,11 @@
 
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
-import type { StayOption } from "@/types/registration";
+
+/** Stay options hidden from new selections but shown for legacy registrations. */
+const LEGACY_STAY_OPTIONS: ReadonlyArray<StayOption> = [StayOption.FRI_SAT, StayOption.FRI_SUN] as const;
 
 export interface EditRegistrationModalProps {
   readonly registration: RegistrationOutput;
@@ -55,9 +58,12 @@ export function EditRegistrationModal({
           <div>
             <label htmlFor="edit-stay" className="block text-sm font-medium text-gray-700">{t("stay")}</label>
             <select id="edit-stay" value={stay} onChange={(e) => setStay(e.target.value)} required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-              <option value="FRI_SAT">{t("stayFriSat")}</option>
+              {LEGACY_STAY_OPTIONS.includes(registration.stay) && (
+                <option value={registration.stay}>
+                  {registration.stay === StayOption.FRI_SAT ? t("stayFriSat") : t("stayFriSun")}
+                </option>
+              )}
               <option value="SAT_SUN">{t("staySatSun")}</option>
-              <option value="FRI_SUN">{t("stayFriSun")}</option>
               <option value="SAT_ONLY">{t("staySatOnly")}</option>
             </select>
           </div>
