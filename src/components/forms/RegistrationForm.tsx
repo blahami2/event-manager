@@ -176,9 +176,7 @@ export function RegistrationForm(): React.ReactElement {
           style={selectStyle}
         >
           <option value="">{tForm("stayPlaceholder")}</option>
-          <option value="FRI_SAT">{tForm("stayFriSat")}</option>
           <option value="SAT_SUN">{tForm("staySatSun")}</option>
-          <option value="FRI_SUN">{tForm("stayFriSun")}</option>
           <option value="SAT_ONLY">{tForm("staySatOnly")}</option>
         </select>
       </FormField>

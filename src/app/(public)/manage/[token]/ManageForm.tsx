@@ -6,8 +6,12 @@ import { registrationSchema } from "@/lib/validation/registration";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 import type { ApiErrorResponse } from "@/types/api";
+
+/** Stay options hidden from new selections but shown for legacy registrations. */
+const LEGACY_STAY_OPTIONS: ReadonlyArray<StayOption> = [StayOption.FRI_SAT, StayOption.FRI_SUN] as const;
 
 interface ManageFormProps {
   readonly registration: RegistrationOutput;
@@ -231,9 +235,12 @@ export function ManageForm({
             style={selectStyle}
           >
             <option value="">{tForm("stayPlaceholder")}</option>
-            <option value="FRI_SAT">{tForm("stayFriSat")}</option>
+            {LEGACY_STAY_OPTIONS.includes(registration.stay) && (
+              <option value={registration.stay}>
+                {registration.stay === StayOption.FRI_SAT ? tForm("stayFriSat") : tForm("stayFriSun")}
+              </option>
+            )}
             <option value="SAT_SUN">{tForm("staySatSun")}</option>
-            <option value="FRI_SUN">{tForm("stayFriSun")}</option>
             <option value="SAT_ONLY">{tForm("staySatOnly")}</option>
           </select>
         </FormField>

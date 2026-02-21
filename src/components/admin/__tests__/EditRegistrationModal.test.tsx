@@ -68,4 +68,28 @@ describe("EditRegistrationModal", () => {
     render(<EditRegistrationModal registration={mockReg} onSave={vi.fn()} onClose={vi.fn()} />);
     expect(screen.getByRole("dialog")).toBeDefined();
   });
+
+  it("should show legacy FRI_SUN option when registration has that stay", () => {
+    render(<EditRegistrationModal registration={mockReg} onSave={vi.fn()} onClose={vi.fn()} />);
+    const select = screen.getByLabelText("stay") as HTMLSelectElement;
+    const values = Array.from(select.options).map((o) => o.value);
+    // - legacy option preserved for existing registration
+    expect(values).toContain("FRI_SUN");
+    // - other legacy option not shown
+    expect(values).not.toContain("FRI_SAT");
+    // - current options available
+    expect(values).toContain("SAT_SUN");
+    expect(values).toContain("SAT_ONLY");
+  });
+
+  it("should not show legacy options when registration has current stay", () => {
+    const satSunReg: RegistrationOutput = { ...mockReg, stay: StayOption.SAT_SUN };
+    render(<EditRegistrationModal registration={satSunReg} onSave={vi.fn()} onClose={vi.fn()} />);
+    const select = screen.getByLabelText("stay") as HTMLSelectElement;
+    const values = Array.from(select.options).map((o) => o.value);
+    expect(values).not.toContain("FRI_SAT");
+    expect(values).not.toContain("FRI_SUN");
+    expect(values).toContain("SAT_SUN");
+    expect(values).toContain("SAT_ONLY");
+  });
 });

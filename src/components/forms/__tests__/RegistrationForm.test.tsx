@@ -17,7 +17,7 @@ beforeEach(() => {
 async function fillForm(user: ReturnType<typeof userEvent.setup>): Promise<void> {
   await user.type(screen.getByLabelText("Participant"), "Alice");
   await user.type(screen.getByLabelText("Email"), "alice@example.com");
-  await user.selectOptions(screen.getByLabelText("Stay"), "FRI_SUN");
+  await user.selectOptions(screen.getByLabelText("Stay"), "SAT_SUN");
   // adultsCount defaults to 1, childrenCount defaults to 0
 }
 
@@ -73,7 +73,7 @@ describe("RegistrationForm", () => {
       body: JSON.stringify({
         name: "Alice",
         email: "alice@example.com",
-        stay: "FRI_SUN",
+        stay: "SAT_SUN",
         adultsCount: 1,
         childrenCount: 0,
       }),
@@ -205,11 +205,17 @@ describe("RegistrationForm", () => {
   it("stay dropdown has correct options", () => {
     render(<RegistrationForm />, { wrapper: IntlWrapper });
     const select = screen.getByLabelText("Stay") as HTMLSelectElement;
-    // placeholder + 4 options
-    expect(select.options.length).toBe(5);
-    expect(select.options[1]?.value).toBe("FRI_SAT");
-    expect(select.options[2]?.value).toBe("SAT_SUN");
-    expect(select.options[3]?.value).toBe("FRI_SUN");
-    expect(select.options[4]?.value).toBe("SAT_ONLY");
+    // placeholder + 2 options (SAT_SUN, SAT_ONLY)
+    expect(select.options.length).toBe(3);
+    expect(select.options[1]?.value).toBe("SAT_SUN");
+    expect(select.options[2]?.value).toBe("SAT_ONLY");
+  });
+
+  it("does not offer FRI_SAT or FRI_SUN stay options", () => {
+    render(<RegistrationForm />, { wrapper: IntlWrapper });
+    const select = screen.getByLabelText("Stay") as HTMLSelectElement;
+    const values = Array.from(select.options).map((o) => o.value);
+    expect(values).not.toContain("FRI_SAT");
+    expect(values).not.toContain("FRI_SUN");
   });
 });
