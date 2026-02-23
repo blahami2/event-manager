@@ -10,7 +10,10 @@ const LEGACY_STAY_OPTIONS: ReadonlyArray<StayOption> = [StayOption.FRI_SAT, Stay
 
 export interface EditRegistrationModalProps {
   readonly registration: RegistrationOutput;
-  readonly onSave: (id: string, data: { name: string; email: string; stay: StayOption; adultsCount: number; childrenCount: number; notes?: string }) => void;
+  readonly onSave: (
+    id: string,
+    data: { name: string; email: string; stay: StayOption; adultsCount: number; childrenCount: number; notes?: string },
+  ) => void;
   readonly onClose: () => void;
 }
 
@@ -43,21 +46,53 @@ export function EditRegistrationModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" role="dialog" aria-label={t("title")}>
-      <div className="w-full max-w-md rounded-lg border border-border-dark bg-admin-card-bg p-6">
-        <h2 className="mb-4 text-lg font-semibold text-admin-text-primary">{t("title")}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all"
+      role="dialog"
+      aria-label={t("title")}
+    >
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-dark bg-dark-secondary/90 shadow-2xl backdrop-blur-md">
+        <div className="border-b border-border-dark/50 bg-white/5 px-6 py-4">
+          <h2 className="text-xl font-semibold tracking-wide text-white">{t("title")}</h2>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label htmlFor="edit-name" className="block text-sm font-medium text-admin-text-secondary">{t("name")}</label>
-            <input id="edit-name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full rounded-md border border-border-dark bg-input-bg px-3 py-2 text-sm text-admin-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" />
+            <label htmlFor="edit-name" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
+              {t("name")}
+            </label>
+            <input
+              id="edit-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            />
           </div>
           <div>
-            <label htmlFor="edit-email" className="block text-sm font-medium text-admin-text-secondary">{t("email")}</label>
-            <input id="edit-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full rounded-md border border-border-dark bg-input-bg px-3 py-2 text-sm text-admin-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" />
+            <label htmlFor="edit-email" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
+              {t("email")}
+            </label>
+            <input
+              id="edit-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            />
           </div>
           <div>
-            <label htmlFor="edit-stay" className="block text-sm font-medium text-admin-text-secondary">{t("stay")}</label>
-            <select id="edit-stay" value={stay} onChange={(e) => setStay(e.target.value)} required className="mt-1 block w-full rounded-md border border-border-dark bg-input-bg px-3 py-2 text-sm text-admin-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent">
+            <label htmlFor="edit-stay" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
+              {t("stay")}
+            </label>
+            <select
+              id="edit-stay"
+              value={stay}
+              onChange={(e) => setStay(e.target.value)}
+              required
+              className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            >
               {LEGACY_STAY_OPTIONS.includes(registration.stay) && (
                 <option value={registration.stay}>
                   {registration.stay === StayOption.FRI_SAT ? t("stayFriSat") : t("stayFriSun")}
@@ -67,23 +102,63 @@ export function EditRegistrationModal({
               <option value="SAT_ONLY">{t("staySatOnly")}</option>
             </select>
           </div>
-          <div>
-            <label htmlFor="edit-adults-count" className="block text-sm font-medium text-admin-text-secondary">{t("adultsCount")}</label>
-            <input id="edit-adults-count" type="number" min="1" value={adultsCount} onChange={(e) => setAdultsCount(e.target.value)} required className="mt-1 block w-full rounded-md border border-border-dark bg-input-bg px-3 py-2 text-sm text-admin-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="edit-adults-count" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
+                {t("adultsCount")}
+              </label>
+              <input
+                id="edit-adults-count"
+                type="number"
+                min="1"
+                value={adultsCount}
+                onChange={(e) => setAdultsCount(e.target.value)}
+                required
+                className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="edit-children-count"
+                className="mb-1.5 block text-sm font-medium text-admin-text-secondary"
+              >
+                {t("childrenCount")}
+              </label>
+              <input
+                id="edit-children-count"
+                type="number"
+                min="0"
+                value={childrenCount}
+                onChange={(e) => setChildrenCount(e.target.value)}
+                required
+                className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              />
+            </div>
           </div>
           <div>
-            <label htmlFor="edit-children-count" className="block text-sm font-medium text-admin-text-secondary">{t("childrenCount")}</label>
-            <input id="edit-children-count" type="number" min="0" value={childrenCount} onChange={(e) => setChildrenCount(e.target.value)} required className="mt-1 block w-full rounded-md border border-border-dark bg-input-bg px-3 py-2 text-sm text-admin-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" />
+            <label htmlFor="edit-notes" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
+              {t("notes")}
+            </label>
+            <textarea
+              id="edit-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              rows={2}
+            />
           </div>
-          <div>
-            <label htmlFor="edit-notes" className="block text-sm font-medium text-admin-text-secondary">{t("notes")}</label>
-            <textarea id="edit-notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-1 block w-full rounded-md border border-border-dark bg-input-bg px-3 py-2 text-sm text-admin-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" rows={2} />
-          </div>
-          <div className="flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="rounded-md border border-border-dark bg-transparent px-4 py-2 text-sm font-medium text-admin-text-secondary hover:border-[#555] hover:text-white">
+          <div className="mt-6 flex justify-end gap-3 border-t border-border-dark/50 pt-5">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border-dark bg-dark-primary/50 px-4 py-2 text-sm font-medium text-admin-text-secondary transition-all hover:bg-white/5 hover:text-white"
+            >
               {t("cancel")}
             </button>
-            <button type="submit" className="rounded-md border-2 border-accent bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-transparent hover:text-accent">
+            <button
+              type="submit"
+              className="rounded-lg border-2 border-accent bg-accent px-6 py-2 text-sm font-bold tracking-wide text-white transition-all hover:bg-transparent hover:text-accent hover:shadow-lg hover:shadow-accent/20"
+            >
               {t("save")}
             </button>
           </div>

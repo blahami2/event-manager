@@ -31,18 +31,33 @@ const nextConfig = {
         value: "camera=(), microphone=(), geolocation=()",
       },
       {
-        key: "Content-Security-Policy",
-        value: [
-          "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-          "img-src 'self' data: https://*.supabase.co https://*.resend.com https://images.unsplash.com",
-          "font-src 'self' https://fonts.gstatic.com",
-          "connect-src 'self' https://*.supabase.co https://*.resend.com",
-          "frame-ancestors 'none'",
-        ].join("; "),
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=()",
       },
     ];
+
+    // Build the CSP dynamically
+    let cspConnectSrc = "'self' https://*.supabase.co https://*.resend.com";
+    let cspImgSrc = "'self' data: https://*.supabase.co https://*.resend.com https://images.unsplash.com";
+
+    // Allow local Supabase endpoints during development
+    if (process.env.NODE_ENV !== "production") {
+      cspConnectSrc += " http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*";
+      cspImgSrc += " http://127.0.0.1:* http://localhost:*";
+    }
+
+    securityHeaders.push({
+      key: "Content-Security-Policy",
+      value: [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "img-src " + cspImgSrc,
+        "font-src 'self' https://fonts.gstatic.com",
+        "connect-src " + cspConnectSrc,
+        "frame-ancestors 'none'",
+      ].join("; "),
+    });
 
     // HSTS only in production
     if (process.env.NODE_ENV === "production") {

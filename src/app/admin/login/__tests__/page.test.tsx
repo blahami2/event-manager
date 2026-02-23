@@ -109,7 +109,7 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "submit" }));
 
     await waitFor(() => {
-      expect(screen.getByText("error")).toBeDefined();
+      expect(screen.getByText("error (Dev Error: Invalid login credentials)")).toBeDefined();
     });
     expect(window.location.href).not.toBe("/admin");
   });

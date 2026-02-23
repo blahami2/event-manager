@@ -49,7 +49,7 @@ export function RegistrationFilters({
           id="status-filter"
           value={status}
           onChange={handleStatusChange}
-          className="rounded-md border border-border-dark bg-input-bg px-3 py-2 text-sm text-admin-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          className="rounded-lg border border-border-dark bg-dark-secondary/80 px-4 py-2.5 text-sm text-admin-text-primary shadow-sm backdrop-blur-sm transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         >
           {statusOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -68,7 +68,7 @@ export function RegistrationFilters({
           placeholder={t("searchPlaceholder")}
           value={search}
           onChange={handleSearchChange}
-          className="w-full rounded-md border border-border-dark bg-input-bg px-3 py-2 text-sm text-admin-text-primary placeholder:text-[#666] focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent sm:max-w-xs"
+          className="w-full rounded-lg border border-border-dark bg-dark-secondary/80 px-4 py-2.5 text-sm text-admin-text-primary placeholder:text-admin-text-secondary/70 shadow-sm backdrop-blur-sm transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 sm:max-w-xs"
         />
       </div>
     </div>
