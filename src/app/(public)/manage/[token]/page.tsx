@@ -124,10 +124,17 @@ export default async function ManagePage({
 
       {/* Form content */}
       <section className="py-20">
-        <div className="mx-auto w-[90%] max-w-[600px]">
-          <div className="border-2 border-accent bg-dark-primary p-10 text-left">
-            <ManageForm registration={result.registration} token={token} />
-          </div>
+        <div
+          style={{
+            maxWidth: "600px",
+            margin: "50px auto 0",
+            background: "var(--color-dark-primary)",
+            padding: "40px",
+            border: "2px solid var(--color-accent)",
+            textAlign: "left",
+          }}
+        >
+          <ManageForm registration={result.registration} token={token} />
         </div>
       </section>
     </main>
