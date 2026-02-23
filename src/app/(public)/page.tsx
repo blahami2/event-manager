@@ -259,7 +259,7 @@ export default function HomePage(): React.ReactElement {
                     color: "var(--color-text-gray)",
                   }}
                 >
-                  12:00
+                  13:00
                 </span>
                 {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
                 <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
