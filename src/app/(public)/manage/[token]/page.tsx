@@ -40,35 +40,36 @@ export default async function ManagePage({
           backgroundImage: "url('https://www.transparenttextures.com/patterns/concrete-wall.png')",
         }}
       >
-        {/* Header */}
+        {/* Error section - matches RSVP section structure */}
         <section
-          className="border-b-[5px] border-accent py-20 text-center"
           style={{
-            backgroundImage: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('/images/hero.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundColor: "var(--color-dark-secondary)",
+            padding: "80px 0",
+            textAlign: "center",
           }}
         >
-          <div className="mx-auto w-[90%] max-w-[1200px]">
+          <div style={{ width: "90%", maxWidth: "1200px", margin: "0 auto" }}>
             <h1
-              className="font-heading text-white"
+              className="font-heading"
               style={{
-                fontSize: "clamp(2.5rem, 6vw, 5rem)",
-                lineHeight: "0.9",
-                textShadow: "3px 3px 0px #000",
                 textTransform: "uppercase",
                 letterSpacing: "2px",
+                fontSize: "clamp(2.5rem, 6vw, 5rem)",
+                lineHeight: "0.9",
               }}
             >
               {t("title")}
             </h1>
-          </div>
-        </section>
-
-        {/* Error content */}
-        <section className="py-20">
-          <div className="mx-auto w-[90%] max-w-[600px]">
-            <div className="border-2 border-accent bg-dark-primary p-10 text-center">
+            <div
+              style={{
+                maxWidth: "600px",
+                margin: "50px auto 0",
+                background: "var(--color-dark-primary)",
+                padding: "40px",
+                border: "2px solid var(--color-accent)",
+                textAlign: "center",
+              }}
+            >
               <p className="text-lg font-medium text-text-gray">{result.error}</p>
             </div>
           </div>
@@ -84,24 +85,22 @@ export default async function ManagePage({
         backgroundImage: "url('https://www.transparenttextures.com/patterns/concrete-wall.png')",
       }}
     >
-      {/* Header */}
+      {/* Manage section - matches RSVP section structure */}
       <section
-        className="border-b-[5px] border-accent py-20 text-center"
         style={{
-          backgroundImage: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('/images/hero.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundColor: "var(--color-dark-secondary)",
+          padding: "80px 0",
+          textAlign: "center",
         }}
       >
-        <div className="mx-auto w-[90%] max-w-[1200px]">
+        <div style={{ width: "90%", maxWidth: "1200px", margin: "0 auto" }}>
           <h1
-            className="font-heading text-white"
+            className="font-heading"
             style={{
-              fontSize: "clamp(2.5rem, 6vw, 5rem)",
-              lineHeight: "0.9",
-              textShadow: "3px 3px 0px #000",
               textTransform: "uppercase",
               letterSpacing: "2px",
+              fontSize: "clamp(2.5rem, 6vw, 5rem)",
+              lineHeight: "0.9",
             }}
           >
             {t("title")}
@@ -109,32 +108,24 @@ export default async function ManagePage({
           <p
             className="font-body"
             style={{
-              fontSize: "1.1rem",
-              fontWeight: 700,
-              marginTop: "20px",
-              letterSpacing: "4px",
-              color: "var(--color-accent)",
-              textTransform: "uppercase",
+              marginTop: "10px",
+              color: "var(--color-text-gray)",
             }}
           >
             {t("subtitle")}
           </p>
-        </div>
-      </section>
-
-      {/* Form content */}
-      <section className="py-20">
-        <div
-          style={{
-            maxWidth: "600px",
-            margin: "50px auto 0",
-            background: "var(--color-dark-primary)",
-            padding: "40px",
-            border: "2px solid var(--color-accent)",
-            textAlign: "left",
-          }}
-        >
-          <ManageForm registration={result.registration} token={token} />
+          <div
+            style={{
+              maxWidth: "600px",
+              margin: "50px auto 0",
+              background: "var(--color-dark-primary)",
+              padding: "40px",
+              border: "2px solid var(--color-accent)",
+              textAlign: "left",
+            }}
+          >
+            <ManageForm registration={result.registration} token={token} />
+          </div>
         </div>
       </section>
     </main>
