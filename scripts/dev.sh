@@ -2,11 +2,13 @@
 set -euo pipefail
 
 # Start Supabase local stack (idempotent - skips if already running)
+# echo "Removing Supabase local stack..."
+# docker rm -f $(docker ps -aq --filter "name=birthday-celebration")
 echo "Starting Supabase local stack..."
 if npx supabase status > /dev/null 2>&1; then
   echo "Supabase is already running."
 else
-  npx supabase start
+  npx -y supabase start
 fi
 
 # Extract credentials and export as env vars for Next.js

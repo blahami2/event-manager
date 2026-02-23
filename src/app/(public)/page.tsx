@@ -5,11 +5,7 @@ import { useTranslations } from "next-intl";
 const HEADING_FONT = "'Anton', sans-serif";
 const BODY_FONT = "'Montserrat', sans-serif";
 
-const HEADLINER_IMAGES = [
-  "/images/milos_03.jpg",
-  "/images/soso_01.png",
-  "/images/misa_01.png",
-];
+const HEADLINER_IMAGES = ["/images/milos_03.jpg", "/images/soso_01.png", "/images/misa_01.png"];
 
 export default function HomePage(): React.ReactElement {
   const t = useTranslations("landing");
@@ -229,10 +225,7 @@ export default function HomePage(): React.ReactElement {
             }}
           >
             {/* .detail-box { flex:1 1 300px; padding:40px; border-right:2px solid #333 } */}
-            <div
-              className="detail-box"
-              style={{ flex: "1 1 300px", padding: "40px", borderRight: "2px solid #333" }}
-            >
+            <div className="detail-box" style={{ flex: "1 1 300px", padding: "40px", borderRight: "2px solid #333" }}>
               {/* .detail-box h3 { font-size:2rem; margin-bottom:20px; color:accent } */}
               <h3
                 style={{
@@ -262,79 +255,83 @@ export default function HomePage(): React.ReactElement {
                   13:00
                 </span>
                 {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
-                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsLineup1")}
                 </span>
               </div>
 
-                {/* .detail-item { margin-bottom:25px } */}
-                <div style={{ marginBottom: "25px" }}>
-                    {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
-                    <span
-                        style={{
-                            fontFamily: BODY_FONT,
-                            fontWeight: 900,
-                            display: "block",
-                            textTransform: "uppercase",
-                            marginBottom: "5px",
-                            color: "var(--color-text-gray)",
-                        }}
-                    >
+              {/* .detail-item { margin-bottom:25px } */}
+              <div style={{ marginBottom: "25px" }}>
+                {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
+                <span
+                  style={{
+                    fontFamily: BODY_FONT,
+                    fontWeight: 900,
+                    display: "block",
+                    textTransform: "uppercase",
+                    marginBottom: "5px",
+                    color: "var(--color-text-gray)",
+                  }}
+                >
                   14:00
                 </span>
-                    {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
-                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsLineup2")}
                 </span>
-
-                </div>
-                {/* .detail-item { margin-bottom:25px } */}
-                <div style={{ marginBottom: "25px" }}>
-                    {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
-                    <span
-                        style={{
-                            fontFamily: BODY_FONT,
-                            fontWeight: 900,
-                            display: "block",
-                            textTransform: "uppercase",
-                            marginBottom: "5px",
-                            color: "var(--color-text-gray)",
-                        }}
-                    >
+              </div>
+              {/* .detail-item { margin-bottom:25px } */}
+              <div style={{ marginBottom: "25px" }}>
+                {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
+                <span
+                  style={{
+                    fontFamily: BODY_FONT,
+                    fontWeight: 900,
+                    display: "block",
+                    textTransform: "uppercase",
+                    marginBottom: "5px",
+                    color: "var(--color-text-gray)",
+                  }}
+                >
                   18:00
                 </span>
-                    {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
-                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsLineup3")}
                 </span>
-                </div>
+              </div>
 
-                {/* .detail-item { margin-bottom:25px } */}
-                <div style={{ marginBottom: "25px" }}>
-                    {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
-                    <span
-                        style={{
-                            fontFamily: BODY_FONT,
-                            fontWeight: 900,
-                            display: "block",
-                            textTransform: "uppercase",
-                            marginBottom: "5px",
-                            color: "var(--color-text-gray)",
-                        }}
-                    >
+              {/* .detail-item { margin-bottom:25px } */}
+              <div style={{ marginBottom: "25px" }}>
+                {/* .detail-label { font-weight:900; display:block; text-transform:uppercase; margin-bottom:5px; color:text-gray } */}
+                <span
+                  style={{
+                    fontFamily: BODY_FONT,
+                    fontWeight: 900,
+                    display: "block",
+                    textTransform: "uppercase",
+                    marginBottom: "5px",
+                    color: "var(--color-text-gray)",
+                  }}
+                >
                   22:00
                 </span>
-                    {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
-                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                {/* .detail-value { font-size:1.2rem; font-weight:700 } */}
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsLineup4")}
                 </span>
-                </div>
+              </div>
             </div>
 
-            <div
-              className="detail-box"
-              style={{ flex: "1 1 300px", padding: "40px", borderRight: "2px solid #333" }}
-            >
+            <div className="detail-box" style={{ flex: "1 1 300px", padding: "40px", borderRight: "2px solid #333" }}>
               <h3
                 style={{
                   fontFamily: HEADING_FONT,
@@ -360,51 +357,54 @@ export default function HomePage(): React.ReactElement {
                 >
                   {t("dateHeader")}
                 </span>
-                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsLocationDate")}
                 </span>
               </div>
-                <div style={{ marginBottom: "25px" }}>
+              <div style={{ marginBottom: "25px" }}>
                 <span
-                    style={{
-                        fontFamily: BODY_FONT,
-                        fontWeight: 900,
-                        display: "block",
-                        textTransform: "uppercase",
-                        marginBottom: "5px",
-                        color: "var(--color-text-gray)",
-                    }}
+                  style={{
+                    fontFamily: BODY_FONT,
+                    fontWeight: 900,
+                    display: "block",
+                    textTransform: "uppercase",
+                    marginBottom: "5px",
+                    color: "var(--color-text-gray)",
+                  }}
                 >
                   {t("venueHeader")}
                 </span>
-                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsLocationStage")}
                 </span>
-                </div>
-                <div style={{ marginBottom: "25px" }}>
+              </div>
+              <div style={{ marginBottom: "25px" }}>
                 <span
-                    style={{
-                        fontFamily: BODY_FONT,
-                        fontWeight: 900,
-                        display: "block",
-                        textTransform: "uppercase",
-                        marginBottom: "5px",
-                        color: "var(--color-text-gray)",
-                    }}
+                  style={{
+                    fontFamily: BODY_FONT,
+                    fontWeight: 900,
+                    display: "block",
+                    textTransform: "uppercase",
+                    marginBottom: "5px",
+                    color: "var(--color-text-gray)",
+                  }}
                 >
                   {t("addressHeader")}
                 </span>
-                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsLocationAddress")}
                 </span>
-                </div>
+              </div>
             </div>
 
             {/* last detail-box: no border-right */}
-            <div
-              className="detail-box"
-              style={{ flex: "1 1 300px", padding: "40px" }}
-            >
+            <div className="detail-box" style={{ flex: "1 1 300px", padding: "40px" }}>
               <h3
                 style={{
                   fontFamily: HEADING_FONT,
@@ -430,27 +430,50 @@ export default function HomePage(): React.ReactElement {
                 >
                   {t("dressCodeHeader")}
                 </span>
-                <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsInfoDressCode")}
                 </span>
               </div>
-                <div style={{ marginBottom: "25px" }}>
+              <div style={{ marginBottom: "25px" }}>
                 <span
-                    style={{
-                        fontFamily: BODY_FONT,
-                        fontWeight: 900,
-                        display: "block",
-                        textTransform: "uppercase",
-                        marginBottom: "5px",
-                        color: "var(--color-text-gray)",
-                    }}
+                  style={{
+                    fontFamily: BODY_FONT,
+                    fontWeight: 900,
+                    display: "block",
+                    textTransform: "uppercase",
+                    marginBottom: "5px",
+                    color: "var(--color-text-gray)",
+                  }}
                 >
                   {t("cateringHeader")}
                 </span>
-                    <span style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase",fontWeight: 700 }}>
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
                   {t("detailsInfoCatering")}
                 </span>
-                </div>
+              </div>
+              <div style={{ marginBottom: "25px" }}>
+                <span
+                  style={{
+                    fontFamily: BODY_FONT,
+                    fontWeight: 900,
+                    display: "block",
+                    textTransform: "uppercase",
+                    marginBottom: "5px",
+                    color: "var(--color-text-gray)",
+                  }}
+                >
+                  {t("contributionHeader")}
+                </span>
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700 }}
+                >
+                  {t("detailsInfoContribution")}
+                </span>
+              </div>
             </div>
           </div>
         </div>

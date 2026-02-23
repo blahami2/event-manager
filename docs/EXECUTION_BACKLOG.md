@@ -1397,62 +1397,62 @@ T-001 (Init Next.js)
 
 # Ticket Index
 
-| ID    | Title                              | Phase | Dependencies                  |
-|-------|------------------------------------|-------|-------------------------------|
-| T-001 | Initialize Next.js Project         | 1     | None                          |
-| T-002 | TypeScript, Tailwind, Testing      | 1     | T-001                         |
-| T-038 | CI Pipeline – Foundation           | 1     | T-002                         |
-| T-003 | Prisma and Database Schema         | 1     | T-002                         |
-| T-039 | Prisma Client Singleton            | 1     | T-003                         |
-| T-004 | Supabase Auth Integration          | 1     | T-003                         |
-| T-005 | Resend Integration                 | 1     | T-004                         |
-| T-006 | Env Config and Folder Structure    | 1     | T-005                         |
-| T-040 | Shared TypeScript Types            | 1     | T-006                         |
-| T-043 | Seed Data Population               | 1     | T-006, T-003                  |
-| T-007 | Error Types                        | 2     | T-006                         |
-| T-041 | API Response Utility               | 2     | T-007                         |
-| T-036 | Error Boundaries                   | 2     | T-007                         |
-| T-008 | Structured Logger                  | 2     | T-006                         |
-| T-009 | Capability Token Utility           | 2     | T-006                         |
-| T-010 | Rate Limiter                       | 2     | T-008, T-006                  |
-| T-042 | CI Pipeline – Coverage Gates       | 2     | T-038, T-009                  |
-| T-011 | Registration Repository            | 3     | T-039, T-040, T-007           |
-| T-012 | Token Repository                   | 3     | T-039, T-040, T-009           |
-| T-013 | Admin Repository                   | 3     | T-039, T-040                  |
-| T-014 | Register Use Case                  | 4     | T-011, T-012, T-009           |
-| T-015 | Manage Registration Use Case       | 4     | T-012, T-011                  |
-| T-016 | Resend Link Use Case               | 4     | T-012, T-011                  |
-| T-017 | Admin Auth Guard                   | 4     | T-004, T-013                  |
-| T-018 | Admin Actions Use Case             | 4     | T-013, T-011                  |
-| T-019 | Email Service                      | 5     | T-014                         |
-| T-020 | Email Templates                    | 5     | T-019                         |
-| T-025 | Register API Route                 | 6     | T-014, T-010, T-041           |
-| T-026 | Manage API Route                   | 6     | T-015, T-010, T-041           |
-| T-027 | Resend Link API Route              | 6     | T-016, T-010, T-041           |
-| T-044 | Admin Mutation API Routes          | 6     | T-017, T-018, T-041           |
-| T-021 | Event Landing Page                 | 7     | T-036, T-025, T-019           |
-| T-022 | Registration Form                  | 7     | T-036, T-025                  |
-| T-023 | Manage Page                        | 7     | T-036, T-026                  |
-| T-024 | Resend Link Page                   | 7     | T-036, T-027                  |
-| T-028 | Admin Layout and Auth              | 8     | T-017                         |
-| T-029 | Admin Dashboard                    | 8     | T-018, T-028                  |
-| T-030 | Admin Registration List            | 8     | T-044, T-028                  |
-| T-031 | Admin CSV Export                   | 8     | T-018                         |
-| T-032 | Rate Limiting Integration          | 9     | T-025, T-026, T-027           |
-| T-033 | Token Logging Audit                | 9     | T-032                         |
-| T-034 | Security Headers                   | 9     | T-033                         |
-| T-045 | CI Pipeline – Security Suites      | 9     | T-038, T-033                  |
-| T-035 | Health Endpoint                    | 10    | T-008                         |
-| T-037 | Data Retention                     | 10    | T-035                         |
-| T-046 | README                             | 10    | T-037                         |
-| T-047 | ICS Calendar Invite Utility        | 11    | T-006                         |
-| T-048 | Attach Calendar Invite to Email    | 11    | T-047, T-019, T-020           |
-| T-049 | i18n Infrastructure Setup          | 11    | T-006                         |
-| T-050 | Translate Public UI Pages          | 11    | T-049, T-021..T-024           |
-| T-051 | Translate Email Templates          | 11    | T-049, T-020                  |
-| T-052 | Language Switcher Component        | 11    | T-049                         |
-| T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031           |
-| T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022    |
+| ID    | Title                             | Phase | Dependencies               |
+| ----- | --------------------------------- | ----- | -------------------------- |
+| T-001 | Initialize Next.js Project        | 1     | None                       |
+| T-002 | TypeScript, Tailwind, Testing     | 1     | T-001                      |
+| T-038 | CI Pipeline – Foundation          | 1     | T-002                      |
+| T-003 | Prisma and Database Schema        | 1     | T-002                      |
+| T-039 | Prisma Client Singleton           | 1     | T-003                      |
+| T-004 | Supabase Auth Integration         | 1     | T-003                      |
+| T-005 | Resend Integration                | 1     | T-004                      |
+| T-006 | Env Config and Folder Structure   | 1     | T-005                      |
+| T-040 | Shared TypeScript Types           | 1     | T-006                      |
+| T-043 | Seed Data Population              | 1     | T-006, T-003               |
+| T-007 | Error Types                       | 2     | T-006                      |
+| T-041 | API Response Utility              | 2     | T-007                      |
+| T-036 | Error Boundaries                  | 2     | T-007                      |
+| T-008 | Structured Logger                 | 2     | T-006                      |
+| T-009 | Capability Token Utility          | 2     | T-006                      |
+| T-010 | Rate Limiter                      | 2     | T-008, T-006               |
+| T-042 | CI Pipeline – Coverage Gates      | 2     | T-038, T-009               |
+| T-011 | Registration Repository           | 3     | T-039, T-040, T-007        |
+| T-012 | Token Repository                  | 3     | T-039, T-040, T-009        |
+| T-013 | Admin Repository                  | 3     | T-039, T-040               |
+| T-014 | Register Use Case                 | 4     | T-011, T-012, T-009        |
+| T-015 | Manage Registration Use Case      | 4     | T-012, T-011               |
+| T-016 | Resend Link Use Case              | 4     | T-012, T-011               |
+| T-017 | Admin Auth Guard                  | 4     | T-004, T-013               |
+| T-018 | Admin Actions Use Case            | 4     | T-013, T-011               |
+| T-019 | Email Service                     | 5     | T-014                      |
+| T-020 | Email Templates                   | 5     | T-019                      |
+| T-025 | Register API Route                | 6     | T-014, T-010, T-041        |
+| T-026 | Manage API Route                  | 6     | T-015, T-010, T-041        |
+| T-027 | Resend Link API Route             | 6     | T-016, T-010, T-041        |
+| T-044 | Admin Mutation API Routes         | 6     | T-017, T-018, T-041        |
+| T-021 | Event Landing Page                | 7     | T-036, T-025, T-019        |
+| T-022 | Registration Form                 | 7     | T-036, T-025               |
+| T-023 | Manage Page                       | 7     | T-036, T-026               |
+| T-024 | Resend Link Page                  | 7     | T-036, T-027               |
+| T-028 | Admin Layout and Auth             | 8     | T-017                      |
+| T-029 | Admin Dashboard                   | 8     | T-018, T-028               |
+| T-030 | Admin Registration List           | 8     | T-044, T-028               |
+| T-031 | Admin CSV Export                  | 8     | T-018                      |
+| T-032 | Rate Limiting Integration         | 9     | T-025, T-026, T-027        |
+| T-033 | Token Logging Audit               | 9     | T-032                      |
+| T-034 | Security Headers                  | 9     | T-033                      |
+| T-045 | CI Pipeline – Security Suites     | 9     | T-038, T-033               |
+| T-035 | Health Endpoint                   | 10    | T-008                      |
+| T-037 | Data Retention                    | 10    | T-035                      |
+| T-046 | README                            | 10    | T-037                      |
+| T-047 | ICS Calendar Invite Utility       | 11    | T-006                      |
+| T-048 | Attach Calendar Invite to Email   | 11    | T-047, T-019, T-020        |
+| T-049 | i18n Infrastructure Setup         | 11    | T-006                      |
+| T-050 | Translate Public UI Pages         | 11    | T-049, T-021..T-024        |
+| T-051 | Translate Email Templates         | 11    | T-049, T-020               |
+| T-052 | Language Switcher Component       | 11    | T-049                      |
+| T-053 | Translate Admin UI                | 11    | T-049, T-028..T-031        |
+| T-054 | Registration Form Field Migration | 11    | T-003, T-040, T-014, T-022 |
 
 **Total tickets: 53** (37 original + 8 Phase 1-10 additions + 8 Phase 11)
 
@@ -1875,17 +1875,17 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 
 # Updated Ticket Index (Phase 11)
 
-| ID    | Title                              | Phase | Dependencies                  |
-|-------|------------------------------------|-------|-------------------------------|
-| T-047 | ICS Calendar Invite Utility        | 11    | T-006                         |
-| T-048 | Attach Calendar Invite to Email    | 11    | T-047, T-019, T-020           |
-| T-049 | i18n Infrastructure Setup          | 11    | T-006                         |
-| T-050 | Translate Public UI Pages          | 11    | T-049, T-021..T-024           |
-| T-051 | Translate Email Templates          | 11    | T-049, T-020                  |
-| T-052 | Language Switcher Component        | 11    | T-049                         |
-| T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031           |
-| T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022    |
-| T-055 | Visual Redesign – v1 Design System | 11    | T-021..T-024, T-036           |
+| ID    | Title                              | Phase | Dependencies               |
+| ----- | ---------------------------------- | ----- | -------------------------- |
+| T-047 | ICS Calendar Invite Utility        | 11    | T-006                      |
+| T-048 | Attach Calendar Invite to Email    | 11    | T-047, T-019, T-020        |
+| T-049 | i18n Infrastructure Setup          | 11    | T-006                      |
+| T-050 | Translate Public UI Pages          | 11    | T-049, T-021..T-024        |
+| T-051 | Translate Email Templates          | 11    | T-049, T-020               |
+| T-052 | Language Switcher Component        | 11    | T-049                      |
+| T-053 | Translate Admin UI                 | 11    | T-049, T-028..T-031        |
+| T-054 | Registration Form Field Migration  | 11    | T-003, T-040, T-014, T-022 |
+| T-055 | Visual Redesign – v1 Design System | 11    | T-021..T-024, T-036        |
 
 **Total tickets: 55** (37 original + 8 Phase 1-10 additions + 10 Phase 11)
 
@@ -1957,6 +1957,26 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 - `tests/unit/lib/usecases/manage-registration.test.ts` (removed `eventName`/`eventDate` assertions)
 
 **Verification:** `npx tsc --noEmit`, `npm run lint`, `npx vitest run` -- all pass (401 tests).
+
+---
+
+## M07: Add Contribution Information to Main Page
+
+**Type:** Enhancement
+**Date:** 2026-02-23
+**Status:** Done
+
+**Problem:** The user requested "information (main page) about recommended contribution for the 'tickets' being an envelope, somehow that it fits into the whole design and idea, concept".
+
+**Solution:**
+- Added `contributionHeader` and `detailsInfoContribution` localization keys to `en.json`, `cs.json`, `sk.json`.
+- Modified `src/app/(public)/page.tsx` to display this information in the Details segment right next to Dress Code and Catering, visually matching the existing template.
+
+**Files changed:**
+- `src/i18n/messages/en.json`
+- `src/i18n/messages/cs.json`
+- `src/i18n/messages/sk.json`
+- `src/app/(public)/page.tsx`
 
 ---
 
