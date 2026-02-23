@@ -101,7 +101,8 @@
     "updateSuccess": "Registration updated successfully! A new manage link has been sent to your email.",
     "confirmCancel": "Are you sure you want to cancel your registration? This cannot be undone.",
     "invalidLink": "This link is not valid or has expired.",
-    "tooManyRequests": "Too many requests. Please try again later."
+    "tooManyRequests": "Too many requests. Please try again later.",
+    "subtitle": "Update your details below"
   },
   "email": {
     "eventName": "Triple threat",
