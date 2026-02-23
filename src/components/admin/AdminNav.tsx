@@ -25,8 +25,9 @@ export function AdminNav(): React.ReactElement {
     <nav className="border-b border-border-dark bg-dark-secondary font-body text-white" aria-label="Admin navigation">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-6">
             <span className="text-lg font-bold">{t("title")}</span>
+            <div className="h-6 w-px bg-border-dark" aria-hidden="true" />
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -43,8 +44,11 @@ export function AdminNav(): React.ReactElement {
           </div>
           <button
             onClick={handleLogout}
-            className="rounded-md px-3 py-2 text-sm font-medium text-admin-text-secondary transition-colors hover:text-accent"
+            className="inline-flex items-center gap-2 rounded border border-border-dark px-4 py-1.5 text-sm font-medium text-admin-text-secondary transition-all hover:border-red-500/50 hover:text-red-400 hover:shadow-[0_0_8px_rgba(239,68,68,0.1)]"
           >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
             {t("logout")}
           </button>
         </div>
