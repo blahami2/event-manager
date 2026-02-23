@@ -1980,4 +1980,30 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 
 ---
 
+## M08: Add Notes Column to Admin Registrations Overview
+
+**Type:** Enhancement
+**Date:** 2026-02-23
+**Status:** Done
+
+**Problem:** The admin registrations overview table did not display the "notes" field that guests fill in during registration. Administrators had no visibility into guest notes without opening individual registrations.
+
+**Solution:**
+- Added a "Notes" column to the `RegistrationTable` component, positioned between the "Children" and "Status" columns
+- Notes are displayed with `max-w-xs truncate` for long text, with a `title` attribute for hover tooltip showing full content
+- Null notes are rendered as an em dash for clean visual presentation
+- Added `"notes"` translation key to all three locale files (EN: "Notes", CS: "Poznamky", SK: "Poznamky")
+- Added 3 new unit tests covering: notes text display, null notes rendering, mixed notes across multiple registrations
+
+**Files changed:**
+- `src/components/admin/RegistrationTable.tsx` (added Notes column header and data cell)
+- `src/components/admin/__tests__/RegistrationTable.test.tsx` (added 3 new tests, updated header test)
+- `src/i18n/messages/en.json` (added `admin.registrations.table.notes` key)
+- `src/i18n/messages/cs.json` (added `admin.registrations.table.notes` key)
+- `src/i18n/messages/sk.json` (added `admin.registrations.table.notes` key)
+
+**Verification:** `npx tsc --noEmit`, `npm run lint`, `npx vitest run` -- all pass (438 tests).
+
+---
+
 End of Execution Backlog.

@@ -188,7 +188,8 @@
         "no": "Nie",
         "stay": "Pobyt",
         "adults": "Dospelí",
-        "children": "Deti"
+        "children": "Deti",
+        "notes": "Poznámky"
       },
       "edit": {
         "title": "Upraviť registráciu",
