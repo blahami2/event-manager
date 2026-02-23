@@ -136,7 +136,8 @@
       "title": "Admin",
       "dashboard": "Dashboard",
       "registrations": "Registrations",
-      "logout": "Logout"
+      "logout": "Logout",
+      "settings": "Settings"
     },
     "login": {
       "title": "Admin Login",
@@ -202,6 +203,21 @@
         "childrenCount": "Children",
         "notes": "Notes"
       }
+    },
+    "settings": {
+      "title": "Settings",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "submit": "Update Password",
+      "submitting": "Updating…",
+      "success": "Password updated successfully",
+      "errorMismatch": "Passwords do not match",
+      "errorMinLength": "Password must be at least 8 characters",
+      "errorSamePassword": "New password must be different",
+      "errorCurrentIncorrect": "Current password is incorrect",
+      "errorGeneric": "Failed to update password"
     }
   }
 }

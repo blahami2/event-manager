@@ -136,7 +136,8 @@
       "title": "Admin",
       "dashboard": "Prehľad",
       "registrations": "Registrácie",
-      "logout": "Odhlásiť sa"
+      "logout": "Odhlásiť sa",
+      "settings": "Nastavenia"
     },
     "login": {
       "title": "Prihlásenie administrátora",
@@ -202,6 +203,21 @@
         "childrenCount": "Deti",
         "notes": "Poznámky"
       }
+    },
+    "settings": {
+      "title": "Nastavenia",
+      "changePassword": "Zmena hesla",
+      "currentPassword": "Súčasné heslo",
+      "newPassword": "Nové heslo",
+      "confirmPassword": "Potvrďte nové heslo",
+      "submit": "Zmeniť heslo",
+      "submitting": "Ukladanie…",
+      "success": "Heslo bolo úspešne zmenené",
+      "errorMismatch": "Heslá sa nezhodujú",
+      "errorMinLength": "Heslo musí mať aspoň 8 znakov",
+      "errorSamePassword": "Nové heslo musí byť odlišné",
+      "errorCurrentIncorrect": "Súčasné heslo je nesprávne",
+      "errorGeneric": "Nepodarilo sa zmeniť heslo"
     }
   }
 }

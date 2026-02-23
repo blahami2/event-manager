@@ -8,6 +8,7 @@ import { createBrowserClient } from "@/lib/auth/supabase-client";
 const navItems = [
   { href: "/admin", labelKey: "dashboard" },
   { href: "/admin/registrations", labelKey: "registrations" },
+  { href: "/admin/settings", labelKey: "settings" },
 ] as const;
 
 export function AdminNav(): React.ReactElement {
