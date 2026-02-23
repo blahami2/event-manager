@@ -120,8 +120,11 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         <a
           href="/api/admin/registrations/export"
           download
-          className="inline-flex items-center border border-border-dark bg-transparent px-4 py-2 text-sm font-medium text-admin-text-secondary transition-colors hover:border-[#555] hover:text-white"
+          className="inline-flex items-center gap-2 border border-border-dark bg-dark-secondary px-4 py-2 text-sm font-medium text-admin-text-secondary transition-all hover:border-accent/50 hover:text-admin-text-primary hover:bg-admin-hover"
         >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3" />
+          </svg>
           {t("downloadCsv")}
         </a>
       </div>
