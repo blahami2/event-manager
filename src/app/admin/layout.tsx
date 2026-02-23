@@ -13,14 +13,14 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>): React.ReactElement {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <AdminNav />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-end py-2">
+        <div className="flex justify-end py-3">
           <LanguageSwitcher />
         </div>
       </div>
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         {children}
       </main>
     </div>

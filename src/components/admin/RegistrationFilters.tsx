@@ -40,7 +40,7 @@ export function RegistrationFilters({
   );
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <div>
         <label htmlFor="status-filter" className="sr-only">
           {t("statusLabel")}
@@ -49,7 +49,7 @@ export function RegistrationFilters({
           id="status-filter"
           value={status}
           onChange={handleStatusChange}
-          className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="rounded-xl border border-slate-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-slate-700 shadow-sm transition-all focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         >
           {statusOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -58,7 +58,7 @@ export function RegistrationFilters({
           ))}
         </select>
       </div>
-      <div className="flex-1">
+      <div className="flex-1 sm:max-w-xs">
         <label htmlFor="search-input" className="sr-only">
           {t("searchLabel")}
         </label>
@@ -68,7 +68,7 @@ export function RegistrationFilters({
           placeholder={t("searchPlaceholder")}
           value={search}
           onChange={handleSearchChange}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:max-w-xs"
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         />
       </div>
     </div>

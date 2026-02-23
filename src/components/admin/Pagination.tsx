@@ -23,29 +23,29 @@ export function Pagination({
   const end = Math.min(page * pageSize, total);
 
   return (
-    <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
-      <p className="text-sm text-gray-700">
-        Showing <span className="font-medium">{start}</span> to{" "}
-        <span className="font-medium">{end}</span> of{" "}
-        <span className="font-medium">{total}</span> results
+    <div className="mt-4 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+      <p className="text-sm text-slate-600">
+        Showing <span className="font-semibold text-slate-900">{start}</span> to{" "}
+        <span className="font-semibold text-slate-900">{end}</span> of{" "}
+        <span className="font-semibold text-slate-900">{total}</span> results
       </p>
-      <nav className="flex gap-1" aria-label="Pagination">
+      <nav className="flex items-center gap-2" aria-label="Pagination">
         <button
           type="button"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
-          className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Previous
         </button>
-        <span className="flex items-center px-3 text-sm text-gray-700">
+        <span className="rounded-xl bg-indigo-50 px-3.5 py-2 text-sm font-semibold text-indigo-700">
           Page {page} of {totalPages}
         </span>
         <button
           type="button"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Next
         </button>

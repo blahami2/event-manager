@@ -11,10 +11,10 @@ export function StatsCard({
 }: StatsCardProps): React.ReactElement {
   return (
     <div
-      className={`rounded-2xl bg-white p-6 shadow-lg ${className}`}
+      className={`rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md ${className}`}
     >
-      <p className="text-sm font-medium text-gray-500">{label}</p>
-      <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{value}</p>
     </div>
   );
 }
