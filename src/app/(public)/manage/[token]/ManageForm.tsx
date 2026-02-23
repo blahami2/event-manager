@@ -27,30 +27,6 @@ interface FieldErrors {
   notes?: string;
 }
 
-const selectStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "15px",
-  background: "#222",
-  border: "2px solid #333",
-  color: "#fff",
-  fontFamily: "'Montserrat', sans-serif",
-  fontSize: "1rem",
-};
-
-const submitStyle: React.CSSProperties = {
-  width: "100%",
-  display: "block",
-  backgroundColor: "var(--color-accent)",
-  color: "#fff",
-  padding: "15px 40px",
-  fontFamily: "'Anton', sans-serif",
-  fontSize: "1.5rem",
-  textTransform: "uppercase",
-  border: "3px solid var(--color-accent)",
-  cursor: "pointer",
-  transition: "all 0.3s ease",
-};
-
 export function ManageForm({
   registration,
   token,
@@ -176,11 +152,14 @@ export function ManageForm({
 
   if (isCancelled) {
     return (
-      <div role="status" style={{ textAlign: "center" }}>
-        <p style={{ fontSize: "1.1rem", fontWeight: 700, textTransform: "uppercase", color: "var(--color-accent)" }}>
+      <div role="status" className="py-6 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center border-2 border-accent">
+          <span className="font-heading text-2xl text-accent">✕</span>
+        </div>
+        <p className="font-heading text-xl uppercase tracking-wider text-accent">
           {t("cancelled")}
         </p>
-        <p style={{ marginTop: "8px", fontSize: "0.875rem", color: "var(--color-text-gray)" }}>
+        <p className="mt-3 font-body text-sm text-text-gray">
           {t("cancelledDescription")}
         </p>
       </div>
@@ -189,8 +168,11 @@ export function ManageForm({
 
   if (successMessage) {
     return (
-      <div role="status" style={{ textAlign: "center" }}>
-        <p style={{ fontSize: "1.1rem", fontWeight: 700, textTransform: "uppercase", color: "var(--color-accent)" }}>
+      <div role="status" className="py-6 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center border-2 border-accent">
+          <span className="font-heading text-2xl text-accent">✓</span>
+        </div>
+        <p className="font-heading text-xl uppercase tracking-wider text-accent">
           {successMessage}
         </p>
       </div>
@@ -231,8 +213,7 @@ export function ManageForm({
             id="stay"
             value={stay}
             onChange={(e) => setStay(e.target.value)}
-            className="form-input"
-            style={selectStyle}
+            className="form-input w-full border-2 border-border-dark bg-input-bg p-[15px] font-body text-base text-white transition-colors duration-200"
           >
             <option value="">{tForm("stayPlaceholder")}</option>
             {LEGACY_STAY_OPTIONS.includes(registration.stay) && (
@@ -254,8 +235,7 @@ export function ManageForm({
             id="adultsCount"
             value={adultsCount}
             onChange={(e) => setAdultsCount(e.target.value)}
-            className="form-input"
-            style={selectStyle}
+            className="form-input w-full border-2 border-border-dark bg-input-bg p-[15px] font-body text-base text-white transition-colors duration-200"
           >
             {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
@@ -274,8 +254,7 @@ export function ManageForm({
             id="childrenCount"
             value={childrenCount}
             onChange={(e) => setChildrenCount(e.target.value)}
-            className="form-input"
-            style={selectStyle}
+            className="form-input w-full border-2 border-border-dark bg-input-bg p-[15px] font-body text-base text-white transition-colors duration-200"
           >
             {Array.from({ length: 11 }, (_, i) => i).map((n) => (
               <option key={n} value={n}>
@@ -300,7 +279,7 @@ export function ManageForm({
         </FormField>
 
         {submitError && (
-          <p style={{ fontSize: "0.875rem", color: "var(--color-accent)", marginBottom: "15px" }} role="alert">
+          <p className="mb-4 text-sm text-accent" role="alert">
             {submitError}
           </p>
         )}
@@ -308,9 +287,9 @@ export function ManageForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="btn-rock"
+          className="btn-rock w-full border-3 border-accent bg-accent font-heading text-2xl uppercase text-white transition-all duration-300"
           style={{
-            ...submitStyle,
+            padding: "15px 40px",
             opacity: isSubmitting ? 0.5 : 1,
             cursor: isSubmitting ? "not-allowed" : "pointer",
           }}
@@ -319,24 +298,15 @@ export function ManageForm({
         </button>
       </form>
 
-      <div style={{ marginTop: "24px", borderTop: "1px solid #333", paddingTop: "24px" }}>
+      <div className="mt-6 border-t-2 border-border-dark pt-6">
         <button
           type="button"
           onClick={handleCancel}
           disabled={isCancelling}
+          className="w-full border-2 border-border-dark bg-transparent px-4 py-3 font-heading uppercase tracking-wider text-text-gray transition-all duration-300 hover:border-accent hover:text-accent"
           style={{
-            width: "100%",
-            display: "block",
-            backgroundColor: "transparent",
-            color: "var(--color-text-gray)",
-            padding: "12px 16px",
-            fontFamily: "'Anton', sans-serif",
-            textTransform: "uppercase",
-            letterSpacing: "1px",
-            border: "2px solid #333",
-            cursor: isCancelling ? "not-allowed" : "pointer",
-            transition: "all 0.3s ease",
             opacity: isCancelling ? 0.5 : 1,
+            cursor: isCancelling ? "not-allowed" : "pointer",
           }}
         >
           {isCancelling ? t("cancelling") : t("cancel")}

@@ -101,7 +101,8 @@
     "updateSuccess": "Registrácia bola úspešne aktualizovaná! Na váš e-mail bol odoslaný nový odkaz na správu.",
     "confirmCancel": "Naozaj chcete zrušiť svoju registráciu? Túto akciu nie je možné vrátiť späť.",
     "invalidLink": "Tento odkaz je neplatný alebo vypršal.",
-    "tooManyRequests": "Príliš veľa požiadaviek. Skúste to prosím neskôr."
+    "tooManyRequests": "Príliš veľa požiadaviek. Skúste to prosím neskôr.",
+    "subtitle": "Aktualizujte svoje údaje nižšie"
   },
   "email": {
     "eventName": "Triple threat",
