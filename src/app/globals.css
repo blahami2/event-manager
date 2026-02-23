@@ -7,6 +7,13 @@
   --color-text-gray: #a1a1a1;
   --color-border-dark: #333333;
   --color-input-bg: #222222;
+  --color-admin-card-bg: #1a1a1a;
+  --color-admin-hover: #252525;
+  --color-admin-accent-soft: rgba(199,31,31,0.15);
+  --color-admin-success: #22c55e;
+  --color-admin-danger: #ef4444;
+  --color-admin-text-primary: #f0f0f0;
+  --color-admin-text-secondary: #a1a1a1;
   --font-heading: 'Anton', sans-serif;
   --font-body: 'Montserrat', sans-serif;
 }

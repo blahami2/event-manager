@@ -22,7 +22,7 @@ export function AdminNav(): React.ReactElement {
   }
 
   return (
-    <nav className="bg-gray-900 text-white" aria-label="Admin navigation">
+    <nav className="border-b border-border-dark bg-dark-secondary font-body text-white" aria-label="Admin navigation">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -33,8 +33,8 @@ export function AdminNav(): React.ReactElement {
                 href={item.href}
                 className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   pathname === item.href
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    ? "border-b-2 border-accent bg-admin-accent-soft text-white"
+                    : "text-admin-text-secondary hover:text-white"
                 }`}
               >
                 {t(item.labelKey)}
@@ -43,7 +43,7 @@ export function AdminNav(): React.ReactElement {
           </div>
           <button
             onClick={handleLogout}
-            className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+            className="rounded-md px-3 py-2 text-sm font-medium text-admin-text-secondary transition-colors hover:text-accent"
           >
             {t("logout")}
           </button>
