@@ -36,6 +36,8 @@ const ignoresConfig = defineConfig([
       "coverage/",
       "next.config.js",
       "postcss.config.mjs",
+      "scripts/",
+      "test-*.ts",
     ],
   },
 ]);

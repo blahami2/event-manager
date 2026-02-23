@@ -22,7 +22,7 @@ function getSupabaseConfig(): { url: string; anonKey: string } {
 
   if (!url || !anonKey) {
     throw new Error(
-      "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set."
+      "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set.",
     );
   }
 
@@ -90,6 +90,11 @@ export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResu
   const { data, error } = await supabase.auth.getUser();
 
   if (error || !data.user) {
+    logger.error("verifyAdmin: Supabase auth failed via cookie", {
+      error,
+      hasUser: !!data.user,
+      cookiesCount: cookies.length,
+    });
     throw new AuthenticationError();
   }
 
@@ -105,10 +110,7 @@ export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResu
  * This handles the case where the database was seeded with a placeholder
  * Supabase user ID that doesn't match the real one (fixes B-005/B-006).
  */
-async function resolveAdmin(
-  supabaseUserId: string,
-  email: string,
-): Promise<VerifyAdminResult> {
+async function resolveAdmin(supabaseUserId: string, email: string): Promise<VerifyAdminResult> {
   let admin = await findAdminBySupabaseId(supabaseUserId);
 
   if (!admin) {

@@ -137,7 +137,7 @@ describe("getRegistrationStats", () => {
       total: 3,
       confirmed: 2,
       cancelled: 1,
-      totalAdults: 5,
+      totalAdults: 4,
       totalChildren: 3,
     });
   });

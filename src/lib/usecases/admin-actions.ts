@@ -7,12 +7,7 @@ import {
 import { logger } from "@/lib/logger";
 import { NotFoundError } from "@/lib/errors/app-errors";
 import { purgeExpiredTokens, purgeCancelledRegistrations } from "@/lib/usecases/data-retention";
-import type {
-  RegistrationFilters,
-  RegistrationOutput,
-  PaginatedResult,
-  RegistrationInput,
-} from "@/types/registration";
+import type { RegistrationFilters, RegistrationOutput, PaginatedResult, RegistrationInput } from "@/types/registration";
 import { RegistrationStatus } from "@/types/registration";
 
 /** Registration statistics summary. */
@@ -45,8 +40,14 @@ export async function getRegistrationStats(): Promise<RegistrationStats> {
   const confirmed = items.filter((r) => r.status === RegistrationStatus.CONFIRMED).length;
   const cancelled = items.filter((r) => r.status === RegistrationStatus.CANCELLED).length;
 
-  const totalAdults = items.reduce((sum, r) => sum + r.adultsCount, 0);
-  const totalChildren = items.reduce((sum, r) => sum + r.childrenCount, 0);
+  const totalAdults = items.reduce(
+    (sum, r) => sum + (r.status === RegistrationStatus.CONFIRMED ? r.adultsCount : 0),
+    0,
+  );
+  const totalChildren = items.reduce(
+    (sum, r) => sum + (r.status === RegistrationStatus.CONFIRMED ? r.childrenCount : 0),
+    0,
+  );
 
   return {
     total: items.length,
@@ -62,10 +63,7 @@ export async function getRegistrationStats(): Promise<RegistrationStats> {
  *
  * @throws {NotFoundError} when registration doesn't exist or is already cancelled
  */
-export async function adminCancelRegistration(
-  registrationId: string,
-  adminId: string,
-): Promise<RegistrationOutput> {
+export async function adminCancelRegistration(registrationId: string, adminId: string): Promise<RegistrationOutput> {
   const existing = await findRegistrationById(registrationId);
 
   if (!existing || existing.status === RegistrationStatus.CANCELLED) {
@@ -158,14 +156,8 @@ export interface DataRetentionResult {
  * Removes expired+revoked tokens and old cancelled registrations.
  * Logs the admin action.
  */
-export async function adminPurgeRetentionData(
-  adminId: string,
-  olderThan?: Date,
-): Promise<DataRetentionResult> {
-  const [tokenResult, regResult] = await Promise.all([
-    purgeExpiredTokens(),
-    purgeCancelledRegistrations(olderThan),
-  ]);
+export async function adminPurgeRetentionData(adminId: string, olderThan?: Date): Promise<DataRetentionResult> {
+  const [tokenResult, regResult] = await Promise.all([purgeExpiredTokens(), purgeCancelledRegistrations(olderThan)]);
 
   logger.info("Admin triggered data retention purge", {
     adminUserId: adminId,

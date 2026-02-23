@@ -69,11 +69,11 @@ export function ChangePasswordForm(): React.ReactElement {
   }
 
   return (
-    <div className="border border-border-dark bg-dark-secondary rounded-lg p-6">
-      <h2 className="text-lg font-semibold text-admin-text-primary mb-4">{t("changePassword")}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+    <div className="max-w-md rounded-xl border border-border-dark bg-dark-secondary/60 p-8 shadow-lg backdrop-blur-md">
+      <h2 className="mb-6 text-xl font-semibold tracking-wide text-admin-text-primary">{t("changePassword")}</h2>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="currentPassword" className="block text-sm font-medium text-admin-text-secondary mb-1">
+          <label htmlFor="currentPassword" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
             {t("currentPassword")}
           </label>
           <input
@@ -82,11 +82,11 @@ export function ChangePasswordForm(): React.ReactElement {
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             required
-            className="w-full bg-dark-primary border border-border-dark text-white rounded-md px-3 py-2"
+            className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
         <div>
-          <label htmlFor="newPassword" className="block text-sm font-medium text-admin-text-secondary mb-1">
+          <label htmlFor="newPassword" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
             {t("newPassword")}
           </label>
           <input
@@ -96,11 +96,11 @@ export function ChangePasswordForm(): React.ReactElement {
             onChange={(e) => setNewPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full bg-dark-primary border border-border-dark text-white rounded-md px-3 py-2"
+            className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-admin-text-secondary mb-1">
+          <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
             {t("confirmPassword")}
           </label>
           <input
@@ -109,22 +109,32 @@ export function ChangePasswordForm(): React.ReactElement {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full bg-dark-primary border border-border-dark text-white rounded-md px-3 py-2"
+            className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
 
         {errorMessage && (
-          <p className="text-sm text-red-400" role="alert">{errorMessage}</p>
+          <div
+            className="rounded-lg border border-red-700/50 bg-red-900/20 p-3 text-sm text-red-400 backdrop-blur-sm"
+            role="alert"
+          >
+            {errorMessage}
+          </div>
         )}
 
         {status === "success" && (
-          <p className="text-sm text-green-400" role="status">{t("success")}</p>
+          <div
+            className="rounded-lg border border-green-700/50 bg-green-900/20 p-3 text-sm text-green-400 backdrop-blur-sm"
+            role="status"
+          >
+            {t("success")}
+          </div>
         )}
 
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="border-2 border-accent bg-accent px-4 py-2 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-transparent hover:text-accent disabled:opacity-50"
+          className="mt-6 inline-flex w-full items-center justify-center rounded-lg border-2 border-accent bg-accent px-6 py-2.5 text-sm font-bold tracking-wide text-white shadow-lg shadow-accent/20 transition-all duration-300 hover:bg-transparent hover:text-accent hover:shadow-none disabled:opacity-50"
         >
           {status === "submitting" ? t("submitting") : t("submit")}
         </button>
