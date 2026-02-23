@@ -116,11 +116,11 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+        <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">{t("title")}</h1>
         <a
           href="/api/admin/registrations/export"
           download
-          className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          className="inline-flex items-center border border-border-dark bg-transparent px-4 py-2 text-sm font-medium text-admin-text-secondary transition-colors hover:border-[#555] hover:text-white"
         >
           {t("downloadCsv")}
         </a>
@@ -137,13 +137,13 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
       <div className="mt-4">
         {state.error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700" role="alert">
+          <div className="mb-4 rounded-md border border-red-700 bg-red-900/40 p-4 text-sm text-red-400" role="alert">
             {state.error}
           </div>
         )}
 
         {state.loading ? (
-          <div className="py-12 text-center text-sm text-gray-500">{t("loading")}</div>
+          <div className="py-12 text-center text-sm text-admin-text-secondary">{t("loading")}</div>
         ) : state.data ? (
           <>
             <RegistrationTable

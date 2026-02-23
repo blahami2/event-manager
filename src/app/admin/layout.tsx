@@ -13,7 +13,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>): React.ReactElement {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-dark-primary font-body text-admin-text-primary">
       <AdminNav />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex justify-end py-2">
