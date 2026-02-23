@@ -50,12 +50,11 @@ export default async function ManagePage({
         >
           <div style={{ width: "90%", maxWidth: "1200px", margin: "0 auto" }}>
             <h1
-              className="font-heading"
               style={{
+                fontFamily: "'Anton', sans-serif",
                 textTransform: "uppercase",
                 letterSpacing: "2px",
-                fontSize: "clamp(2.5rem, 6vw, 5rem)",
-                lineHeight: "0.9",
+                textAlign: "center",
               }}
             >
               {t("title")}
@@ -95,21 +94,21 @@ export default async function ManagePage({
       >
         <div style={{ width: "90%", maxWidth: "1200px", margin: "0 auto" }}>
           <h1
-            className="font-heading"
             style={{
+              fontFamily: "'Anton', sans-serif",
               textTransform: "uppercase",
               letterSpacing: "2px",
-              fontSize: "clamp(2.5rem, 6vw, 5rem)",
-              lineHeight: "0.9",
+              textAlign: "center",
             }}
           >
             {t("title")}
           </h1>
           <p
-            className="font-body"
             style={{
+              fontFamily: "'Montserrat', sans-serif",
               marginTop: "10px",
               color: "var(--color-text-gray)",
+              textAlign: "center",
             }}
           >
             {t("subtitle")}
