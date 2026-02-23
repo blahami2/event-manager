@@ -94,6 +94,9 @@ export function RegistrationTable({ registrations, onEdit, onCancel }: Registrat
                 {t("children")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
+                {t("notes")}
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
                 {t("status")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
@@ -112,6 +115,9 @@ export function RegistrationTable({ registrations, onEdit, onCancel }: Registrat
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{formatStay(reg.stay)}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{reg.adultsCount}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{reg.childrenCount}</td>
+                <td className="max-w-xs truncate px-6 py-4 text-sm text-[#c8c8c8]" title={reg.notes ?? undefined}>
+                  {reg.notes ?? "\u2014"}
+                </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm">
                   <StatusBadge status={reg.status} />
                 </td>

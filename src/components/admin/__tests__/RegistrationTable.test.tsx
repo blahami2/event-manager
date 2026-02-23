@@ -40,13 +40,14 @@ describe("RegistrationTable", () => {
     expect(screen.getByText("noResults")).toBeDefined();
   });
 
-  it("should render table headers when registrations exist", () => {
+  it("should render table headers including notes when registrations exist", () => {
     render(<RegistrationTable {...defaultProps} />);
     expect(screen.getByText("name")).toBeDefined();
     expect(screen.getByText("email")).toBeDefined();
     expect(screen.getByText("stay")).toBeDefined();
     expect(screen.getByText("adults")).toBeDefined();
     expect(screen.getByText("children")).toBeDefined();
+    expect(screen.getByText("notes")).toBeDefined();
     expect(screen.getByText("status")).toBeDefined();
     expect(screen.getByText("created")).toBeDefined();
     expect(screen.getByText("actions")).toBeDefined();
@@ -103,5 +104,52 @@ describe("RegistrationTable", () => {
     fireEvent.click(screen.getByText("cancel"));
     fireEvent.click(screen.getByText("no"));
     expect(screen.queryByText("confirmCancel")).toBeNull();
+  });
+
+  it("should display notes text when registration has notes", () => {
+    // given
+    // - a registration with notes content
+    const regWithNotes = makeRegistration({ notes: "Vegetarian diet, arriving late" });
+
+    // when
+    render(<RegistrationTable registrations={[regWithNotes]} onEdit={vi.fn()} onCancel={vi.fn()} />);
+
+    // then
+    expect(screen.getByText("Vegetarian diet, arriving late")).toBeDefined();
+  });
+
+  it("should display empty cell when registration has null notes", () => {
+    // given
+    // - a registration with null notes
+    const regWithoutNotes = makeRegistration({ notes: null });
+
+    // when
+    render(<RegistrationTable registrations={[regWithoutNotes]} onEdit={vi.fn()} onCancel={vi.fn()} />);
+
+    // then
+    // - the notes column header exists
+    expect(screen.getByText("notes")).toBeDefined();
+    // - no notes text is displayed in the data row (the cell should render a dash)
+    const cells = screen.getAllByRole("cell");
+    const notesCell = cells.find((cell) => cell.textContent === "\u2014");
+    expect(notesCell).toBeDefined();
+  });
+
+  it("should render notes column for multiple registrations with mixed notes", () => {
+    // given
+    // - one registration with notes and one without
+    const registrations = [
+      makeRegistration({ id: "reg-1", notes: "Has allergies" }),
+      makeRegistration({ id: "reg-2", notes: null, name: "Jane Doe", email: "jane@example.com" }),
+    ];
+
+    // when
+    render(<RegistrationTable registrations={registrations} onEdit={vi.fn()} onCancel={vi.fn()} />);
+
+    // then
+    expect(screen.getByText("Has allergies")).toBeDefined();
+    const cells = screen.getAllByRole("cell");
+    const dashCells = cells.filter((cell) => cell.textContent === "\u2014");
+    expect(dashCells.length).toBeGreaterThanOrEqual(1);
   });
 });

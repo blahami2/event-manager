@@ -188,7 +188,8 @@
         "no": "No",
         "stay": "Stay",
         "adults": "Adults",
-        "children": "Children"
+        "children": "Children",
+        "notes": "Notes"
       },
       "edit": {
         "title": "Edit Registration",
