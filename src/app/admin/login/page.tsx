@@ -41,7 +41,7 @@ export default function LoginPage(): React.ReactElement {
   return (
     <div className="flex min-h-screen items-center justify-center bg-dark-primary px-4 font-body">
       <div className="w-full max-w-md border border-border-dark border-t-2 border-t-accent bg-admin-card-bg p-8 rounded-sm">
-        <h1 className="mb-6 text-center font-heading text-2xl uppercase tracking-widest text-admin-text-primary">
+        <h1 className="mb-6 text-center font-heading text-3xl uppercase tracking-widest text-admin-text-primary">
           {t("title")}
         </h1>
 

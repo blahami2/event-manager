@@ -37,7 +37,7 @@ body {
   line-height: 1.6;
 }
 
-h1, h2, h3 {
+h1 {
   font-family: 'Anton', sans-serif;
   text-transform: uppercase;
   letter-spacing: 2px;
