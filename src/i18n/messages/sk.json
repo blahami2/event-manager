@@ -127,6 +127,7 @@
   },
   "resend": {
     "title": "Znovu odoslať odkaz na správu",
+    "description": "Stratili ste odkaz na správu? Žiadny problém — zadajte svoj e-mail a pošleme vám nový.",
     "reservationSubtitle": "Zadajte e-mail, s ktorým ste sa registrovali, a my vám pošleme nový odkaz na správu.",
     "sending": "Odosielanie…",
     "sendButton": "Odoslať odkaz na správu",
