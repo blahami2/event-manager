@@ -127,6 +127,7 @@
   },
   "resend": {
     "title": "Resend Manage Link",
+    "description": "Lost your manage link? No worries — enter your email and we'll send you a new one.",
     "reservationSubtitle": "Enter the email you registered with and we'll send you a new manage link.",
     "sending": "Sending…",
     "sendButton": "Send Manage Link",
