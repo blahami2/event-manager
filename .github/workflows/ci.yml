@@ -57,4 +57,5 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder"
           SUPABASE_SERVICE_ROLE_KEY: "placeholder"
           RESEND_API_KEY: "placeholder"
+          EMAIL_FROM: "Test <noreply@placeholder.com>"
           BASE_URL: "http://localhost:3000"

@@ -421,6 +421,7 @@ All rate limit responses return:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon key          |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key       |
 | `RESEND_API_KEY`       | Yes      | Resend API key                  |
+| `EMAIL_FROM`           | Yes      | Sender address for emails (e.g. `Birthday Celebration <noreply@resend.dev>`) |
 | `BASE_URL`             | Yes      | Application base URL            |
 | `NODE_ENV`             | Yes      | `development` or `production`   |
 | `LOG_LEVEL`            | No       | `debug`, `info`, `warn`, `error`|

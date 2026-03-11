@@ -39,9 +39,14 @@ export async function sendManageLink(
   params: SendManageLinkParams,
 ): Promise<SendManageLinkResult> {
   const apiKey = process.env["RESEND_API_KEY"];
+  const emailFrom = process.env["EMAIL_FROM"];
 
   if (!apiKey) {
     return { success: false, error: "Missing RESEND_API_KEY environment variable." };
+  }
+
+  if (!emailFrom) {
+    return { success: false, error: "Missing EMAIL_FROM environment variable." };
   }
 
   const resend = new Resend(apiKey);
@@ -63,7 +68,7 @@ export async function sendManageLink(
     eventEndDate: eventEnd,
     eventLocation: t("eventLocation"),
     eventDescription: t("eventDescription"),
-    organizerEmail: "noreply@resend.dev",
+    organizerEmail: emailFrom.includes("<") ? emailFrom.match(/<(.+)>/)?.[1] ?? emailFrom : emailFrom,
   });
 
   const { subject, html } = await renderManageLinkEmail({
@@ -73,7 +78,7 @@ export async function sendManageLink(
   });
 
   const { error } = await resend.emails.send({
-    from: "Birthday Celebration <noreply@resend.dev>",
+    from: emailFrom,
     to,
     subject,
     html,

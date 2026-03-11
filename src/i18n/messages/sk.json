@@ -190,7 +190,11 @@
         "stay": "Pobyt",
         "adults": "Dospelí",
         "children": "Deti",
-        "notes": "Poznámky"
+        "notes": "Poznámky",
+        "resendEmail": "Znovu odoslať e-mail",
+        "confirmResend": "Znovu odoslať registračný e-mail?",
+        "resendSuccess": "Registračný e-mail bol úspešne znovu odoslaný.",
+        "resendError": "Nepodarilo sa znovu odoslať registračný e-mail."
       },
       "edit": {
         "title": "Upraviť registráciu",

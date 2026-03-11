@@ -9,6 +9,8 @@ export interface RegistrationTableProps {
   readonly registrations: ReadonlyArray<RegistrationOutput>;
   readonly onEdit: (registration: RegistrationOutput) => void;
   readonly onCancel: (registrationId: string) => void;
+  readonly onResendEmail?: (registrationId: string) => void;
+  readonly resendingId?: string | null;
 }
 
 function formatDate(date: Date): string {
@@ -43,10 +45,11 @@ function StatusBadge({ status }: { readonly status: RegistrationStatus }): React
   return <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${styles}`}>{status}</span>;
 }
 
-export function RegistrationTable({ registrations, onEdit, onCancel }: RegistrationTableProps): React.ReactElement {
+export function RegistrationTable({ registrations, onEdit, onCancel, onResendEmail, resendingId }: RegistrationTableProps): React.ReactElement {
   const t = useTranslations("admin.registrations.table");
   const tReg = useTranslations("admin.registrations");
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [confirmingResendId, setConfirmingResendId] = useState<string | null>(null);
 
   const handleCancelClick = useCallback((id: string) => {
     setConfirmingId(id);
@@ -62,6 +65,22 @@ export function RegistrationTable({ registrations, onEdit, onCancel }: Registrat
 
   const handleDismissConfirm = useCallback(() => {
     setConfirmingId(null);
+  }, []);
+
+  const handleResendClick = useCallback((id: string) => {
+    setConfirmingResendId(id);
+  }, []);
+
+  const handleConfirmResend = useCallback(
+    (id: string) => {
+      onResendEmail?.(id);
+      setConfirmingResendId(null);
+    },
+    [onResendEmail],
+  );
+
+  const handleDismissResendConfirm = useCallback(() => {
+    setConfirmingResendId(null);
   }, []);
 
   if (registrations.length === 0) {
@@ -141,6 +160,24 @@ export function RegistrationTable({ registrations, onEdit, onCancel }: Registrat
                         {t("no")}
                       </button>
                     </span>
+                  ) : confirmingResendId === reg.id ? (
+                    <span className="flex items-center gap-2">
+                      <span className="text-blue-400">{t("confirmResend")}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleConfirmResend(reg.id)}
+                        className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
+                      >
+                        {t("yes")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDismissResendConfirm}
+                        className="rounded border border-border-dark bg-transparent px-2 py-1 text-xs text-admin-text-secondary hover:text-white"
+                      >
+                        {t("no")}
+                      </button>
+                    </span>
                   ) : (
                     <span className="flex items-center gap-2">
                       <button
@@ -151,13 +188,23 @@ export function RegistrationTable({ registrations, onEdit, onCancel }: Registrat
                         {t("edit")}
                       </button>
                       {reg.status !== RegistrationStatus.CANCELLED && (
-                        <button
-                          type="button"
-                          onClick={() => handleCancelClick(reg.id)}
-                          className="text-red-500 transition-colors hover:text-red-300 group-hover:scale-105"
-                        >
-                          {t("cancel")}
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleCancelClick(reg.id)}
+                            className="text-red-500 transition-colors hover:text-red-300 group-hover:scale-105"
+                          >
+                            {t("cancel")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleResendClick(reg.id)}
+                            disabled={resendingId === reg.id}
+                            className="text-blue-400 transition-colors hover:text-blue-300 group-hover:scale-105 disabled:opacity-50"
+                          >
+                            {resendingId === reg.id ? t("resendEmail") + "..." : t("resendEmail")}
+                          </button>
+                        </>
                       )}
                     </span>
                   )}

@@ -63,3 +63,10 @@ export class AuthorizationError extends AppError {
     this.name = "AuthorizationError";
   }
 }
+
+export class InvalidStatusError extends AppError {
+  constructor(message: string) {
+    super(message, "INVALID_STATUS", 400);
+    this.name = "InvalidStatusError";
+  }
+}

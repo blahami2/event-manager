@@ -64,6 +64,7 @@ describe("sendManageLink", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env["RESEND_API_KEY"] = "re_test_key";
+    process.env["EMAIL_FROM"] = "Birthday Celebration <noreply@test.com>";
     mockRenderManageLinkEmail.mockResolvedValue({
       subject: "Your Registration Manage Link",
       html: "<p>rendered email</p>",
@@ -187,6 +188,20 @@ describe("sendManageLink", () => {
     expect(result).toEqual({
       success: false,
       error: "Missing RESEND_API_KEY environment variable.",
+    });
+  });
+
+  test("should return success false when EMAIL_FROM is missing", async () => {
+    // given
+    delete process.env["EMAIL_FROM"];
+
+    // when
+    const result = await sendManageLink(baseParams);
+
+    // then
+    expect(result).toEqual({
+      success: false,
+      error: "Missing EMAIL_FROM environment variable.",
     });
   });
 

@@ -1,14 +1,22 @@
 import { NextRequest } from "next/server";
+import { z } from "zod";
 
 import { verifyAdmin } from "@/lib/auth/admin-guard";
 import {
   listRegistrationsPaginated,
   adminEditRegistration,
   adminCancelRegistration,
+  adminResendEmail,
 } from "@/lib/usecases/admin-actions";
 import { successResponse, handleApiError } from "@/lib/api-response";
+import { ValidationError } from "@/lib/errors/app-errors";
 import type { RegistrationFilters, RegistrationInput } from "@/types/registration";
 import { RegistrationStatus } from "@/types/registration";
+
+/** Zod schema for the POST (resend email) request body. */
+const resendEmailSchema = z.object({
+  registrationId: z.string().uuid("registrationId must be a valid UUID"),
+});
 
 /**
  * GET /api/admin/registrations
@@ -89,6 +97,36 @@ export async function DELETE(request: NextRequest): Promise<Response> {
     );
 
     return successResponse(result, "Registration cancelled");
+  } catch (error: unknown) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * POST /api/admin/registrations
+ *
+ * Admin resend registration confirmation email with a new manage link.
+ * Body: { registrationId: string }
+ */
+export async function POST(request: NextRequest): Promise<Response> {
+  try {
+    const { adminId } = await verifyAdmin(request);
+
+    const body: unknown = await request.json();
+    const parsed = resendEmailSchema.safeParse(body);
+
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const fieldName = issue.path.join(".");
+        fields[fieldName] = issue.message;
+      }
+      throw new ValidationError("Validation failed", fields);
+    }
+
+    const result = await adminResendEmail(parsed.data.registrationId, adminId);
+
+    return successResponse(result, "Registration email resent successfully");
   } catch (error: unknown) {
     return handleApiError(error);
   }

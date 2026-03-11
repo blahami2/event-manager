@@ -42,6 +42,8 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   const [page, setPage] = useState(1);
   const [state, setState] = useState<FetchState>({ data: null, loading: true, error: null });
   const [editing, setEditing] = useState<RegistrationOutput | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [resendFeedback, setResendFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const loadData = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
@@ -84,6 +86,29 @@ export default function AdminRegistrationsPage(): React.ReactElement {
       }
     },
     [loadData, t],
+  );
+
+  const handleResendEmail = useCallback(
+    async (registrationId: string) => {
+      setResendingId(registrationId);
+      setResendFeedback(null);
+      try {
+        const res = await fetch("/api/admin/registrations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ registrationId }),
+        });
+        if (!res.ok) {
+          throw new Error("Failed to resend email");
+        }
+        setResendFeedback({ type: "success", message: t("table.resendSuccess") });
+      } catch {
+        setResendFeedback({ type: "error", message: t("table.resendError") });
+      } finally {
+        setResendingId(null);
+      }
+    },
+    [t],
   );
 
   const handleEdit = useCallback((registration: RegistrationOutput) => {
@@ -155,11 +180,30 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           </div>
         )}
 
+        {resendFeedback && (
+          <div
+            className={`mb-4 rounded-md border p-4 text-sm ${
+              resendFeedback.type === "success"
+                ? "border-green-700 bg-green-900/40 text-green-400"
+                : "border-red-700 bg-red-900/40 text-red-400"
+            }`}
+            role="alert"
+          >
+            {resendFeedback.message}
+          </div>
+        )}
+
         {state.loading ? (
           <div className="py-12 text-center text-sm text-admin-text-secondary">{t("loading")}</div>
         ) : state.data ? (
           <>
-            <RegistrationTable registrations={state.data.items} onEdit={handleEdit} onCancel={handleCancel} />
+            <RegistrationTable
+              registrations={state.data.items}
+              onEdit={handleEdit}
+              onCancel={handleCancel}
+              onResendEmail={handleResendEmail}
+              resendingId={resendingId}
+            />
             <Pagination
               page={state.data.page}
               pageSize={state.data.pageSize}
