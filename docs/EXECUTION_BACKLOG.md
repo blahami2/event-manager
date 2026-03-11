@@ -2060,4 +2060,24 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 
 ---
 
+## T-EXT-001: Rows Per Page Selector for Admin Registrations Table
+
+**Status:** DONE
+
+**Description:** Add a UI control (dropdown) in the admin registrations table that lets the user choose how many rows to display per page (10, 20, 50, 100). Default remains 20. Selection persists for the session via React state.
+
+**Files Changed:**
+- `src/components/admin/PageSizeSelector.tsx` (new component)
+- `src/components/admin/Pagination.tsx` (added `onPageSizeChange` prop, embedded `PageSizeSelector`)
+- `src/app/admin/registrations/page.tsx` (added `pageSize` state, `handlePageSizeChange` callback, wired to `Pagination`)
+- `src/i18n/messages/en.json` (added `admin.registrations.pagination.rowsPerPage` key)
+- `src/i18n/messages/cs.json` (added `admin.registrations.pagination.rowsPerPage` key)
+- `src/i18n/messages/sk.json` (added `admin.registrations.pagination.rowsPerPage` key)
+- `src/components/admin/__tests__/PageSizeSelector.test.tsx` (new, 5 tests)
+- `src/components/admin/__tests__/Pagination.test.tsx` (updated, 8 tests — added page size selector tests)
+
+**Verification:** `npx tsc --noEmit`, `npm run lint`, `npx vitest run` -- all pass (452 tests). Security and architecture checks pass.
+
+---
+
 End of Execution Backlog.
