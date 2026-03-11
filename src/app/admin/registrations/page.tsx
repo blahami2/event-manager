@@ -8,7 +8,7 @@ import { EditRegistrationModal } from "@/components/admin/EditRegistrationModal"
 import { Pagination } from "@/components/admin/Pagination";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
-const PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 20;
 
 interface FetchState {
   readonly data: PaginatedResult<RegistrationOutput> | null;
@@ -20,12 +20,13 @@ async function fetchRegistrations(
   status: string,
   search: string,
   page: number,
+  pageSize: number,
 ): Promise<PaginatedResult<RegistrationOutput>> {
   const params = new URLSearchParams();
   if (status) params.set("status", status);
   if (search) params.set("search", search);
   params.set("page", String(page));
-  params.set("pageSize", String(PAGE_SIZE));
+  params.set("pageSize", String(pageSize));
 
   const res = await fetch(`/api/admin/registrations?${params.toString()}`);
   if (!res.ok) {
@@ -40,6 +41,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [state, setState] = useState<FetchState>({ data: null, loading: true, error: null });
   const [editing, setEditing] = useState<RegistrationOutput | null>(null);
   const [resendingId, setResendingId] = useState<string | null>(null);
@@ -48,12 +50,12 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   const loadData = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
-      const data = await fetchRegistrations(status, search, page);
+      const data = await fetchRegistrations(status, search, page, pageSize);
       setState({ data, loading: false, error: null });
     } catch {
       setState((prev) => ({ ...prev, loading: false, error: t("errorLoad") }));
     }
-  }, [status, search, page, t]);
+  }, [status, search, page, pageSize, t]);
 
   useEffect(() => {
     void loadData();
@@ -66,6 +68,11 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   const handleSearchChange = useCallback((newSearch: string) => {
     setSearch(newSearch);
+    setPage(1);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newPageSize: number) => {
+    setPageSize(newPageSize);
     setPage(1);
   }, []);
 
@@ -209,6 +216,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
               pageSize={state.data.pageSize}
               total={state.data.total}
               onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
             />
           </>
         ) : null}

@@ -196,6 +196,9 @@
         "resendSuccess": "Registračný e-mail bol úspešne znovu odoslaný.",
         "resendError": "Nepodarilo sa znovu odoslať registračný e-mail."
       },
+      "pagination": {
+        "rowsPerPage": "Riadkov na stránku"
+      },
       "edit": {
         "title": "Upraviť registráciu",
         "name": "Meno",

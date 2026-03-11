@@ -196,6 +196,9 @@
         "resendSuccess": "Registration email resent successfully.",
         "resendError": "Failed to resend registration email."
       },
+      "pagination": {
+        "rowsPerPage": "Rows per page"
+      },
       "edit": {
         "title": "Edit Registration",
         "name": "Name",

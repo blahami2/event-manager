@@ -1,13 +1,16 @@
 "use client";
 
+import { PageSizeSelector } from "./PageSizeSelector";
+
 export interface PaginationProps {
   readonly page: number;
   readonly pageSize: number;
   readonly total: number;
   readonly onPageChange: (page: number) => void;
+  readonly onPageSizeChange: (pageSize: number) => void;
 }
 
-export function Pagination({ page, pageSize, total, onPageChange }: PaginationProps): React.ReactElement | null {
+export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChange }: PaginationProps): React.ReactElement | null {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   if (totalPages <= 1) {
@@ -19,11 +22,14 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border-dark/50 px-6 py-4">
-      <p className="text-sm text-admin-text-secondary">
-        Showing <span className="font-medium text-admin-text-primary">{start}</span> to{" "}
-        <span className="font-medium text-admin-text-primary">{end}</span> of{" "}
-        <span className="font-medium text-admin-text-primary">{total}</span> results
-      </p>
+      <div className="flex items-center gap-6">
+        <p className="text-sm text-admin-text-secondary">
+          Showing <span className="font-medium text-admin-text-primary">{start}</span> to{" "}
+          <span className="font-medium text-admin-text-primary">{end}</span> of{" "}
+          <span className="font-medium text-admin-text-primary">{total}</span> results
+        </p>
+        <PageSizeSelector pageSize={pageSize} onPageSizeChange={onPageSizeChange} />
+      </div>
       <nav className="flex items-center gap-2" aria-label="Pagination">
         <button
           type="button"
