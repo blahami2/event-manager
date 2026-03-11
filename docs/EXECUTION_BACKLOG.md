@@ -2006,4 +2006,58 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 
 ---
 
+## M09: Admin Resend Registration Email
+
+**Type:** Feature
+**Date:** 2026-03-11
+**Status:** Done
+
+**Problem:** Administrators had no way to resend the registration confirmation email (with manage link) to a guest from the admin interface. If a guest lost their email or the original delivery failed, the admin had no recourse other than asking the guest to use the public resend-link flow.
+
+**Solution:**
+- Added `adminResendEmail` use case function to `src/lib/usecases/admin-actions.ts`
+  - Finds registration by ID, validates it is CONFIRMED (not CANCELLED)
+  - Revokes all existing tokens, generates a new capability token, stores the hash
+  - Sends manage link email via `sendManageLink()`
+  - Logs admin action with `adminUserId`, `action: "resend_email"`, `targetId`, masked email
+  - Throws `NotFoundError` if registration not found, `InvalidStatusError` if cancelled
+- Added `InvalidStatusError` to `src/lib/errors/app-errors.ts` (code: `INVALID_STATUS`, status: 400)
+- Added `POST` handler to `src/app/api/admin/registrations/route.ts`
+  - Validates input with Zod schema (registrationId must be UUID)
+  - Delegates to `adminResendEmail` use case
+  - Returns consistent API response shape
+- Added "Resend Email" button to `src/components/admin/RegistrationTable.tsx`
+  - Only shown for CONFIRMED registrations
+  - Includes confirmation dialog before sending (same pattern as cancel)
+  - Shows loading state while sending
+- Wired up resend handler in `src/app/admin/registrations/page.tsx`
+  - Success/error feedback displayed above the table
+- Added translation keys to all three locale files (EN, CS, SK):
+  - `admin.registrations.table.resendEmail`
+  - `admin.registrations.table.confirmResend`
+  - `admin.registrations.table.resendSuccess`
+  - `admin.registrations.table.resendError`
+- Added 6 unit tests for the new use case in `tests/unit/lib/usecases/admin-resend-email.test.ts`:
+  - Happy path (confirmed registration, email sent successfully)
+  - Registration not found (throws NotFoundError)
+  - Registration is cancelled (throws InvalidStatusError)
+  - Email sending fails (returns error result)
+  - Proper logging with masked email
+  - Correct manage URL construction from BASE_URL
+
+**Files changed:**
+- `src/lib/usecases/admin-actions.ts` (added `adminResendEmail` function and imports)
+- `src/lib/errors/app-errors.ts` (added `InvalidStatusError` class)
+- `src/app/api/admin/registrations/route.ts` (added POST handler with Zod validation)
+- `src/components/admin/RegistrationTable.tsx` (added resend button with confirmation)
+- `src/app/admin/registrations/page.tsx` (wired up resend handler and feedback)
+- `src/i18n/messages/en.json` (added 4 translation keys)
+- `src/i18n/messages/cs.json` (added 4 translation keys)
+- `src/i18n/messages/sk.json` (added 4 translation keys)
+- `tests/unit/lib/usecases/admin-resend-email.test.ts` (new, 6 tests)
+
+**Verification:** `npx tsc --noEmit`, `npm run lint`, `npx vitest run` -- all pass (444 tests). Security and architecture checks pass.
+
+---
+
 End of Execution Backlog.

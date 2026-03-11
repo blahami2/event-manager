@@ -60,6 +60,7 @@ describe("ICS calendar attachment in registration email", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env["RESEND_API_KEY"] = "re_test_key";
+    process.env["EMAIL_FROM"] = "Birthday Celebration <noreply@test.com>";
     mockSend.mockResolvedValue({ data: { id: "email-id-1" }, error: null });
     mockRenderManageLinkEmail.mockResolvedValue({
       subject: "Your Registration Manage Link",

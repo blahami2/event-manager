@@ -190,7 +190,11 @@
         "stay": "Stay",
         "adults": "Adults",
         "children": "Children",
-        "notes": "Notes"
+        "notes": "Notes",
+        "resendEmail": "Resend Email",
+        "confirmResend": "Resend registration email?",
+        "resendSuccess": "Registration email resent successfully.",
+        "resendError": "Failed to resend registration email."
       },
       "edit": {
         "title": "Edit Registration",
