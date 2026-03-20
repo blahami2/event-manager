@@ -23,6 +23,8 @@ of bugs and propose minimal, correct fixes.
 - Use clear, concise language.
 - Search for up-to-date information and resources.
 - Absolutely always prioritize quality over quantity. Everything should be high-grade.
+- A question is a query for information (answer), it's not a request for action (task, command)!
+- When generating temporary .md files (e.g. analysis, plan, review), put them in the project's tmp/\<type\>/ folder (e.g. tmp/reviews/, tmp/plans/, tmp/analysis/). Use the naming pattern <agent-id>-<target>.md (e.g. reviewer-code-auth-service.md).
 - Aim for 90%+ code coverage on new code; never decrease existing coverage.
 - Test files should mirror the structure of source files for easy navigation.
 - Use descriptive test names: "should [expected behavior] when [condition]".
@@ -60,6 +62,7 @@ of bugs and propose minimal, correct fixes.
 - Use afterEach() for cleanup, not nested afterEach() calls.
 - Use beforeAll() for setup, not nested beforeAll() calls.
 - Use afterAll() for cleanup, not nested afterAll() calls.
+- Follow TDD when refactoring: ensure tests pass before AND after refactoring.
 - Never make write operations to git (no git commit, git push, etc.) on master, main, develop or acceptance branch.
 - Prefer composition over inheritance.
 - Follow the Single Responsibility Principle for classes.
@@ -78,6 +81,18 @@ of bugs and propose minimal, correct fixes.
 - Preserve existing functionality unless explicitly asked to change it.
 - Document non-obvious decisions and trade-offs.
 - Minimize code duplication.
+- Never log or expose sensitive data (passwords, tokens, API keys).
+- Validate and sanitize all user inputs.
+- Use parameterized queries to prevent SQL injection.
+- Avoid eval() and similar dynamic code execution.
+- Use secure random number generators for cryptographic purposes.
+- Implement proper authentication and authorization checks.
+- Keep dependencies up to date to patch known vulnerabilities.
+- Use HTTPS for all external communications.
+- Implement rate limiting for public APIs.
+- Follow the principle of least privilege.
+- Store secrets in secure vaults, not in code or config files.
+- Implement proper CSRF protection for web applications.
 - Use strict TypeScript configuration (strict: true in tsconfig.json).
 - Prefer interfaces for public APIs, types for internal structures.
 - Use readonly for immutable properties and ReadonlyArray<T> for immutable arrays.
@@ -96,6 +111,18 @@ of bugs and propose minimal, correct fixes.
 - Prefer named exports over default exports for better refactoring.
 - Use utility types (Partial, Pick, Omit, Record) appropriately.
 - Document complex types and public APIs with JSDoc comments.
+- Prefer standard library over third-party when feasible.
+- Evaluate transitive dependency cost before adding a library.
+- Avoid dependencies for trivial functionality you can write in a few lines.
+- Use proper dependency scoping (compile, runtime, test, provided/compileOnly).
+- Prefer specific sub-modules over umbrella/starter dependencies (e.g. spring-web over spring-boot-starter-web when only HTTP is needed).
+- Pin versions explicitly, avoid dynamic or floating versions.
+- Prefer well-maintained libraries with active communities and security track records.
+- Minimize dependency surface area - import only what you need.
+- Audit dependency size and impact on build, bundle, and startup time.
+- Document why each non-obvious dependency was chosen.
+- When multiple libraries offer similar functionality, prefer the one with fewer transitive dependencies.
+- Regularly review dependencies for unused or redundant entries.
 
 ## Prompt
 
