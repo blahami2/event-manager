@@ -55,12 +55,13 @@ export async function PUT(request: NextRequest): Promise<Response> {
     const { adminId } = await verifyAdmin(request);
 
     const body = (await request.json()) as Record<string, unknown>;
-    const { registrationId, name, email, stay, adultsCount, childrenCount, notes } = body;
+    const { registrationId, name, email, stay, accommodation, adultsCount, childrenCount, notes } = body;
 
     const data: RegistrationInput = {
       name: name as string,
       email: email as string,
       stay: stay as RegistrationInput["stay"],
+      accommodation: accommodation as RegistrationInput["accommodation"],
       adultsCount: adultsCount as number,
       childrenCount: childrenCount as number,
       ...(notes !== undefined ? { notes: notes as string } : {}),

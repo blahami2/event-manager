@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotFoundError, AppError } from "@/lib/errors/app-errors";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 
 // ── Mock dependencies ──
@@ -58,6 +58,7 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
     name: "Alice Johnson",
     email: "alice@example.com",
     stay: StayOption.FRI_SUN,
+    accommodation: AccommodationOption.ANYWHERE,
     adultsCount: 2,
     childrenCount: 0,
     notes: null,

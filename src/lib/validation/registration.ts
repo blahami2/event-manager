@@ -6,6 +6,11 @@ import { z } from "zod";
 const STAY_OPTIONS = ["FRI_SAT", "SAT_SUN", "FRI_SUN", "SAT_ONLY"] as const;
 
 /**
+ * Accommodation option values matching the Prisma AccommodationOption enum.
+ */
+const ACCOMMODATION_OPTIONS = ["PRIVATE_ROOM", "COMMON_ROOM", "OWN_TENT", "ANYWHERE", "NONE"] as const;
+
+/**
  * Zod validation schema for guest registration input.
  *
  * Enforces the domain constraints defined in docs/ARCHITECTURE.md Section 8.1:
@@ -26,6 +31,8 @@ export const registrationSchema = z.object({
     .email("Invalid email format"),
   stay: z
     .enum(STAY_OPTIONS, { error: "Please select a stay option" }),
+  accommodation: z
+    .enum(ACCOMMODATION_OPTIONS, { error: "Please select an accommodation option" }),
   adultsCount: z
     .number()
     .int("Adults count must be a whole number")

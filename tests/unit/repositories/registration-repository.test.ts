@@ -8,7 +8,7 @@ import {
   listRegistrations,
   countRegistrations,
 } from "@/repositories/registration-repository";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 
 // ── Mock Prisma ──
 
@@ -36,6 +36,7 @@ const dbRegistration = {
   name: "Alice Johnson",
   email: "alice@example.com",
   stay: "FRI_SUN" as const,
+  accommodation: "ANYWHERE" as const,
   adultsCount: 2,
   childrenCount: 0,
   notes: null,
@@ -58,6 +59,7 @@ describe("createRegistration", () => {
       name: "Alice Johnson",
       email: "alice@example.com",
       stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
       adultsCount: 2,
       childrenCount: 0,
     });
@@ -69,6 +71,7 @@ describe("createRegistration", () => {
         name: "Alice Johnson",
         email: "alice@example.com",
         stay: "FRI_SUN",
+        accommodation: "ANYWHERE",
         adultsCount: 2,
         childrenCount: 0,
         notes: undefined,
@@ -80,6 +83,7 @@ describe("createRegistration", () => {
       name: "Alice Johnson",
       email: "alice@example.com",
       stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
       adultsCount: 2,
       childrenCount: 0,
       notes: null,
@@ -101,6 +105,7 @@ describe("createRegistration", () => {
       name: "Alice Johnson",
       email: "alice@example.com",
       stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
       adultsCount: 2,
       childrenCount: 0,
       notes: "Vegetarian",
@@ -190,6 +195,7 @@ describe("updateRegistration", () => {
       name: "Alice Smith",
       email: "alice@example.com",
       stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
       adultsCount: 3,
       childrenCount: 0,
     });
@@ -201,6 +207,7 @@ describe("updateRegistration", () => {
         name: "Alice Smith",
         email: "alice@example.com",
         stay: "FRI_SUN",
+        accommodation: "ANYWHERE",
         adultsCount: 3,
         childrenCount: 0,
         notes: undefined,

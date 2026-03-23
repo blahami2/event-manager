@@ -2,7 +2,8 @@ import { getRegistrationByToken } from "@/lib/usecases/manage-registration";
 import { AppError } from "@/lib/errors/app-errors";
 import type { RegistrationOutput } from "@/types/registration";
 import { ManageForm } from "./ManageForm";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
+import { REGISTRATION_DEADLINE } from "@/config/event";
 
 interface ManagePageProps {
   readonly params: Promise<{ token: string }>;
@@ -31,6 +32,9 @@ export default async function ManagePage({
   const { token } = await params;
   const result = await loadRegistration(token);
   const t = await getTranslations("manage");
+  const locale = await getLocale();
+  const isDeadlinePassed = new Date() > REGISTRATION_DEADLINE;
+  const deadlineDateStr = REGISTRATION_DEADLINE.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" });
 
   if (result.error !== null) {
     return (
@@ -103,28 +107,50 @@ export default async function ManagePage({
           >
             {t("title")}
           </h1>
-          <p
-            style={{
-              fontFamily: "'Montserrat', sans-serif",
-              marginTop: "10px",
-              color: "var(--color-text-gray)",
-              textAlign: "center",
-            }}
-          >
-            {t("subtitle")}
-          </p>
-          <div
-            style={{
-              maxWidth: "600px",
-              margin: "50px auto 0",
-              background: "var(--color-dark-primary)",
-              padding: "40px",
-              border: "2px solid var(--color-accent)",
-              textAlign: "left",
-            }}
-          >
-            <ManageForm registration={result.registration} token={token} />
-          </div>
+          {isDeadlinePassed ? (
+            <div
+              style={{
+                maxWidth: "600px",
+                margin: "50px auto 0",
+                background: "var(--color-dark-primary)",
+                padding: "40px",
+                border: "2px solid var(--color-accent)",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ fontFamily: "'Anton', sans-serif", fontSize: "1.5rem", textTransform: "uppercase", color: "var(--color-accent)" }}>
+                {t("closed")}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  marginTop: "10px",
+                  color: "var(--color-text-gray)",
+                  textAlign: "center",
+                }}
+              >
+                {t("subtitle")}
+              </p>
+              <p style={{ fontFamily: "'Anton', sans-serif", marginTop: "15px", fontSize: "1.1rem", textTransform: "uppercase", color: "var(--color-accent)", letterSpacing: "1px" }}>
+                {t("deadline", { date: deadlineDateStr })}
+              </p>
+              <div
+                style={{
+                  maxWidth: "600px",
+                  margin: "50px auto 0",
+                  background: "var(--color-dark-primary)",
+                  padding: "40px",
+                  border: "2px solid var(--color-accent)",
+                  textAlign: "left",
+                }}
+              >
+                <ManageForm registration={result.registration} token={token} />
+              </div>
+            </>
+          )}
         </div>
       </section>
     </main>

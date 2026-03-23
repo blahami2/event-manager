@@ -21,6 +21,23 @@ function formatDate(date: Date): string {
   });
 }
 
+function formatAccommodation(accommodation: string): string {
+  switch (accommodation) {
+    case "PRIVATE_ROOM":
+      return "Private";
+    case "COMMON_ROOM":
+      return "Common";
+    case "OWN_TENT":
+      return "Tent";
+    case "ANYWHERE":
+      return "Any";
+    case "NONE":
+      return "None";
+    default:
+      return accommodation;
+  }
+}
+
 function formatStay(stay: string): string {
   switch (stay) {
     case "FRI_SAT":
@@ -162,6 +179,9 @@ export function RegistrationTable({ registrations, onEdit, onCancel, onResendEma
                   {t("children")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
+                  {t("accommodation")}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
                   {t("notes")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
@@ -183,6 +203,7 @@ export function RegistrationTable({ registrations, onEdit, onCancel, onResendEma
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{formatStay(reg.stay)}</td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{reg.adultsCount}</td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{reg.childrenCount}</td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{formatAccommodation(reg.accommodation)}</td>
                   <td className="max-w-xs truncate px-6 py-4 text-sm text-[#c8c8c8]" title={reg.notes ?? undefined}>
                     {reg.notes ?? "\u2014"}
                   </td>

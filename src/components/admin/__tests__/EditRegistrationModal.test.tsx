@@ -4,7 +4,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { EditRegistrationModal } from "../EditRegistrationModal";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 
 // Mock next-intl
@@ -17,6 +17,7 @@ const mockReg: RegistrationOutput = {
   name: "John Doe",
   email: "john@example.com",
   stay: StayOption.FRI_SUN,
+  accommodation: AccommodationOption.ANYWHERE,
   adultsCount: 2,
   childrenCount: 1,
   notes: "Vegan",
@@ -58,6 +59,7 @@ describe("EditRegistrationModal", () => {
       name: "Jane Doe",
       email: "john@example.com",
       stay: "FRI_SUN",
+      accommodation: "ANYWHERE",
       adultsCount: 3,
       childrenCount: 1,
       notes: "Vegan",

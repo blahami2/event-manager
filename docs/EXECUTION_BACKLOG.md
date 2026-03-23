@@ -2080,4 +2080,44 @@ T-055 (Visual redesign) ←[T-021..T-024, T-036]
 
 ---
 
+## T-NEW-01: Add Accommodation Dropdown + Registration Deadline
+
+**Status:** DONE
+
+### Description
+
+Two features implemented:
+
+1. **Accommodation dropdown** — Full-stack field added to registration: Prisma enum (`AccommodationOption`), types, validation, repository, use cases, API routes, public forms (RegistrationForm, ManageForm), admin (EditRegistrationModal, RegistrationTable), and CSV export. Options: Private Room, Common Room, Own Tent, Anywhere, None. Defaults to "Anywhere" for overnight stays, auto-selects "None" for Saturday-only. All three locales (EN, CS, SK) updated.
+
+2. **Registration deadline** — Deadline of April 19, 2026 configured in `src/config/event.ts`. Displayed on landing page (RSVP section + Details section), register page, and manage page. After deadline: forms are hidden and replaced with "closed" message directing guests to contact administrators. API-level enforcement added in both `registerGuest` and `updateRegistrationByToken` use cases. Date formatting is locale-aware.
+
+### Files Modified
+
+- `prisma/schema.prisma` (new `AccommodationOption` enum + field)
+- `prisma/migrations/20260323_add_accommodation/migration.sql` (new)
+- `src/types/registration.ts` (new enum + interface fields)
+- `src/lib/validation/registration.ts` (new Zod field)
+- `src/config/event.ts` (new `REGISTRATION_DEADLINE` constant)
+- `src/repositories/registration-repository.ts` (accommodation in toOutput, create, update)
+- `src/lib/usecases/register.ts` (accommodation passthrough + deadline check)
+- `src/lib/usecases/manage-registration.ts` (accommodation passthrough + deadline check)
+- `src/lib/usecases/admin-actions.ts` (CSV column)
+- `src/app/api/manage/route.ts` (accommodation in PUT)
+- `src/app/api/admin/registrations/route.ts` (accommodation in PUT)
+- `src/components/forms/RegistrationForm.tsx` (accommodation dropdown + useEffect)
+- `src/app/(public)/manage/[token]/ManageForm.tsx` (accommodation dropdown + useEffect)
+- `src/components/admin/EditRegistrationModal.tsx` (accommodation dropdown)
+- `src/components/admin/RegistrationTable.tsx` (accommodation column + formatAccommodation)
+- `src/app/(public)/page.tsx` (deadline display in RSVP + Details sections)
+- `src/app/(public)/register/page.tsx` (deadline display + closed state)
+- `src/app/(public)/manage/[token]/page.tsx` (deadline display + closed state)
+- `src/app/admin/registrations/page.tsx` (handleSave type updated)
+- `src/i18n/messages/en.json`, `cs.json`, `sk.json` (accommodation + deadline keys)
+- 8 test files updated with `accommodation` field
+
+**Verification:** `npx tsc --noEmit` passes. Pre-existing test environment issues (58 test suites fail on clean main) are unrelated.
+
+---
+
 End of Execution Backlog.

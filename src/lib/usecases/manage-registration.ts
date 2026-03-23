@@ -5,8 +5,9 @@ import { sendManageLink } from "@/lib/email/send-manage-link";
 import { logger, maskEmail } from "@/lib/logger";
 import { NotFoundError, ValidationError } from "@/lib/errors/app-errors";
 import { registrationSchema } from "@/lib/validation/registration";
-import { StayOption } from "@/types/registration";
+import { StayOption, AccommodationOption } from "@/types/registration";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
+import { REGISTRATION_DEADLINE } from "@/config/event";
 import type { RegistrationOutput } from "@/types/registration";
 
 /**
@@ -83,6 +84,11 @@ export async function updateRegistrationByToken(
   rawToken: string,
   data: unknown,
 ): Promise<UpdateRegistrationResult> {
+  // Check deadline
+  if (new Date() > REGISTRATION_DEADLINE) {
+    throw new ValidationError("Registration changes are no longer allowed", {});
+  }
+
   const tokenData = await resolveToken(rawToken);
 
   // Validate input with Zod schema
@@ -97,13 +103,14 @@ export async function updateRegistrationByToken(
     throw new ValidationError("Validation failed", fields);
   }
 
-  const { name, email, stay, adultsCount, childrenCount, notes } = parsed.data;
+  const { name, email, stay, accommodation, adultsCount, childrenCount, notes } = parsed.data;
 
   // Update the registration record
   const updatedRegistration = await updateRegistration(tokenData.registrationId, {
     name,
     email,
     stay: stay as StayOption,
+    accommodation: accommodation as AccommodationOption,
     adultsCount,
     childrenCount,
     notes,

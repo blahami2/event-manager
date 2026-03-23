@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { RegistrationForm } from "@/components/forms/RegistrationForm";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { REGISTRATION_DEADLINE } from "@/config/event";
 
 const HEADING_FONT = "'Anton', sans-serif";
 const BODY_FONT = "'Montserrat', sans-serif";
@@ -9,6 +10,9 @@ const HEADLINER_IMAGES = ["/images/milos_03.jpg", "/images/soso_01.png", "/image
 
 export default function HomePage(): React.ReactElement {
   const t = useTranslations("landing");
+  const locale = useLocale();
+  const isDeadlinePassed = new Date() > REGISTRATION_DEADLINE;
+  const deadlineDateStr = REGISTRATION_DEADLINE.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" });
 
   return (
     <main style={{ fontFamily: BODY_FONT }}>
@@ -401,6 +405,25 @@ export default function HomePage(): React.ReactElement {
                   {t("detailsLocationAddress")}
                 </span>
               </div>
+              <div style={{ marginBottom: "25px" }}>
+                <span
+                  style={{
+                    fontFamily: BODY_FONT,
+                    fontWeight: 900,
+                    display: "block",
+                    textTransform: "uppercase",
+                    marginBottom: "5px",
+                    color: "var(--color-text-gray)",
+                  }}
+                >
+                  {t("deadlineHeader")}
+                </span>
+                <span
+                  style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700, color: "var(--color-accent)" }}
+                >
+                  {REGISTRATION_DEADLINE.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                </span>
+              </div>
             </div>
 
             {/* last detail-box: no border-right */}
@@ -502,25 +525,45 @@ export default function HomePage(): React.ReactElement {
           <p style={{ fontFamily: BODY_FONT, marginTop: "10px", color: "var(--color-text-gray)" }}>
             {t("rsvpDescription")}
           </p>
-          {/* .rsvp-form { max-width:600px; margin:50px auto 0; background:bg-main; padding:40px; border:2px solid accent } */}
-          <div
-            style={{
-              maxWidth: "600px",
-              margin: "50px auto 0",
-              background: "var(--color-dark-primary)",
-              padding: "40px",
-              border: "2px solid var(--color-accent)",
-              textAlign: "left",
-            }}
-          >
-            <RegistrationForm />
-          </div>
-          {/* Already registered link */}
-          <div style={{ marginTop: "20px" }}>
-            <Button href="/resend-link" variant="secondary">
-              {t("alreadyRegistered")}
-            </Button>
-          </div>
+          {isDeadlinePassed ? (
+            <div
+              style={{
+                maxWidth: "600px",
+                margin: "50px auto 0",
+                background: "var(--color-dark-primary)",
+                padding: "40px",
+                border: "2px solid var(--color-accent)",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ fontFamily: HEADING_FONT, fontSize: "1.5rem", textTransform: "uppercase", color: "var(--color-accent)" }}>
+                {t("registrationClosed")}
+              </p>
+            </div>
+          ) : (
+            <>
+              <p style={{ fontFamily: HEADING_FONT, marginTop: "20px", fontSize: "1.1rem", textTransform: "uppercase", color: "var(--color-accent)", letterSpacing: "1px" }}>
+                {t("registrationDeadline", { date: deadlineDateStr })}
+              </p>
+              <div
+                style={{
+                  maxWidth: "600px",
+                  margin: "50px auto 0",
+                  background: "var(--color-dark-primary)",
+                  padding: "40px",
+                  border: "2px solid var(--color-accent)",
+                  textAlign: "left",
+                }}
+              >
+                <RegistrationForm />
+              </div>
+              <div style={{ marginTop: "20px" }}>
+                <Button href="/resend-link" variant="secondary">
+                  {t("alreadyRegistered")}
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </main>

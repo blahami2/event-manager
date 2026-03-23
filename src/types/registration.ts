@@ -19,11 +19,21 @@ export enum StayOption {
   SAT_ONLY = "SAT_ONLY",
 }
 
+/** Accommodation option enum (mirrors Prisma AccommodationOption). */
+export enum AccommodationOption {
+  PRIVATE_ROOM = "PRIVATE_ROOM",
+  COMMON_ROOM = "COMMON_ROOM",
+  OWN_TENT = "OWN_TENT",
+  ANYWHERE = "ANYWHERE",
+  NONE = "NONE",
+}
+
 /** Input data for creating or updating a registration. */
 export interface RegistrationInput {
   readonly name: string;
   readonly email: string;
   readonly stay: StayOption;
+  readonly accommodation: AccommodationOption;
   readonly adultsCount: number;
   readonly childrenCount: number;
   readonly notes?: string;
@@ -35,6 +45,7 @@ export interface RegistrationOutput {
   readonly name: string;
   readonly email: string;
   readonly stay: StayOption;
+  readonly accommodation: AccommodationOption;
   readonly adultsCount: number;
   readonly childrenCount: number;
   readonly notes: string | null;

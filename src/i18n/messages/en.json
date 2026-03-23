@@ -41,6 +41,13 @@
     "staySatSun": "Saturday – Sunday",
     "stayFriSun": "Friday – Sunday",
     "staySatOnly": "Saturday only",
+    "accommodation": "Accommodation",
+    "accommodationPlaceholder": "Select accommodation…",
+    "accommodationPrivateRoom": "Private Room",
+    "accommodationCommonRoom": "Common Room",
+    "accommodationOwnTent": "Own Tent",
+    "accommodationAnywhere": "Anywhere",
+    "accommodationNone": "None",
     "adultsCount": "Number of Adults",
     "childrenCount": "Number of Children",
     "notes": "Notes (anything else)",
@@ -81,7 +88,10 @@
     "infoHeader": "Backstage",
     "reservationSubtitle": "Secure your spot in the pit. Capacity is limited!",
     "rsvpHeading": "Reservation",
-    "rsvpDescription": "Secure your spot in the pit. Capacity is limited!"
+    "rsvpDescription": "Secure your spot in the pit. Capacity is limited!",
+    "registrationDeadline": "Registration closes on {date}",
+    "registrationClosed": "Registration is closed. Please contact the administrators.",
+    "deadlineHeader": "Registration deadline"
   },
   "registration": {
     "title": "Register",
@@ -89,7 +99,9 @@
     "submitting": "Submitting…",
     "register": "Submit Reservation",
     "success": "Registration successful! Check your email for your manage link.",
-    "alreadyRegistered": "You are already registered"
+    "alreadyRegistered": "You are already registered",
+    "deadline": "Registration closes on {date}",
+    "closed": "Registration is closed. Please contact the administrators."
   },
   "manage": {
     "title": "Manage Registration",
@@ -104,7 +116,9 @@
     "confirmCancel": "Are you sure you want to cancel your registration? This cannot be undone.",
     "invalidLink": "This link is not valid or has expired.",
     "tooManyRequests": "Too many requests. Please try again later.",
-    "subtitle": "Update your details below"
+    "subtitle": "Update your details below",
+    "deadline": "Changes allowed until {date}",
+    "closed": "The deadline has passed. Please contact the administrators to make changes."
   },
   "email": {
     "eventName": "Triple threat",
@@ -190,6 +204,7 @@
         "stay": "Stay",
         "adults": "Adults",
         "children": "Children",
+        "accommodation": "Accommodation",
         "notes": "Notes",
         "resendEmail": "Resend Email",
         "confirmResend": "Resend registration email?",
@@ -210,6 +225,12 @@
         "staySatSun": "Sat–Sun",
         "stayFriSun": "Fri–Sun",
         "staySatOnly": "Sat",
+        "accommodation": "Accommodation",
+        "accommodationPrivateRoom": "Private",
+        "accommodationCommonRoom": "Common",
+        "accommodationOwnTent": "Tent",
+        "accommodationAnywhere": "Any",
+        "accommodationNone": "None",
         "adultsCount": "Adults",
         "childrenCount": "Children",
         "notes": "Notes"
