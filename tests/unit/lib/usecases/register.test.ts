@@ -44,6 +44,7 @@ const validInput = {
   name: "Alice Johnson",
   email: "alice@example.com",
   stay: "FRI_SUN",
+  accommodation: "ANYWHERE",
   adultsCount: 2,
   childrenCount: 1,
   notes: "Vegetarian",
@@ -108,6 +109,7 @@ describe("registerGuest", () => {
       name: "Alice Johnson",
       email: "alice@example.com",
       stay: "FRI_SUN",
+      accommodation: "ANYWHERE",
       adultsCount: 2,
       childrenCount: 1,
       notes: "Vegetarian",
@@ -218,6 +220,7 @@ describe("registerGuest", () => {
       name: "Bob Smith",
       email: "bob@example.com",
       stay: "FRI_SAT",
+      accommodation: "ANYWHERE",
       adultsCount: 1,
       childrenCount: 0,
     };
@@ -361,7 +364,7 @@ describe("registerGuest validation", () => {
   });
 
   it("should include field-level error details in ValidationError", async () => {
-    const input = { name: "", email: "bad", stay: "INVALID", adultsCount: 0, childrenCount: -1 };
+    const input = { name: "", email: "bad", stay: "INVALID", accommodation: "ANYWHERE", adultsCount: 0, childrenCount: -1 };
     const { registerGuest } = await import("@/lib/usecases/register");
 
     try {

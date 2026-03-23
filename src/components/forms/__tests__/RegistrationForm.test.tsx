@@ -74,6 +74,7 @@ describe("RegistrationForm", () => {
         name: "Alice",
         email: "alice@example.com",
         stay: "SAT_SUN",
+        accommodation: "ANYWHERE",
         adultsCount: 1,
         childrenCount: 0,
       }),
