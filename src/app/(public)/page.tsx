@@ -421,7 +421,7 @@ export default function HomePage(): React.ReactElement {
                 <span
                   style={{ fontFamily: BODY_FONT, fontSize: "1.2rem", textTransform: "uppercase", fontWeight: 700, color: "var(--color-accent)" }}
                 >
-                  {REGISTRATION_DEADLINE.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                  {REGISTRATION_DEADLINE.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })}
                 </span>
               </div>
             </div>
