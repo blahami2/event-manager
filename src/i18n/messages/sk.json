@@ -41,6 +41,13 @@
     "staySatSun": "Sobota – Nedeľa",
     "stayFriSun": "Piatok – Nedeľa",
     "staySatOnly": "Iba sobota",
+    "accommodation": "Ubytovanie",
+    "accommodationPlaceholder": "Vyberte ubytovanie…",
+    "accommodationPrivateRoom": "Vlastná izba",
+    "accommodationCommonRoom": "Spoločenská miestnosť",
+    "accommodationOwnTent": "Vlastný stan",
+    "accommodationAnywhere": "Kdekoľvek",
+    "accommodationNone": "Žiadne",
     "adultsCount": "Počet dospelých",
     "childrenCount": "Počet detí",
     "notes": "Poznámka (čo sa inam nezmestilo)",
@@ -81,7 +88,10 @@
     "infoHeader": "Backstage",
     "reservationSubtitle": "Zabezpeč si svoje miesto v kotli. Kapacita obmedzená!",
     "rsvpHeading": "Rezervácia vstupu",
-    "rsvpDescription": "Zabezpeč si svoje miesto v kotli. Kapacita obmedzená!"
+    "rsvpDescription": "Zabezpeč si svoje miesto v kotli. Kapacita obmedzená!",
+    "registrationDeadline": "Registrácia sa uzatvára {date}",
+    "registrationClosed": "Registrácia je uzatvorená. Kontaktujte prosím organizátorov.",
+    "deadlineHeader": "Uzávierka registrácie"
   },
   "registration": {
     "title": "Registrácia",
@@ -89,7 +99,9 @@
     "submitting": "Odosielanie…",
     "register": "Odoslať rezerváciu",
     "success": "Registrácia prebehla úspešne! Na váš e-mail sme odoslali odkaz na správu.",
-    "alreadyRegistered": "Už ste zaregistrovaní"
+    "alreadyRegistered": "Už ste zaregistrovaní",
+    "deadline": "Registrácia sa uzatvára {date}",
+    "closed": "Registrácia je uzatvorená. Kontaktujte prosím organizátorov."
   },
   "manage": {
     "title": "Správa registrácie",
@@ -104,7 +116,9 @@
     "confirmCancel": "Naozaj chcete zrušiť svoju registráciu? Túto akciu nie je možné vrátiť späť.",
     "invalidLink": "Tento odkaz je neplatný alebo vypršal.",
     "tooManyRequests": "Príliš veľa požiadaviek. Skúste to prosím neskôr.",
-    "subtitle": "Aktualizujte svoje údaje nižšie"
+    "subtitle": "Aktualizujte svoje údaje nižšie",
+    "deadline": "Zmeny sú možné do {date}",
+    "closed": "Termín na zmeny vypršal. Kontaktujte prosím organizátorov."
   },
   "email": {
     "eventName": "Triple threat",
@@ -190,6 +204,7 @@
         "stay": "Pobyt",
         "adults": "Dospelí",
         "children": "Deti",
+        "accommodation": "Ubytovanie",
         "notes": "Poznámky",
         "resendEmail": "Znovu odoslať e-mail",
         "confirmResend": "Znovu odoslať registračný e-mail?",
@@ -210,6 +225,12 @@
         "staySatSun": "So–Ne",
         "stayFriSun": "Pi–Ne",
         "staySatOnly": "So",
+        "accommodation": "Ubytovanie",
+        "accommodationPrivateRoom": "Izba",
+        "accommodationCommonRoom": "Spol.",
+        "accommodationOwnTent": "Stan",
+        "accommodationAnywhere": "Kde.",
+        "accommodationNone": "Žiadne",
         "adultsCount": "Dospelí",
         "childrenCount": "Deti",
         "notes": "Poznámky"

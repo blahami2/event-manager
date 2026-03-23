@@ -11,6 +11,14 @@
 import type { StayOption } from "@/types/registration";
 
 /**
+ * Registration deadline.
+ *
+ * After this date, the public registration form and manage form
+ * are disabled and guests are directed to contact administrators.
+ */
+export const REGISTRATION_DEADLINE = new Date("2026-04-19T23:59:59+02:00");
+
+/**
  * Event start/end dates mapped by guest stay option.
  *
  * Used to generate dynamic ICS calendar invites with correct

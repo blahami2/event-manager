@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { StayOption } from "@/types/registration";
+import { StayOption, AccommodationOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 
 /** Stay options hidden from new selections but shown for legacy registrations. */
@@ -12,7 +12,7 @@ export interface EditRegistrationModalProps {
   readonly registration: RegistrationOutput;
   readonly onSave: (
     id: string,
-    data: { name: string; email: string; stay: StayOption; adultsCount: number; childrenCount: number; notes?: string },
+    data: { name: string; email: string; stay: StayOption; accommodation: AccommodationOption; adultsCount: number; childrenCount: number; notes?: string },
   ) => void;
   readonly onClose: () => void;
 }
@@ -26,6 +26,7 @@ export function EditRegistrationModal({
   const [name, setName] = useState(registration.name);
   const [email, setEmail] = useState(registration.email);
   const [stay, setStay] = useState(registration.stay as string);
+  const [accommodation, setAccommodation] = useState(registration.accommodation as string);
   const [adultsCount, setAdultsCount] = useState(String(registration.adultsCount));
   const [childrenCount, setChildrenCount] = useState(String(registration.childrenCount));
   const [notes, setNotes] = useState(registration.notes ?? "");
@@ -37,12 +38,13 @@ export function EditRegistrationModal({
         name,
         email,
         stay: stay as StayOption,
+        accommodation: accommodation as AccommodationOption,
         adultsCount: Number(adultsCount),
         childrenCount: Number(childrenCount),
         ...(notes ? { notes } : {}),
       });
     },
-    [registration.id, name, email, stay, adultsCount, childrenCount, notes, onSave],
+    [registration.id, name, email, stay, accommodation, adultsCount, childrenCount, notes, onSave],
   );
 
   return (
@@ -100,6 +102,24 @@ export function EditRegistrationModal({
               )}
               <option value="SAT_SUN">{t("staySatSun")}</option>
               <option value="SAT_ONLY">{t("staySatOnly")}</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="edit-accommodation" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
+              {t("accommodation")}
+            </label>
+            <select
+              id="edit-accommodation"
+              value={accommodation}
+              onChange={(e) => setAccommodation(e.target.value)}
+              required
+              className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+            >
+              <option value="PRIVATE_ROOM">{t("accommodationPrivateRoom")}</option>
+              <option value="COMMON_ROOM">{t("accommodationCommonRoom")}</option>
+              <option value="OWN_TENT">{t("accommodationOwnTent")}</option>
+              <option value="ANYWHERE">{t("accommodationAnywhere")}</option>
+              <option value="NONE">{t("accommodationNone")}</option>
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">

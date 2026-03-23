@@ -59,11 +59,12 @@ export async function PUT(req: NextRequest): Promise<Response> {
     const body = (await req.json()) as Record<string, unknown>;
     const token = extractToken(body);
 
-    const { name, email, stay, adultsCount, childrenCount, notes } = body;
+    const { name, email, stay, accommodation, adultsCount, childrenCount, notes } = body;
     const result = await updateRegistrationByToken(token, {
       name,
       email,
       stay,
+      accommodation,
       adultsCount,
       childrenCount,
       notes,

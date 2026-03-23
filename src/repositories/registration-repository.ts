@@ -6,7 +6,7 @@ import type {
   PaginatedResult,
 } from "@/types/registration";
 import { RegistrationStatus } from "@/types/registration";
-import type { StayOption } from "@/types/registration";
+import type { StayOption, AccommodationOption } from "@/types/registration";
 
 /**
  * Registration data-access layer.
@@ -22,6 +22,7 @@ function toOutput(row: {
   name: string;
   email: string;
   stay: string;
+  accommodation: string;
   adultsCount: number;
   childrenCount: number;
   notes: string | null;
@@ -34,6 +35,7 @@ function toOutput(row: {
     name: row.name,
     email: row.email,
     stay: row.stay as StayOption,
+    accommodation: row.accommodation as AccommodationOption,
     adultsCount: row.adultsCount,
     childrenCount: row.childrenCount,
     notes: row.notes,
@@ -57,6 +59,7 @@ export async function createRegistration(
       name: data.name,
       email: data.email,
       stay: data.stay,
+      accommodation: data.accommodation,
       adultsCount: data.adultsCount,
       childrenCount: data.childrenCount,
       notes: data.notes,
@@ -93,6 +96,7 @@ export async function updateRegistration(
       name: data.name,
       email: data.email,
       stay: data.stay,
+      accommodation: data.accommodation,
       adultsCount: data.adultsCount,
       childrenCount: data.childrenCount,
       notes: data.notes,

@@ -25,6 +25,14 @@ enum StayOption {
   SAT_ONLY
 }
 
+enum AccommodationOption {
+  PRIVATE_ROOM
+  COMMON_ROOM
+  OWN_TENT
+  ANYWHERE
+  NONE
+}
+
 // ---------- Models ----------
 
 /// Guest registration for the birthday celebration event.
@@ -35,6 +43,7 @@ model Registration {
   stay          StayOption
   adultsCount   Int
   childrenCount Int
+  accommodation AccommodationOption @default(ANYWHERE)
   notes         String?            @db.VarChar(500)
   status        RegistrationStatus @default(CONFIRMED)
   createdAt     DateTime           @default(now())

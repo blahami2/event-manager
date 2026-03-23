@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { registrationSchema } from "@/lib/validation/registration";
 import { FormField } from "@/components/ui/FormField";
@@ -12,6 +12,7 @@ interface FieldErrors {
   name?: string;
   email?: string;
   stay?: string;
+  accommodation?: string;
   adultsCount?: string;
   childrenCount?: string;
   notes?: string;
@@ -51,6 +52,7 @@ export function RegistrationForm(): React.ReactElement {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [stay, setStay] = useState("");
+  const [accommodation, setAccommodation] = useState("ANYWHERE");
   const [adultsCount, setAdultsCount] = useState("1");
   const [childrenCount, setChildrenCount] = useState("0");
   const [notes, setNotes] = useState("");
@@ -58,6 +60,14 @@ export function RegistrationForm(): React.ReactElement {
   const [submitError, setSubmitError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (stay === "SAT_ONLY") {
+      setAccommodation("NONE");
+    } else if (accommodation === "NONE" && stay !== "") {
+      setAccommodation("ANYWHERE");
+    }
+  }, [stay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
@@ -71,6 +81,7 @@ export function RegistrationForm(): React.ReactElement {
       name: name.trim(),
       email: email.trim(),
       stay: stay || undefined,
+      accommodation,
       adultsCount: Number(adultsCount),
       childrenCount: Number(childrenCount),
       notes: notes.trim() || undefined,
@@ -178,6 +189,33 @@ export function RegistrationForm(): React.ReactElement {
           <option value="">{tForm("stayPlaceholder")}</option>
           <option value="SAT_SUN">{tForm("staySatSun")}</option>
           <option value="SAT_ONLY">{tForm("staySatOnly")}</option>
+        </select>
+      </FormField>
+
+      <FormField
+        label={tForm("accommodation")}
+        htmlFor="accommodation"
+        error={fieldErrors.accommodation}
+      >
+        <select
+          id="accommodation"
+          value={accommodation}
+          onChange={(e) => setAccommodation(e.target.value)}
+          className="form-input"
+          style={selectStyle}
+          disabled={stay === "SAT_ONLY"}
+        >
+          {stay === "SAT_ONLY" ? (
+            <option value="NONE">{tForm("accommodationNone")}</option>
+          ) : (
+            <>
+              <option value="ANYWHERE">{tForm("accommodationAnywhere")}</option>
+              <option value="PRIVATE_ROOM">{tForm("accommodationPrivateRoom")}</option>
+              <option value="COMMON_ROOM">{tForm("accommodationCommonRoom")}</option>
+              <option value="OWN_TENT">{tForm("accommodationOwnTent")}</option>
+              <option value="NONE">{tForm("accommodationNone")}</option>
+            </>
+          )}
         </select>
       </FormField>
 

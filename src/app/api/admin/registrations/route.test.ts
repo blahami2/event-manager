@@ -27,7 +27,7 @@ import {
   AuthorizationError,
   NotFoundError,
 } from "@/lib/errors/app-errors";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 
 const ADMIN_RESULT = { authenticated: true as const, adminId: "admin-1" };
 
@@ -121,6 +121,7 @@ describe("PUT /api/admin/registrations", () => {
       name: "Jane",
       email: "jane@example.com",
       stay: StayOption.FRI_SAT,
+      accommodation: AccommodationOption.ANYWHERE,
       adultsCount: 2,
       childrenCount: 0,
       notes: null,
@@ -155,6 +156,7 @@ describe("PUT /api/admin/registrations", () => {
       name: "Jane",
       email: "jane@example.com",
       stay: StayOption.FRI_SAT,
+      accommodation: AccommodationOption.ANYWHERE,
       adultsCount: 1,
       childrenCount: 0,
       notes: "vegan",
@@ -234,6 +236,7 @@ describe("DELETE /api/admin/registrations", () => {
       name: "Jane",
       email: "jane@example.com",
       stay: StayOption.FRI_SAT,
+      accommodation: AccommodationOption.ANYWHERE,
       adultsCount: 1,
       childrenCount: 0,
       notes: null,

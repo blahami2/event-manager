@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotFoundError } from "@/lib/errors/app-errors";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
 // ── Mock dependencies ──
@@ -40,6 +40,7 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
     name: "Alice Johnson",
     email: "alice@example.com",
     stay: StayOption.FRI_SUN,
+    accommodation: AccommodationOption.ANYWHERE,
     adultsCount: 2,
     childrenCount: 0,
     notes: null,
@@ -194,7 +195,7 @@ describe("adminEditRegistration", () => {
     const updatedReg = makeRegistration({ id: "reg-1", name: "Alice Updated", adultsCount: 3 });
     mockUpdateRegistration.mockResolvedValue(updatedReg);
 
-    const editData = { name: "Alice Updated", email: "alice@example.com", stay: StayOption.FRI_SUN, adultsCount: 3, childrenCount: 0 };
+    const editData = { name: "Alice Updated", email: "alice@example.com", stay: StayOption.FRI_SUN, accommodation: AccommodationOption.ANYWHERE, adultsCount: 3, childrenCount: 0 };
 
     const result = await adminEditRegistration("reg-1", editData, adminId);
 
@@ -213,7 +214,7 @@ describe("adminEditRegistration", () => {
   it("should throw NotFoundError when registration does not exist", async () => {
     mockFindRegistrationById.mockResolvedValue(null);
     await expect(
-      adminEditRegistration("nonexistent", { name: "X", email: "x@x.com", stay: StayOption.FRI_SAT, adultsCount: 1, childrenCount: 0 }, adminId),
+      adminEditRegistration("nonexistent", { name: "X", email: "x@x.com", stay: StayOption.FRI_SAT, accommodation: AccommodationOption.ANYWHERE, adultsCount: 1, childrenCount: 0 }, adminId),
     ).rejects.toThrow(NotFoundError);
   });
 });
@@ -231,7 +232,7 @@ describe("exportRegistrationsCsv", () => {
     const csv = await exportRegistrationsCsv();
 
     const lines = csv.split("\n");
-    expect(lines[0]).toBe("name,email,stay,adultsCount,childrenCount,notes,status,createdAt");
+    expect(lines[0]).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt");
     expect(lines).toHaveLength(4);
     expect(lines[1]).toContain("Alice Johnson");
     expect(lines[1]).toContain("alice@example.com");
@@ -267,7 +268,7 @@ describe("exportRegistrationsCsv", () => {
 
     const lines = csv.split("\n");
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toBe("name,email,stay,adultsCount,childrenCount,notes,status,createdAt");
+    expect(lines[0]).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt");
   });
 
   it("should handle null notes as empty string", async () => {
@@ -282,8 +283,8 @@ describe("exportRegistrationsCsv", () => {
     const csv = await exportRegistrationsCsv();
 
     const lines = csv.split("\n");
-    // notes is after childrenCount (index 5)
+    // notes is after childrenCount (index 6, accounting for accommodation column)
     const fields = lines[1]?.split(",");
-    expect(fields?.[5]).toBe("");
+    expect(fields?.[6]).toBe("");
   });
 });

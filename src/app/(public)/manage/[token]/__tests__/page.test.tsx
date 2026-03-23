@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { IntlWrapper } from "@/test/intl-wrapper";
 import { ManageForm } from "../ManageForm";
 import type { RegistrationOutput } from "@/types/registration";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 
 const fetchMock = vi.fn();
 
@@ -19,6 +19,7 @@ const mockRegistration: RegistrationOutput = {
   name: "Alice Smith",
   email: "alice@example.com",
   stay: StayOption.FRI_SUN,
+  accommodation: AccommodationOption.ANYWHERE,
   adultsCount: 2,
   childrenCount: 1,
   notes: "Vegetarian",

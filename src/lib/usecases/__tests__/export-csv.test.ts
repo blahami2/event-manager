@@ -10,7 +10,7 @@ vi.mock("@/lib/logger", () => ({
 
 import { exportRegistrationsCsv } from "../admin-actions";
 import { listRegistrations } from "@/repositories/registration-repository";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 
 describe("exportRegistrationsCsv", () => {
   beforeEach(() => {
@@ -26,7 +26,7 @@ describe("exportRegistrationsCsv", () => {
     });
 
     const csv = await exportRegistrationsCsv();
-    expect(csv).toBe("name,email,stay,adultsCount,childrenCount,notes,status,createdAt");
+    expect(csv).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt");
   });
 
   it("includes registration data rows", async () => {
@@ -37,6 +37,7 @@ describe("exportRegistrationsCsv", () => {
           name: "Jane",
           email: "jane@example.com",
           stay: StayOption.FRI_SAT,
+          accommodation: AccommodationOption.ANYWHERE,
           adultsCount: 2,
           childrenCount: 0,
           notes: null,
@@ -53,7 +54,7 @@ describe("exportRegistrationsCsv", () => {
     const csv = await exportRegistrationsCsv();
     const lines = csv.split("\n");
     expect(lines).toHaveLength(2);
-    expect(lines[1]).toBe("Jane,jane@example.com,FRI_SAT,2,0,,CONFIRMED,2026-01-15T10:00:00.000Z");
+    expect(lines[1]).toBe("Jane,jane@example.com,FRI_SAT,ANYWHERE,2,0,,CONFIRMED,2026-01-15T10:00:00.000Z");
   });
 
   it("escapes commas in field values", async () => {
@@ -64,6 +65,7 @@ describe("exportRegistrationsCsv", () => {
           name: "Doe, Jane",
           email: "jane@example.com",
           stay: StayOption.FRI_SUN,
+          accommodation: AccommodationOption.ANYWHERE,
           adultsCount: 1,
           childrenCount: 0,
           notes: "nuts, dairy",
@@ -91,6 +93,7 @@ describe("exportRegistrationsCsv", () => {
           name: 'Jane "JD" Doe',
           email: "jane@example.com",
           stay: StayOption.SAT_SUN,
+          accommodation: AccommodationOption.ANYWHERE,
           adultsCount: 1,
           childrenCount: 0,
           notes: null,

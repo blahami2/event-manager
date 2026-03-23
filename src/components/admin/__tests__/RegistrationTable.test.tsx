@@ -4,7 +4,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RegistrationTable } from "../RegistrationTable";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 
 // Mock next-intl
@@ -18,6 +18,7 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
     name: "John Doe",
     email: "john@example.com",
     stay: StayOption.FRI_SUN,
+    accommodation: AccommodationOption.ANYWHERE,
     adultsCount: 2,
     childrenCount: 0,
     notes: null,

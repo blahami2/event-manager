@@ -113,7 +113,7 @@ export async function adminEditRegistration(
 }
 
 /** CSV column headers. */
-const CSV_COLUMNS = ["name", "email", "stay", "adultsCount", "childrenCount", "notes", "status", "createdAt"] as const;
+const CSV_COLUMNS = ["name", "email", "stay", "accommodation", "adultsCount", "childrenCount", "notes", "status", "createdAt"] as const;
 
 /**
  * Escape a CSV field: quote it if it contains commas, quotes, or newlines.
