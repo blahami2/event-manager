@@ -44,7 +44,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps): React.ReactElement {
   return (
     <Modal open={open} onClose={onDismiss} title={title} size="sm">
-      <p className="mb-6 text-sm text-admin-text-primary">{message}</p>
+      <p className="mb-6 text-sm text-text-secondary">{message}</p>
       <div className="flex justify-end gap-3">
         <Button
           variant="secondary"

@@ -30,16 +30,15 @@ export function Pagination({
   const end = Math.min(page * pageSize, total);
 
   return (
-    <div className="flex flex-col items-center justify-between gap-4 border-t border-border-dark/50 px-6 py-4 sm:flex-row">
+    <div className="flex flex-col items-center justify-between gap-4 px-1 pt-4 sm:flex-row">
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-        <p className="text-sm text-admin-text-secondary">
+        <p className="text-sm text-text-secondary">
           {t("showing")}{" "}
-          <span className="font-medium text-admin-text-primary">{start}</span>{" "}
-          {t("to")}{" "}
-          <span className="font-medium text-admin-text-primary">{end}</span>{" "}
+          <span className="font-mono tabular-nums font-medium text-text-primary">{start}</span>
+          <span className="mx-0.5 text-text-tertiary">{"–"}</span>
+          <span className="font-mono tabular-nums font-medium text-text-primary">{end}</span>{" "}
           {t("of")}{" "}
-          <span className="font-medium text-admin-text-primary">{total}</span>{" "}
-          {t("results")}
+          <span className="font-mono tabular-nums font-medium text-text-primary">{total}</span>
         </p>
         <PageSizeSelector pageSize={pageSize} onPageSizeChange={onPageSizeChange} />
       </div>
@@ -49,10 +48,14 @@ export function Pagination({
           size="sm"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
+          aria-label={t("previous")}
         >
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
           {t("previous")}
         </Button>
-        <span className="px-2 text-sm font-medium text-admin-text-secondary">
+        <span className="px-2 text-sm font-medium text-text-secondary">
           {t("pageOfPages", { page, total: totalPages })}
         </span>
         <Button
@@ -60,8 +63,12 @@ export function Pagination({
           size="sm"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
+          aria-label={t("next")}
         >
           {t("next")}
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </Button>
       </nav>
     </div>

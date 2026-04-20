@@ -6,24 +6,24 @@ export interface BadgeProps {
   readonly children: React.ReactNode;
 }
 
-/**
- * Semantic badge primitive. Replaces the hardcoded green/red status pills
- * scattered across admin pages. Colours map to semantic tokens rather than
- * specific hues so Tier B's token overhaul flows through automatically.
- */
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   success:
-    "bg-admin-success/15 text-admin-success border border-admin-success/30",
-  warning: "bg-amber-500/15 text-amber-400 border border-amber-500/30",
+    "bg-success-muted text-success ring-1 ring-inset ring-success/25",
+  warning:
+    "bg-warning-muted text-warning ring-1 ring-inset ring-warning/25",
   danger:
-    "bg-admin-danger/15 text-admin-danger border border-admin-danger/30",
+    "bg-danger-muted text-danger ring-1 ring-inset ring-danger/25",
   neutral:
-    "bg-admin-hover text-admin-text-secondary border border-border-dark",
+    "bg-admin-hover text-text-secondary ring-1 ring-inset ring-border-default",
 };
 
 const BASE_CLASSES =
-  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold";
+  "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider";
 
+/**
+ * Semantic badge primitive. Paired with a leading dot to make status pills
+ * legible even at small sizes — the dot carries the hue, the label the meaning.
+ */
 export function Badge({
   variant = "neutral",
   className = "",
@@ -36,6 +36,18 @@ export function Badge({
         .filter(Boolean)
         .join(" ")}
     >
+      <span
+        aria-hidden="true"
+        className={`inline-block h-1.5 w-1.5 rounded-full ${
+          variant === "success"
+            ? "bg-success"
+            : variant === "warning"
+              ? "bg-warning"
+              : variant === "danger"
+                ? "bg-danger"
+                : "bg-text-tertiary"
+        }`}
+      />
       {children}
     </span>
   );

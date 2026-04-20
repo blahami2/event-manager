@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -30,15 +29,12 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;700;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <div className="fixed right-4 top-4 z-50">
-            <LanguageSwitcher />
-          </div>
           {children}
         </NextIntlClientProvider>
       </body>

@@ -42,10 +42,10 @@ describe("RegistrationTable", () => {
     expect(screen.getByText("noResults")).toBeDefined();
   });
 
-  it("should render table headers including notes when registrations exist", () => {
+  it("should render table headers when registrations exist", () => {
     render(<RegistrationTable {...defaultProps} />);
+    // Name column now stacks name + email, so there's no dedicated email header.
     expect(screen.getByText("name")).toBeDefined();
-    expect(screen.getByText("email")).toBeDefined();
     expect(screen.getByText("stay")).toBeDefined();
     expect(screen.getByText("adults")).toBeDefined();
     expect(screen.getByText("children")).toBeDefined();

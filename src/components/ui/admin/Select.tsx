@@ -50,16 +50,27 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       <label htmlFor={selectId} className={LABEL_CLASSES}>
         {label}
       </label>
-      <select
-        ref={ref}
-        id={selectId}
-        className={`${CONTROL_CLASSES} ${className}`.trim()}
-        aria-invalid={error ? "true" : undefined}
-        aria-describedby={describedBy}
-        {...rest}
-      >
-        {children}
-      </select>
+      <div className="relative">
+        <select
+          ref={ref}
+          id={selectId}
+          className={`${CONTROL_CLASSES} appearance-none pr-9 ${className}`.trim()}
+          aria-invalid={error ? "true" : undefined}
+          aria-describedby={describedBy}
+          {...rest}
+        >
+          {children}
+        </select>
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+        </svg>
+      </div>
       {error ? (
         <p id={errorId} role="alert" className={ERROR_CLASSES}>
           {error}

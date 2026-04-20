@@ -71,3 +71,6 @@ next-env.d.ts
 # MCPs
 .playwright-mcp/
 
+# Local scratchpad
+tmp/
+

@@ -175,14 +175,15 @@
       "error": "Invalid credentials"
     },
     "dashboard": {
+      "eyebrow": "Overview",
       "title": "Dashboard",
-      "totalRegistrations": "Total Registrations",
+      "totalRegistrations": "Total",
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",
-      "viewRegistrations": "View Registrations",
+      "viewRegistrations": "View registrations",
       "exportCsv": "Export CSV",
-      "totalAdults": "Total Adults",
-      "totalChildren": "Total Children"
+      "totalAdults": "Adults",
+      "totalChildren": "Children"
     },
     "pagination": {
       "showing": "Showing",
@@ -195,7 +196,9 @@
       "label": "Pagination"
     },
     "registrations": {
+      "eyebrow": "Guest list",
       "title": "Registrations",
+      "totalCount": "{count, plural, =0 {No entries yet} one {# entry} other {# entries}}",
       "downloadCsv": "Download CSV",
       "addReservation": "Add reservation",
       "addSuccess": "Reservation added successfully.",
@@ -277,6 +280,7 @@
       }
     },
     "settings": {
+      "eyebrow": "Account",
       "title": "Settings",
       "changePassword": "Change Password",
       "currentPassword": "Current Password",

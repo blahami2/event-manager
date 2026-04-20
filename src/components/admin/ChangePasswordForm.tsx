@@ -70,8 +70,8 @@ export function ChangePasswordForm(): React.ReactElement {
   }
 
   return (
-    <div className="max-w-md rounded-xl border border-border-dark bg-dark-secondary/60 p-8 shadow-lg">
-      <h2 className="mb-6 text-xl font-semibold tracking-wide text-admin-text-primary">
+    <div>
+      <h2 className="mb-5 text-base font-semibold tracking-tight text-text-primary">
         {t("changePassword")}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -103,7 +103,7 @@ export function ChangePasswordForm(): React.ReactElement {
 
         {errorMessage && (
           <div
-            className="rounded-md border border-admin-danger/40 bg-admin-danger/10 p-3 text-sm text-admin-danger"
+            className="rounded-md border border-danger/40 bg-danger-muted p-3 text-sm text-danger"
             role="alert"
           >
             {errorMessage}
@@ -112,7 +112,7 @@ export function ChangePasswordForm(): React.ReactElement {
 
         {status === "success" && (
           <div
-            className="rounded-md border border-admin-success/40 bg-admin-success/10 p-3 text-sm text-admin-success"
+            className="rounded-md border border-success/40 bg-success-muted p-3 text-sm text-success"
             role="status"
           >
             {t("success")}

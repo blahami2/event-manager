@@ -257,14 +257,14 @@ export function AddRegistrationModal({
 
         {submitError ? (
           <p
-            className="rounded-md border border-admin-danger/40 bg-admin-danger/10 p-3 text-sm text-admin-danger"
+            className="rounded-md border border-danger/40 bg-danger-muted p-3 text-sm text-danger"
             role="alert"
           >
             {renderFieldError(submitError)}
           </p>
         ) : null}
 
-        <div className="mt-6 flex justify-end gap-3 border-t border-border-dark/60 pt-4">
+        <div className="-mx-6 -mb-5 mt-2 flex items-center justify-end gap-3 border-t border-border-subtle bg-surface-base/40 px-6 py-4">
           <Button
             variant="secondary"
             onClick={onClose}

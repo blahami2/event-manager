@@ -175,14 +175,15 @@
       "error": "Neplatné přihlašovací údaje"
     },
     "dashboard": {
+      "eyebrow": "Přehled",
       "title": "Přehled",
-      "totalRegistrations": "Celkem registrací",
+      "totalRegistrations": "Celkem",
       "confirmed": "Potvrzené",
       "cancelled": "Zrušené",
       "viewRegistrations": "Zobrazit registrace",
       "exportCsv": "Exportovat CSV",
-      "totalAdults": "Celkem dospělých",
-      "totalChildren": "Celkem dětí"
+      "totalAdults": "Dospělí",
+      "totalChildren": "Děti"
     },
     "pagination": {
       "showing": "Zobrazeno",
@@ -195,7 +196,9 @@
       "label": "Stránkování"
     },
     "registrations": {
+      "eyebrow": "Seznam hostů",
       "title": "Registrace",
+      "totalCount": "{count, plural, =0 {Zatím žádné záznamy} one {# záznam} few {# záznamy} other {# záznamů}}",
       "downloadCsv": "Stáhnout CSV",
       "addReservation": "Přidat rezervaci",
       "addSuccess": "Rezervace byla úspěšně přidána.",
@@ -277,6 +280,7 @@
       }
     },
     "settings": {
+      "eyebrow": "Účet",
       "title": "Nastavení",
       "changePassword": "Změna hesla",
       "currentPassword": "Současné heslo",

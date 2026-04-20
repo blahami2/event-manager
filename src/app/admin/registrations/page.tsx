@@ -162,34 +162,30 @@ export default function AdminRegistrationsPage(): React.ReactElement {
     [loadData, t],
   );
 
+  const totalLabel =
+    state.data
+      ? t("totalCount", { count: state.data.total })
+      : null;
+
   return (
-    <div>
-      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">
-          {t("title")}
-        </h1>
+    <div className="space-y-6">
+      <header className="flex flex-col items-start justify-between gap-4 border-b border-border-subtle pb-6 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-text-tertiary">
+            {t("eyebrow")}
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">
+            {t("title")}
+          </h1>
+          {totalLabel ? (
+            <p className="mt-1 text-sm text-text-secondary">{totalLabel}</p>
+          ) : null}
+        </div>
         <div className="flex items-center gap-2">
-          <Button variant="primary" onClick={handleOpenAdd}>
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            {t("addReservation")}
-          </Button>
           <a
             href="/api/admin/registrations/export"
             download
-            className="inline-flex items-center gap-2 rounded-md border border-border-dark bg-dark-secondary px-4 py-2 text-sm font-medium text-admin-text-primary transition-colors hover:bg-admin-hover hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-border-dark focus-visible:ring-offset-2 focus-visible:ring-offset-dark-primary"
+            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-transparent px-3 py-2 text-sm font-medium text-text-secondary transition-colors duration-150 hover:border-border-strong hover:bg-surface-raised hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base"
           >
             <svg
               className="h-4 w-4"
@@ -207,19 +203,34 @@ export default function AdminRegistrationsPage(): React.ReactElement {
             </svg>
             {t("downloadCsv")}
           </a>
+          <Button variant="primary" onClick={handleOpenAdd}>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            {t("addReservation")}
+          </Button>
         </div>
-      </div>
+      </header>
 
-      <div className="mt-6">
-        <RegistrationFilters
-          status={status}
-          search={search}
-          onStatusChange={handleStatusChange}
-          onSearchChange={handleSearchChange}
-        />
-      </div>
+      <RegistrationFilters
+        status={status}
+        search={search}
+        onStatusChange={handleStatusChange}
+        onSearchChange={handleSearchChange}
+      />
 
-      <div className="mt-4">
+      <div>
         {state.error && (
           <div
             className="mb-4 rounded-md border border-admin-danger/40 bg-admin-danger/10 p-4 text-sm text-admin-danger"

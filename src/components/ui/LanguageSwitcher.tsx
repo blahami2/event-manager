@@ -60,7 +60,7 @@ export function LanguageSwitcher(): React.ReactElement {
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-1 border border-border-dark bg-dark-secondary px-3 py-1.5 text-sm text-white hover:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
+        className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-raised/70 px-2.5 py-1.5 text-sm text-text-primary backdrop-blur-sm transition-colors duration-150 hover:border-border-strong hover:bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base"
       >
         <span>{current.flag}</span>
         <span className="hidden sm:inline">{current.label}</span>
@@ -83,7 +83,7 @@ export function LanguageSwitcher(): React.ReactElement {
         <ul
           role="listbox"
           aria-label="Available languages"
-          className="absolute right-0 z-50 mt-1 w-40 border border-border-dark bg-dark-secondary py-1 shadow-lg"
+          className="absolute right-0 z-50 mt-1 w-40 overflow-hidden rounded-md border border-border-default bg-surface-overlay py-1 shadow-pop admin-pop-in"
         >
           {LANGUAGES.map((lang) => (
             <li
@@ -98,10 +98,10 @@ export function LanguageSwitcher(): React.ReactElement {
                 }
               }}
               tabIndex={0}
-              className={`flex cursor-pointer items-center gap-2 px-3 py-2 text-sm hover:bg-dark-primary ${
+              className={`flex cursor-pointer items-center gap-2 px-3 py-2 text-sm transition-colors duration-100 hover:bg-admin-hover ${
                 lang.locale === currentLocale
-                  ? "bg-dark-primary font-medium text-accent"
-                  : "text-white"
+                  ? "bg-admin-hover font-medium text-accent"
+                  : "text-text-primary"
               }`}
             >
               <span>{lang.flag}</span>

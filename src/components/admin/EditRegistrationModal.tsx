@@ -147,7 +147,7 @@ export function EditRegistrationModal({
           rows={4}
           maxLength={NOTES_MAX_LENGTH}
         />
-        <div className="mt-6 flex justify-end gap-3 border-t border-border-dark/60 pt-4">
+        <div className="-mx-6 -mb-5 mt-2 flex items-center justify-end gap-3 border-t border-border-subtle bg-surface-base/40 px-6 py-4">
           <Button variant="secondary" onClick={onClose}>
             {t("cancel")}
           </Button>
