@@ -53,18 +53,25 @@ attack surfaces, and produce actionable security recommendations.
 - Preserve existing functionality unless explicitly asked to change it.
 - Document non-obvious decisions and trade-offs.
 - Minimize code duplication.
-- Never log or expose sensitive data (passwords, tokens, API keys).
-- Validate and sanitize all user inputs.
-- Use parameterized queries to prevent SQL injection.
-- Avoid eval() and similar dynamic code execution.
-- Use secure random number generators for cryptographic purposes.
-- Implement proper authentication and authorization checks.
+- Never log or expose sensitive data (passwords, tokens, API keys, PII).
+- Validate and sanitize all inputs at system boundaries (user input, external APIs, file uploads).
+- Use secure random number generators for cryptographic purposes — never use predictable RNGs.
+- Implement proper authentication and authorization checks at every entry point.
 - Keep dependencies up to date to patch known vulnerabilities.
-- Use HTTPS for all external communications.
-- Implement rate limiting for public APIs.
-- Follow the principle of least privilege.
-- Store secrets in secure vaults, not in code or config files.
-- Implement proper CSRF protection for web applications.
+- Use HTTPS/TLS for all external communications — never transmit sensitive data over plaintext.
+- Follow the principle of least privilege for all access controls, permissions, and credentials.
+- Store secrets in secure vaults or environment-managed secret stores, never in code or config files.
+- Never use eval or Function() constructor with untrusted input — they enable arbitrary code execution.
+- Escape all user-generated content before inserting into the DOM — use framework-provided sanitization (React JSX, Angular DomSanitizer) instead of innerHTML.
+- Use parameterized queries or ORM methods for all database operations — never interpolate user input into SQL or NoSQL query strings.
+- Implement CSRF protection for state-changing endpoints — use anti-CSRF tokens or SameSite cookie attributes.
+- Implement rate limiting on public API endpoints to prevent brute-force and denial-of-service attacks.
+- Guard against prototype pollution — validate JSON keys before merging into objects, avoid recursive Object.assign or spread on untrusted data.
+- Set Content-Security-Policy headers to restrict script sources and prevent inline script execution.
+- Validate and sanitize URL parameters and redirect targets — never redirect to user-controlled URLs without allowlisting.
+- Use HttpOnly, Secure, and SameSite flags on cookies containing session tokens or sensitive data.
+- Avoid exposing detailed error messages or stack traces to clients — log server-side, return generic errors.
+- Use crypto.randomUUID() or crypto.getRandomValues() instead of Math.random() for security-sensitive values.
 - Use strict TypeScript configuration (strict: true in tsconfig.json).
 - Prefer interfaces for public APIs, types for internal structures.
 - Use readonly for immutable properties and ReadonlyArray<T> for immutable arrays.

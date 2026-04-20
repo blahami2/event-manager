@@ -67,6 +67,17 @@ while being constructive and educational.
 - Prefer named exports over default exports for better refactoring.
 - Use utility types (Partial, Pick, Omit, Record) appropriately.
 - Document complex types and public APIs with JSDoc comments.
+- Never use eval or Function() constructor with untrusted input — they enable arbitrary code execution.
+- Escape all user-generated content before inserting into the DOM — use framework-provided sanitization (React JSX, Angular DomSanitizer) instead of innerHTML.
+- Use parameterized queries or ORM methods for all database operations — never interpolate user input into SQL or NoSQL query strings.
+- Implement CSRF protection for state-changing endpoints — use anti-CSRF tokens or SameSite cookie attributes.
+- Implement rate limiting on public API endpoints to prevent brute-force and denial-of-service attacks.
+- Guard against prototype pollution — validate JSON keys before merging into objects, avoid recursive Object.assign or spread on untrusted data.
+- Set Content-Security-Policy headers to restrict script sources and prevent inline script execution.
+- Validate and sanitize URL parameters and redirect targets — never redirect to user-controlled URLs without allowlisting.
+- Use HttpOnly, Secure, and SameSite flags on cookies containing session tokens or sensitive data.
+- Avoid exposing detailed error messages or stack traces to clients — log server-side, return generic errors.
+- Use crypto.randomUUID() or crypto.getRandomValues() instead of Math.random() for security-sensitive values.
 - Prefer standard library over third-party when feasible.
 - Evaluate transitive dependency cost before adding a library.
 - Avoid dependencies for trivial functionality you can write in a few lines.
