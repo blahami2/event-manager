@@ -151,14 +151,9 @@ function SelectPill({
   readonly options: ReadonlyArray<Option>;
   readonly onChange: (value: string) => void;
 }): React.ReactElement {
-  const active = value !== "";
   return (
     <label
-      className={`relative inline-flex w-full cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors duration-150 sm:w-auto ${
-        active
-          ? "border-accent/60 bg-accent-muted text-text-primary"
-          : "border-border-default bg-surface-sunken text-text-secondary hover:border-border-strong hover:text-text-primary"
-      }`}
+      className="relative inline-flex w-full cursor-pointer items-center gap-2 rounded-md border border-border-default bg-surface-sunken px-3 py-2 text-sm text-text-secondary transition-colors duration-150 hover:border-border-strong hover:text-text-primary sm:w-auto"
     >
       <span className="sr-only">{label}</span>
       <span className="whitespace-nowrap text-xs font-medium uppercase tracking-[0.08em] text-text-tertiary">
