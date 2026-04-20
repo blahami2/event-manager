@@ -233,6 +233,97 @@ describe("RegistrationTable", () => {
     });
   });
 
+  it("should render row checkboxes when selection is enabled", () => {
+    // given
+    // - selection is opt-in via the `selection` prop
+    const onSelectionChange = vi.fn();
+
+    // when
+    render(
+      <RegistrationTable
+        {...defaultProps}
+        selection={{ selectedIds: new Set<string>(), onSelectionChange }}
+      />,
+    );
+
+    // then
+    // - one checkbox per row + one select-all header checkbox
+    const table = within(getDesktopTable());
+    const checkboxes = table.getAllByRole("checkbox");
+    expect(checkboxes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("should invoke onSelectionChange with the row id when a row checkbox is clicked", () => {
+    // given
+    const onSelectionChange = vi.fn();
+
+    // when
+    render(
+      <RegistrationTable
+        {...defaultProps}
+        selection={{ selectedIds: new Set<string>(), onSelectionChange }}
+      />,
+    );
+    // - click the first non-header checkbox
+    const table = within(getDesktopTable());
+    const rowCheckbox = table.getByLabelText("selectRow");
+    fireEvent.click(rowCheckbox);
+
+    // then
+    // - the callback receives a Set containing just the clicked id
+    expect(onSelectionChange).toHaveBeenCalled();
+    const arg = onSelectionChange.mock.calls[0]?.[0] as Set<string>;
+    expect(arg.has("reg-1")).toBe(true);
+  });
+
+  it("should highlight matching substrings in name and email when searchHighlight is set", () => {
+    // given
+    // - a query substring that matches both name and email
+    const reg = makeRegistration({ name: "Alice Cooper", email: "alice@band.com" });
+
+    // when
+    render(
+      <RegistrationTable
+        registrations={[reg]}
+        onEdit={vi.fn()}
+        onCancel={vi.fn()}
+        searchHighlight="alice"
+      />,
+    );
+
+    // then
+    const desktopTable = getDesktopTable();
+    // - the match is wrapped in a <mark>
+    const marks = desktopTable.querySelectorAll("mark");
+    expect(marks.length).toBeGreaterThanOrEqual(2);
+    // - each mark contains the matched substring (case-insensitive match preserves case)
+    for (const mark of Array.from(marks)) {
+      expect(mark.textContent?.toLowerCase()).toBe("alice");
+    }
+  });
+
+  it("should open the detail drawer via onRowClick when a row is clicked", () => {
+    // given
+    const onRowClick = vi.fn();
+    const reg = makeRegistration();
+
+    // when
+    render(
+      <RegistrationTable
+        registrations={[reg]}
+        onEdit={vi.fn()}
+        onCancel={vi.fn()}
+        onRowClick={onRowClick}
+      />,
+    );
+    // - click on the name cell (not on an action button)
+    const table = within(getDesktopTable());
+    fireEvent.click(table.getByText("John Doe"));
+
+    // then
+    expect(onRowClick).toHaveBeenCalledWith(reg);
+  });
+
   it("should display em-dash when registration has null notes", () => {
     // given
     // - a registration with null notes
