@@ -2450,4 +2450,125 @@ visual design system — that's Tier B.
 
 ---
 
+## T-ADMIN-B: Admin UI Tier B — Modern Visual System, Toasts, Responsive Table
+
+**Status:** DONE
+
+### Description
+
+Tier A delivered the structural refactor (labels, primitives, overflow
+fixes). Tier B delivers the visual redesign: cohesive design tokens,
+corrected typographic hierarchy, a toast system that replaces the old
+banner feedback pattern, skeleton loading, a responsive table that
+collapses to cards on narrow viewports, sortable column headers, and
+animated modal/backdrop transitions.
+
+The aesthetic direction is editorial, dark, dense — Linear / Vercel
+territory. The rock-themed red accent (`#c71f1f`) is kept but demoted
+to the primary CTA only (no more `shadow-lg shadow-accent/20` glow on
+every button). Typography hierarchy is inverted from "huge uppercase
+title, tiny table headers" to "modest section title, readable table
+headers" — admins scan tables more often than page titles.
+
+### Design Tokens (new in `src/app/globals.css`)
+
+- **Surface scale:** `--color-surface-0` through `--color-surface-3`
+  for progressive elevation (canvas → card → modal → hover-stripe).
+- **Border scale:** `--color-border` (hairline default) and
+  `--color-border-strong` (nav dividers, emphasised focus).
+- **Text scale:** `--color-text-primary / secondary / tertiary`.
+- **Semantic colours:** `--color-accent` (CTA red), `--color-success`,
+  `--color-warning`, `--color-danger`.
+- **Radius scale:** `--radius-xs` through `--radius-xl`.
+- **Shadow scale:** `--shadow-xs` through `--shadow-lg`, composited
+  for dark-on-dark depth.
+- **Motion tokens:** `--motion-fast/base/slow`, easing curves
+  `--ease-standard` and `--ease-emphasized`.
+- **Legacy aliases:** the existing public-site tokens
+  (`--color-dark-primary`, `--color-border-dark`, etc.) are aliased to
+  the new canonical variables so email templates and the landing page
+  are unaffected.
+- **Motion keyframes:** `admin-modal-in`, `admin-modal-backdrop-in`,
+  `admin-toast-in`, `admin-skeleton`, each with a
+  `prefers-reduced-motion: reduce` override.
+
+### Files Added
+
+- `src/components/ui/admin/Toast.tsx` — `ToastProvider` + `useToast()`
+  hook. ~180 LOC, no dependencies. Success/error/info variants,
+  auto-dismiss with per-variant defaults (6.5s errors, 4.5s others),
+  stackable top-right, dismissable, `durationMs: 0` for sticky
+  toasts, programmatic dismiss by id.
+- `src/components/ui/admin/Skeleton.tsx` — `Skeleton` (generic
+  shimmer) + `TableSkeleton` (rows × columns shimmer in a table
+  shell).
+- `src/components/ui/admin/EmptyState.tsx` — Icon + title + copy +
+  action CTA.
+- Test files for each (8 + 4 + 2 new tests).
+
+### Files Modified
+
+- `src/app/globals.css` — full token system + animations.
+- `src/app/admin/layout.tsx` — mounts `<ToastProvider>` at the root
+  so every admin page can call `useToast()`.
+- `src/components/ui/admin/Button.tsx` — classes rewritten against
+  semantic tokens; `shadow-lg shadow-accent/20` noise removed;
+  `brightness-110`/`brightness-95` used for hover/active to avoid
+  per-variant colour arithmetic.
+- `src/components/ui/admin/Modal.tsx` — `animate-backdrop-in` +
+  `animate-modal-in` classes applied; surfaces & shadows switched
+  to tokens; generous 6-unit (`p-6`) padding; close X button uses
+  the token focus ring.
+- `src/components/ui/admin/Badge.tsx` — token-backed variants with
+  `ring-1 ring-inset` for a calmer look.
+- `src/components/ui/admin/field-classes.ts` — same treatment;
+  `aria-invalid` selector flips the border to danger without a JS
+  branch.
+- `src/components/admin/AdminNav.tsx` — full redesign: hairline top
+  bar, small caps title, underlined active link, subdued logout
+  button (no more bordered glassy capsule).
+- `src/components/admin/StatsCard.tsx` — dropped gradients, glow, and
+  hover-lift; now a clean labeled number with tabular-nums.
+- `src/components/admin/RegistrationTable.tsx` — sticky header that
+  stays visible while scrolling (`top-14` matches nav height);
+  optional zebra stripe; sortable headers for Name / Status /
+  Created via new `sort` + `onSortChange` props; **responsive card
+  view** at `< md` (table hidden, each registration renders as a
+  card with name+email header, stat grid, notes, actions); empty
+  state swapped to the `EmptyState` primitive.
+- `src/app/admin/registrations/page.tsx` — uses `TableSkeleton` for
+  loading; toast replaces banner feedback for add/resend/cancel
+  errors; header redesigned as "label / title" pair.
+- `src/app/admin/page.tsx` — new header pattern; stats card row is
+  now 5 columns at `lg`.
+- `src/app/admin/login/page.tsx` — polished: small caps eyebrow,
+  rock-heading title, larger max-width, subtle radial glow.
+- `src/app/admin/settings/page.tsx` — same header pattern.
+- `src/components/admin/ChangePasswordForm.tsx` — token surfaces,
+  consistent with other admin forms.
+
+### Test Updates
+
+- `src/components/admin/__tests__/RegistrationTable.test.tsx` — queries
+  scoped to the desktop `<table>` via a local `getDesktopTable()`
+  helper (jsdom renders both the desktop table and mobile card list,
+  since CSS media queries are not evaluated); three new tests for
+  sortable headers (render + toggle + column-switch behaviour).
+- `src/app/admin/registrations/__tests__/page.test.tsx` — each render
+  now wraps `<AdminRegistrationsPage />` in `<ToastProvider>` since
+  the page consumes `useToast()`.
+
+### Verification
+
+- `npx tsc --noEmit` — passes.
+- `npm run lint` — passes (the 1 pre-existing `layout.tsx` font
+  warning unchanged).
+- `npx vitest run` — **548 passed** (+17 over Tier A's 531).
+- All accessibility contracts held: focus trap, focus restoration,
+  `role="status"`/`role="alert"` on toasts with `aria-live="polite"`
+  viewport, `aria-sort` on sortable headers,
+  `prefers-reduced-motion` honoured.
+
+---
+
 End of Execution Backlog.

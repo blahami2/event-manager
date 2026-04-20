@@ -70,8 +70,8 @@ export function ChangePasswordForm(): React.ReactElement {
   }
 
   return (
-    <div className="max-w-md rounded-xl border border-border-dark bg-dark-secondary/60 p-8 shadow-lg">
-      <h2 className="mb-6 text-xl font-semibold tracking-wide text-admin-text-primary">
+    <section className="max-w-md rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-surface-1)] p-6">
+      <h2 className="mb-5 text-[15px] font-semibold tracking-tight text-[color:var(--color-text-primary)]">
         {t("changePassword")}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,6 +82,7 @@ export function ChangePasswordForm(): React.ReactElement {
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
           required
+          autoComplete="current-password"
         />
         <Input
           label={t("newPassword")}
@@ -91,6 +92,7 @@ export function ChangePasswordForm(): React.ReactElement {
           onChange={(e) => setNewPassword(e.target.value)}
           required
           minLength={8}
+          autoComplete="new-password"
         />
         <Input
           label={t("confirmPassword")}
@@ -99,11 +101,12 @@ export function ChangePasswordForm(): React.ReactElement {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
+          autoComplete="new-password"
         />
 
         {errorMessage && (
           <div
-            className="rounded-md border border-admin-danger/40 bg-admin-danger/10 p-3 text-sm text-admin-danger"
+            className="rounded-[var(--radius-md)] border border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/10 p-3 text-sm text-[color:var(--color-danger)]"
             role="alert"
           >
             {errorMessage}
@@ -112,7 +115,7 @@ export function ChangePasswordForm(): React.ReactElement {
 
         {status === "success" && (
           <div
-            className="rounded-md border border-admin-success/40 bg-admin-success/10 p-3 text-sm text-admin-success"
+            className="rounded-[var(--radius-md)] border border-[color:var(--color-success)]/40 bg-[color:var(--color-success)]/10 p-3 text-sm text-[color:var(--color-success)]"
             role="status"
           >
             {t("success")}
@@ -128,6 +131,6 @@ export function ChangePasswordForm(): React.ReactElement {
           {status === "submitting" ? t("submitting") : t("submit")}
         </Button>
       </form>
-    </div>
+    </section>
   );
 }

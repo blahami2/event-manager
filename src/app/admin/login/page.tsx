@@ -41,54 +41,70 @@ export default function LoginPage(): React.ReactElement {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-dark-primary px-4 font-body">
-      {/* Ambient backdrop glow */}
-      <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/5 blur-[100px]" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[color:var(--color-surface-0)] px-4 font-body">
+      {/* Ambient backdrop — very subtle accent glow, no neon */}
+      <div
+        aria-hidden="true"
+        className="absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[color:var(--color-accent)]/[0.06] blur-[120px]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03),transparent_60%)]"
+      />
 
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border-dark bg-dark-secondary/60 p-8 shadow-2xl backdrop-blur-md">
-        <h1 className="mb-8 text-center font-heading text-4xl uppercase tracking-widest text-white">
-          {t("title")}
-        </h1>
+      <div className="relative z-10 w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[color:var(--color-text-tertiary)]">
+            Back office
+          </p>
+          <h1 className="mt-2 font-[var(--font-heading)] text-3xl uppercase tracking-[0.18em] text-[color:var(--color-text-primary)]">
+            {t("title")}
+          </h1>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label={t("email")}
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isSubmitting}
-          />
+        <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-[color:var(--color-surface-1)]/80 p-8 shadow-[var(--shadow-lg)] backdrop-blur-md">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label={t("email")}
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
+              autoComplete="email"
+            />
 
-          <Input
-            label={t("password")}
-            id="password"
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isSubmitting}
-          />
+            <Input
+              label={t("password")}
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isSubmitting}
+              autoComplete="current-password"
+            />
 
-          {error && (
-            <div
-              className="rounded-md border border-admin-danger/40 bg-admin-danger/10 p-3 text-sm text-admin-danger"
-              role="alert"
+            {error && (
+              <div
+                className="rounded-[var(--radius-md)] border border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/10 p-3 text-xs text-[color:var(--color-danger)]"
+                role="alert"
+              >
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              variant="primary"
+              className="mt-2 w-full"
+              loading={isSubmitting}
             >
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            variant="primary"
-            className="mt-4 w-full"
-            loading={isSubmitting}
-          >
-            {isSubmitting ? t("submitting") : t("submit")}
-          </Button>
-        </form>
+              {isSubmitting ? t("submitting") : t("submit")}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

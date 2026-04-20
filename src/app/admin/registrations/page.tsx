@@ -8,10 +8,11 @@ import { EditRegistrationModal } from "@/components/admin/EditRegistrationModal"
 import type { EditRegistrationPayload } from "@/components/admin/EditRegistrationModal";
 import { AddRegistrationModal } from "@/components/admin/AddRegistrationModal";
 import { Pagination } from "@/components/admin/Pagination";
-import { Button } from "@/components/ui/admin";
+import { Button, TableSkeleton, useToast } from "@/components/ui/admin";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
 const DEFAULT_PAGE_SIZE = 20;
+const TABLE_COLUMN_COUNT = 10;
 
 interface FetchState {
   readonly data: PaginatedResult<RegistrationOutput> | null;
@@ -41,6 +42,7 @@ async function fetchRegistrations(
 
 export default function AdminRegistrationsPage(): React.ReactElement {
   const t = useTranslations("admin.registrations");
+  const toast = useToast();
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -49,8 +51,6 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   const [editing, setEditing] = useState<RegistrationOutput | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
-  const [resendFeedback, setResendFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [addFeedback, setAddFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const loadData = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
@@ -94,16 +94,15 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         }
         await loadData();
       } catch {
-        setState((prev) => ({ ...prev, error: t("errorCancel") }));
+        toast.error(t("errorCancel"));
       }
     },
-    [loadData, t],
+    [loadData, t, toast],
   );
 
   const handleResendEmail = useCallback(
     async (registrationId: string) => {
       setResendingId(registrationId);
-      setResendFeedback(null);
       try {
         const res = await fetch("/api/admin/registrations", {
           method: "POST",
@@ -113,14 +112,14 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         if (!res.ok) {
           throw new Error("Failed to resend email");
         }
-        setResendFeedback({ type: "success", message: t("table.resendSuccess") });
+        toast.success(t("table.resendSuccess"));
       } catch {
-        setResendFeedback({ type: "error", message: t("table.resendError") });
+        toast.error(t("table.resendError"));
       } finally {
         setResendingId(null);
       }
     },
-    [t],
+    [t, toast],
   );
 
   const handleEdit = useCallback((registration: RegistrationOutput) => {
@@ -128,7 +127,6 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   }, []);
 
   const handleOpenAdd = useCallback(() => {
-    setAddFeedback(null);
     setIsAdding(true);
   }, []);
 
@@ -138,9 +136,9 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   const handleAddCreated = useCallback(async () => {
     setIsAdding(false);
-    setAddFeedback({ type: "success", message: t("addSuccess") });
+    toast.success(t("addSuccess"));
     await loadData();
-  }, [loadData, t]);
+  }, [loadData, t, toast]);
 
   const handleSave = useCallback(
     async (id: string, data: EditRegistrationPayload) => {
@@ -156,18 +154,23 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         setEditing(null);
         await loadData();
       } catch {
-        setState((prev) => ({ ...prev, error: t("errorUpdate") }));
+        toast.error(t("errorUpdate"));
       }
     },
-    [loadData, t],
+    [loadData, t, toast],
   );
 
   return (
     <div>
-      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">
-          {t("title")}
-        </h1>
+      <header className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[color:var(--color-text-tertiary)]">
+            Admin
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[color:var(--color-text-primary)]">
+            {t("title")}
+          </h1>
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="primary" onClick={handleOpenAdd}>
             <svg
@@ -189,7 +192,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           <a
             href="/api/admin/registrations/export"
             download
-            className="inline-flex items-center gap-2 rounded-md border border-border-dark bg-dark-secondary px-4 py-2 text-sm font-medium text-admin-text-primary transition-colors hover:bg-admin-hover hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-border-dark focus-visible:ring-offset-2 focus-visible:ring-offset-dark-primary"
+            className="inline-flex items-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface-2)] px-4 py-2 text-sm font-medium text-[color:var(--color-text-primary)] transition-colors duration-[var(--motion-fast)] hover:bg-[color:var(--color-surface-3)] hover:border-[color:var(--color-border-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-border-strong)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-surface-0)]"
           >
             <svg
               className="h-4 w-4"
@@ -201,14 +204,14 @@ export default function AdminRegistrationsPage(): React.ReactElement {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={1.75}
                 d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"
               />
             </svg>
             {t("downloadCsv")}
           </a>
         </div>
-      </div>
+      </header>
 
       <div className="mt-6">
         <RegistrationFilters
@@ -222,43 +225,15 @@ export default function AdminRegistrationsPage(): React.ReactElement {
       <div className="mt-4">
         {state.error && (
           <div
-            className="mb-4 rounded-md border border-admin-danger/40 bg-admin-danger/10 p-4 text-sm text-admin-danger"
+            className="mb-4 rounded-[var(--radius-md)] border border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/10 p-3 text-sm text-[color:var(--color-danger)]"
             role="alert"
           >
             {state.error}
           </div>
         )}
 
-        {resendFeedback && (
-          <div
-            className={`mb-4 rounded-md border p-4 text-sm ${
-              resendFeedback.type === "success"
-                ? "border-admin-success/40 bg-admin-success/10 text-admin-success"
-                : "border-admin-danger/40 bg-admin-danger/10 text-admin-danger"
-            }`}
-            role="alert"
-          >
-            {resendFeedback.message}
-          </div>
-        )}
-
-        {addFeedback && (
-          <div
-            className={`mb-4 rounded-md border p-4 text-sm ${
-              addFeedback.type === "success"
-                ? "border-admin-success/40 bg-admin-success/10 text-admin-success"
-                : "border-admin-danger/40 bg-admin-danger/10 text-admin-danger"
-            }`}
-            role="alert"
-          >
-            {addFeedback.message}
-          </div>
-        )}
-
         {state.loading ? (
-          <div className="py-12 text-center text-sm text-admin-text-secondary">
-            {t("loading")}
-          </div>
+          <TableSkeleton rows={pageSize > 10 ? 10 : pageSize} columns={TABLE_COLUMN_COUNT} label={t("loading")} />
         ) : state.data ? (
           <>
             <RegistrationTable
