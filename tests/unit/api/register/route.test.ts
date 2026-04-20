@@ -80,7 +80,9 @@ describe("POST /api/register", () => {
       data: { registrationId: "reg-123" },
       message: "Registration successful. Check your email.",
     });
-    expect(mockRegisterGuest).toHaveBeenCalledWith(validBody);
+    expect(mockRegisterGuest).toHaveBeenCalledWith(validBody, {
+      bypassDeadline: false,
+    });
   });
 
   it("delegates to registerGuest use case", async () => {
@@ -89,7 +91,9 @@ describe("POST /api/register", () => {
 
     await callRoute(buildRequest(input));
 
-    expect(mockRegisterGuest).toHaveBeenCalledWith(input);
+    expect(mockRegisterGuest).toHaveBeenCalledWith(input, {
+      bypassDeadline: false,
+    });
   });
 
   it("returns 400 on validation failure", async () => {
@@ -177,5 +181,21 @@ describe("POST /api/register", () => {
     const text = await res.clone().text();
 
     expect(text).not.toMatch(/token/i);
+  });
+
+  it("always passes bypassDeadline=false even if the client body contains bypassDeadline=true", async () => {
+    // given
+    // - a malicious client attempts to disable the deadline check by
+    //   adding bypassDeadline: true to the request body; the public
+    //   route must never forward a bypass flag to the use case.
+    mockRegisterGuest.mockResolvedValue({ registrationId: "reg-321" });
+    const bodyWithBypass = { ...validBody, bypassDeadline: true };
+
+    // when
+    await callRoute(buildRequest(bodyWithBypass));
+
+    // then
+    const callArgs = mockRegisterGuest.mock.calls[0] as unknown[];
+    expect(callArgs[1]).toEqual({ bypassDeadline: false });
   });
 });

@@ -2120,4 +2120,206 @@ Two features implemented:
 
 ---
 
+## T-NEW-02: Admin "Add Reservation" GUI
+
+**Status:** DONE
+
+### Description
+
+Added an admin-only GUI that allows administrators to manually create a
+registration from the admin registrations page. A new "Add reservation"
+button in the page header opens a modal dialog styled to match the existing
+admin aesthetic (dark theme, accent-colored primary action, border/backdrop
+conventions). The modal reuses the existing public `POST /api/register`
+endpoint — no new backend endpoint was introduced, per scope constraint.
+
+The modal mirrors the field set accepted by the endpoint's Zod
+`registrationSchema` (name, email, stay, accommodation, adultsCount,
+childrenCount, optional notes), applies the same client-side validation
+used by the public `RegistrationForm`, enforces the same stay/accommodation
+coupling rules (SAT_ONLY forces `NONE`), surfaces server-side validation
+errors field-by-field, and shows dedicated messages for rate-limit (429)
+and generic failure responses.
+
+On success: the modal closes, a success feedback banner is shown above the
+table, and the registrations list is re-fetched so the newly-created row
+appears immediately. All new UI strings are localized across `en`, `cs`,
+`sk` (identical key sets).
+
+### Endpoint Decision
+
+The user explicitly requested reuse of the existing endpoint. The only
+existing endpoint that creates a registration is `POST /api/register`;
+the admin routes at `POST/PUT/DELETE /api/admin/registrations` only
+resend-email / edit / cancel existing registrations. The modal therefore
+targets `POST /api/register`. This preserves all server-side invariants
+(Zod validation, capability-token creation, manage-link email) without
+duplicating logic.
+
+### Files Added
+
+- `src/components/admin/AddRegistrationModal.tsx` — new admin modal
+- `src/components/admin/__tests__/AddRegistrationModal.test.tsx` — 12 unit tests
+- `src/app/admin/registrations/__tests__/page.test.tsx` — 4 integration tests for page wiring
+
+### Files Modified
+
+- `src/app/admin/registrations/page.tsx` — "Add reservation" button, modal wiring, success banner, list refresh
+- `src/i18n/messages/en.json` — `addReservation`, `addSuccess`, full `admin.registrations.add.*` subtree
+- `src/i18n/messages/cs.json` — same keys translated
+- `src/i18n/messages/sk.json` — same keys translated
+
+### Tests Added (16 total)
+
+- Modal renders with all required form fields.
+- Cancel button invokes `onClose`.
+- Empty-form submission triggers client-side validation (no fetch).
+- Valid submission POSTs the correct payload to `/api/register`.
+- Notes are included in the payload when provided.
+- Submit button is disabled and shows the "submitting" label while the request is pending.
+- Server 400 with `fields` surfaces field-level errors.
+- Server 429 surfaces the rate-limit message.
+- Server 500 surfaces the generic error.
+- Network failure surfaces the generic error.
+- `onCreated` is not called on validation error.
+- SAT_ONLY stay forces accommodation to NONE in the payload.
+- Page renders the "Add reservation" button.
+- Clicking it opens the modal (dialog present).
+- Cancel inside the modal closes it.
+- Successful creation refetches `/api/admin/registrations` and closes the modal.
+
+### Verification
+
+- `npx tsc --noEmit` — passes (0 errors).
+- `npm run lint` — passes (0 errors; 1 pre-existing warning in `src/app/layout.tsx` unrelated to this change).
+- `npx vitest run` — 447 passed (+16 over baseline); the 23 pre-existing failures are all related to the registration deadline having already passed in the test environment and are unrelated to this change (delta verified by stashing the change and re-running the suite on a clean tree).
+- `npx vitest run tests/security/ tests/architecture/` — 24 passed.
+
+---
+
+## T-NEW-03: Admin "Add Reservation" Bypasses Registration Deadline
+
+**Status:** DONE
+
+### Description
+
+Follow-up to T-NEW-02. The admin "Add reservation" modal previously
+targeted the public `POST /api/register` endpoint, which enforces the
+registration deadline. After the deadline passed (2026-04-19), the
+modal became unusable for its primary purpose — allowing administrators
+to register late guests on their behalf.
+
+This ticket introduces a dedicated admin endpoint that bypasses the
+deadline check while preserving every other invariant (Zod validation,
+capability-token generation, manage-link email delivery, admin action
+logging). The bypass is strictly server-side: the admin handler passes
+`bypassDeadline: true` to the use case, and the public handler passes
+`bypassDeadline: false`. A client cannot opt into bypass by adding a
+field to the body — the public route ignores any `bypassDeadline` key
+in the body and always passes `false` to the use case (covered by a
+dedicated test).
+
+### Design Decision: New Endpoint, Not Reused POST
+
+`POST /api/admin/registrations` is already taken by the admin "resend
+email" action (see `route.ts`). Rather than overload that verb with a
+second responsibility, the new handler lives at
+`POST /api/admin/registrations/create`. This mirrors the existing
+`/api/admin/registrations/export` subpath convention for admin-only
+actions that do not fit the base resource verbs.
+
+### Auth Pattern
+
+The handler reuses `verifyAdmin` from `@/lib/auth/admin-guard` — the
+same guard used by `GET/PUT/DELETE /api/admin/registrations` and
+`GET /api/admin/registrations/export`. It follows the exact pattern:
+destructure `{ adminId }` from `await verifyAdmin(request)`, then rely
+on `handleApiError` to map `AuthenticationError` → 401 and
+`AuthorizationError` → 403.
+
+### Files Added
+
+- `src/app/api/admin/registrations/create/route.ts` — new admin handler
+- `src/app/api/admin/registrations/create/route.test.ts` — 8 route tests
+
+### Files Modified
+
+- `src/lib/usecases/register.ts` — added `RegisterGuestOptions`
+  interface and optional second argument to `registerGuest`; the
+  deadline check at step 0 is skipped when `bypassDeadline: true`.
+- `src/app/api/register/route.ts` — now explicitly passes
+  `{ bypassDeadline: false }` to make the invariant visible at the
+  call site.
+- `src/components/admin/AddRegistrationModal.tsx` — POST target switched
+  from `/api/register` to `/api/admin/registrations/create`; JSDoc
+  updated.
+- `tests/unit/lib/usecases/register.test.ts` — 4 new tests covering the
+  `bypassDeadline` option (default behaviour, explicit `false`,
+  explicit `true` past the deadline, invalid input still rejected).
+- `tests/unit/api/register/route.test.ts` — 2 existing tests updated
+  to assert the new second argument; 1 new test guarantees the public
+  endpoint ignores a client-supplied `bypassDeadline: true`.
+- `src/app/admin/registrations/__tests__/page.test.tsx` — URL assertion
+  updated to the new endpoint; the refetch detection was tightened to
+  avoid matching the create POST itself.
+- `src/components/admin/__tests__/AddRegistrationModal.test.tsx` — URL
+  assertion updated to the new endpoint.
+
+### Tests Added (13 net new)
+
+Use-case tests (4):
+- Throws `ValidationError` past the deadline when `bypassDeadline` is
+  not provided.
+- Throws `ValidationError` past the deadline when `bypassDeadline:
+  false`.
+- Creates the registration past the deadline when `bypassDeadline:
+  true`.
+- Still validates input when `bypassDeadline: true` (invalid payload
+  rejected).
+
+Route tests (8):
+- Returns 201 with `{ registrationId }` on success.
+- Logs admin-initiated creation with masked email at info level
+  (matching `LOG4`/`LOG5`).
+- Returns 401 when unauthenticated.
+- Returns 403 when the caller is not an admin.
+- Returns 400 with field errors when the use case throws
+  `ValidationError`.
+- Returns 201 past the deadline because `bypassDeadline` is set
+  server-side.
+- Ignores a client-supplied `bypassDeadline: false` in the body and
+  still passes `true` to the use case.
+- Returns 500 on unexpected errors.
+
+Public-route hardening (1):
+- The public `/api/register` route ignores a body `bypassDeadline:
+  true` and always passes `false` to the use case.
+
+### Follow-up Flagged (Not Done Here)
+
+The 23 pre-existing test failures listed in T-NEW-02 are all caused by
+the real wall-clock time being past `REGISTRATION_DEADLINE`
+(2026-04-19). Several of them live in files this ticket did not
+touch: `tests/unit/lib/usecases/manage-registration.test.ts` (5
+failures), `src/app/(public)/__tests__/page.test.tsx > HomePage` (1
+failure). Others live in `tests/unit/lib/usecases/register.test.ts`
+and `tests/unit/api/register/route.test.ts`. These tests should
+either pin a fixed `vi.setSystemTime(...)` before each case, or — for
+the admin paths that now have a bypass option — call
+`registerGuest(input, { bypassDeadline: true })`. Out of scope here:
+to keep the diff focused, only the tests directly in files modified
+by this ticket were updated. The remaining deadline-related failures
+are a separate, clearly-scoped cleanup ticket.
+
+### Verification
+
+- `npx tsc --noEmit` — passes (0 errors).
+- `npm run lint` — passes (0 errors; the same 1 pre-existing warning
+  in `src/app/layout.tsx` unrelated to this change).
+- `npx vitest run` — 460 passed (+13 over the T-NEW-02 baseline of
+  447); 23 pre-existing failures unchanged.
+- `npx vitest run tests/security/ tests/architecture/` — 24 passed.
+
+---
+
 End of Execution Backlog.
