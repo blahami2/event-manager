@@ -116,18 +116,18 @@ describe("RegistrationTable", () => {
     expect(screen.queryByText("confirmCancel")).toBeNull();
   });
 
-  it("should display short notes inline without an expand affordance", () => {
+  it("should display the expand affordance for any non-empty note", () => {
     // given
-    // - a note comfortably below the preview threshold
     const regWithNotes = makeRegistration({ notes: "Vegetarian diet" });
 
     // when
     render(<RegistrationTable registrations={[regWithNotes]} onEdit={vi.fn()} onCancel={vi.fn()} />);
 
-    // then
+    // then — rows are kept the same compact height; the full note is
+    // always behind an expand toggle, even for short notes, so every row
+    // renders at identical height until the user asks otherwise.
     expect(screen.getByText("Vegetarian diet")).toBeDefined();
-    // - no expand toggle for short notes
-    expect(screen.queryByText("notesExpand")).toBeNull();
+    expect(screen.getByText("notesExpand")).toBeDefined();
   });
 
   it("should expand long notes when the expand button is clicked", () => {

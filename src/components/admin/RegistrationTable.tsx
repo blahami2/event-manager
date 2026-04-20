@@ -24,9 +24,6 @@ export interface RegistrationTableProps {
   readonly searchQuery?: string;
 }
 
-/** Character threshold above which the notes cell shows an expand affordance. */
-const NOTES_PREVIEW_CHARS = 60;
-
 function formatDate(date: Date): string {
   // Use a fixed locale so the SSR-rendered string matches the client-side
   // hydration; the admin UI is organizer-facing so a single locale for
@@ -94,30 +91,44 @@ function NotesCell({
   const [expanded, setExpanded] = useState(false);
   if (!notes)
     return <span className="text-text-tertiary">{"\u2014"}</span>;
-  if (notes.length <= NOTES_PREVIEW_CHARS) {
+
+  if (!expanded) {
+    // Collapsed: single line, ellipsis. Clicking "Read" expands in place.
     return (
-      <span className="whitespace-pre-wrap break-words text-text-secondary">
-        {notes}
-      </span>
+      <div className="flex items-center gap-2">
+        <span className="truncate text-text-secondary" title={notes}>
+          {notes}
+        </span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpanded(true);
+          }}
+          className="shrink-0 text-xs font-medium text-accent transition-colors duration-150 hover:text-accent-hover focus:outline-none focus-visible:underline"
+          aria-expanded={false}
+        >
+          {expandLabel}
+        </button>
+      </div>
     );
   }
 
-  const preview = notes.slice(0, NOTES_PREVIEW_CHARS).trimEnd();
   return (
     <div className="flex flex-col items-start gap-1">
       <span className="whitespace-pre-wrap break-words text-text-secondary">
-        {expanded ? notes : `${preview}…`}
+        {notes}
       </span>
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          setExpanded((v) => !v);
+          setExpanded(false);
         }}
         className="text-xs font-medium text-accent transition-colors duration-150 hover:text-accent-hover focus:outline-none focus-visible:underline"
-        aria-expanded={expanded}
+        aria-expanded={true}
       >
-        {expanded ? collapseLabel : expandLabel}
+        {collapseLabel}
       </button>
     </div>
   );
@@ -243,7 +254,7 @@ export function RegistrationTable({
                 <HeaderCell align="right">{t("adults")}</HeaderCell>
                 <HeaderCell align="right">{t("children")}</HeaderCell>
                 <HeaderCell>{t("accommodation")}</HeaderCell>
-                <HeaderCell>{t("notes")}</HeaderCell>
+                <HeaderCell width="w-[260px] min-w-[260px]">{t("notes")}</HeaderCell>
                 <HeaderCell>{t("status")}</HeaderCell>
                 <HeaderCell>{t("created")}</HeaderCell>
                 <HeaderCell align="right">{t("actions")}</HeaderCell>
@@ -296,7 +307,7 @@ export function RegistrationTable({
                     <td className="whitespace-nowrap px-4 py-3 align-top text-sm text-text-secondary">
                       {accommodationLabel(reg.accommodation, tEnums)}
                     </td>
-                    <td className="max-w-[260px] px-4 py-3 align-top text-sm">
+                    <td className="w-[260px] min-w-[260px] max-w-[260px] px-4 py-3 align-top text-sm">
                       <NotesCell
                         notes={reg.notes}
                         expandLabel={tReg("notesExpand")}
@@ -390,16 +401,18 @@ export function RegistrationTable({
 function HeaderCell({
   children,
   align = "left",
+  width,
 }: {
   readonly children: React.ReactNode;
   readonly align?: "left" | "right";
+  readonly width?: string;
 }): React.ReactElement {
   return (
     <th
       scope="col"
       className={`px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary ${
         align === "right" ? "text-right" : "text-left"
-      }`}
+      } ${width ?? ""}`.trim()}
     >
       {children}
     </th>
