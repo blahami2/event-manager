@@ -2,11 +2,20 @@
  * @vitest-environment jsdom
  */
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { IntlWrapper } from "@/test/intl-wrapper";
 import HomePage from "../page";
 
 describe("HomePage", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-01T10:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("displays event name", () => {
     render(<HomePage />, { wrapper: IntlWrapper });
     expect(screen.getByText("Triple threat")).toBeDefined();

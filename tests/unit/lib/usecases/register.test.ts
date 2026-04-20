@@ -93,6 +93,12 @@ describe("registerGuest", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("BASE_URL", "https://example.com");
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-01T10:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should create registration, generate token, store hash, send email, and return registrationId", async () => {
@@ -271,6 +277,12 @@ describe("registerGuest validation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("BASE_URL", "https://example.com");
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-01T10:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should throw ValidationError when name is empty", async () => {
