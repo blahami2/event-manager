@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
@@ -28,25 +28,16 @@ export interface SortState {
   readonly direction: SortDirection;
 }
 
-export interface TableSelection {
-  readonly selectedIds: ReadonlySet<string>;
-  readonly onSelectionChange: (ids: ReadonlySet<string>) => void;
-}
-
 export interface RegistrationTableProps {
   readonly registrations: ReadonlyArray<RegistrationOutput>;
   readonly onEdit: (registration: RegistrationOutput) => void;
   readonly onCancel: (registrationId: string) => void;
   readonly onResendEmail?: (registrationId: string) => void;
   readonly resendingId?: string | null;
+  /** Current sort state. When omitted, sorting UI is not rendered. */
   readonly sort?: SortState;
+  /** Invoked when the user clicks a sortable header. */
   readonly onSortChange?: (sort: SortState) => void;
-  /** When provided, a checkbox column + select-all header are rendered. */
-  readonly selection?: TableSelection;
-  /** When provided, clicking a row body (not action buttons) fires this. */
-  readonly onRowClick?: (registration: RegistrationOutput) => void;
-  /** When set, matching substrings in name + email are highlighted. */
-  readonly searchHighlight?: string;
 }
 
 function formatDate(date: Date): string {
@@ -58,47 +49,9 @@ function formatDate(date: Date): string {
 }
 
 /**
- * Highlight every occurrence of `query` inside `text` with a `<mark>` element.
- * Matching is case-insensitive; the original casing is preserved in output.
- *
- * Exported for testing the logic in isolation if needed.
+ * Render a registration status using the shared Badge primitive. The mapping
+ * lives here (not in Badge) because it's domain-specific.
  */
-export function highlightMatches(
-  text: string,
-  query: string,
-): React.ReactNode {
-  const trimmed = query.trim();
-  if (trimmed.length === 0) return text;
-
-  const lowerText = text.toLowerCase();
-  const lowerQuery = trimmed.toLowerCase();
-  const parts: React.ReactNode[] = [];
-  let cursor = 0;
-  let matchIdx = lowerText.indexOf(lowerQuery, cursor);
-  let key = 0;
-
-  while (matchIdx !== -1) {
-    if (matchIdx > cursor) {
-      parts.push(text.slice(cursor, matchIdx));
-    }
-    parts.push(
-      <mark
-        key={`m${key++}`}
-        className="rounded-sm bg-[color:var(--color-accent)]/25 px-0.5 text-inherit"
-      >
-        {text.slice(matchIdx, matchIdx + trimmed.length)}
-      </mark>,
-    );
-    cursor = matchIdx + trimmed.length;
-    matchIdx = lowerText.indexOf(lowerQuery, cursor);
-  }
-
-  if (cursor < text.length) {
-    parts.push(text.slice(cursor));
-  }
-  return parts;
-}
-
 function StatusBadge({
   status,
   label,
@@ -113,6 +66,11 @@ function StatusBadge({
   );
 }
 
+/**
+ * Notes cell with expand/collapse. Short notes render inline. Long notes
+ * show a preview + "more" toggle, replacing the earlier `truncate + title`
+ * approach which hid content from users who did not hover.
+ */
 function NotesCell({
   notes,
   expandLabel,
@@ -136,10 +94,7 @@ function NotesCell({
       </span>
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setExpanded((v) => !v);
-        }}
+        onClick={() => setExpanded((v) => !v)}
         className="self-start text-xs font-medium text-[color:var(--color-accent)] transition-colors hover:brightness-110 focus:outline-none focus-visible:underline"
         aria-expanded={expanded}
       >
@@ -149,6 +104,11 @@ function NotesCell({
   );
 }
 
+/**
+ * Sortable-header button. Renders the column label plus an up/down caret
+ * indicating the current direction on the active column. Non-sortable
+ * columns render a plain `<span>`.
+ */
 function SortableHeader({
   label,
   columnKey,
@@ -160,7 +120,9 @@ function SortableHeader({
   readonly sort?: SortState;
   readonly onSortChange?: (sort: SortState) => void;
 }): React.ReactElement {
-  if (!onSortChange) return <span>{label}</span>;
+  if (!onSortChange) {
+    return <span>{label}</span>;
+  }
   const isActive = sort?.key === columnKey;
   const direction = isActive ? sort?.direction ?? "asc" : "asc";
 
@@ -206,9 +168,6 @@ export function RegistrationTable({
   resendingId,
   sort,
   onSortChange,
-  selection,
-  onRowClick,
-  searchHighlight,
 }: RegistrationTableProps): React.ReactElement {
   const t = useTranslations("admin.registrations.table");
   const tReg = useTranslations("admin.registrations");
@@ -218,9 +177,11 @@ export function RegistrationTable({
   const handleCancelClick = useCallback((id: string) => {
     setConfirmAction({ type: "cancel", id });
   }, []);
+
   const handleResendClick = useCallback((id: string) => {
     setConfirmAction({ type: "resend", id });
   }, []);
+
   const handleConfirm = useCallback(() => {
     if (!confirmAction) return;
     if (confirmAction.type === "cancel") {
@@ -230,43 +191,10 @@ export function RegistrationTable({
     }
     setConfirmAction(null);
   }, [confirmAction, onCancel, onResendEmail]);
-  const handleDismiss = useCallback(() => setConfirmAction(null), []);
 
-  // --- Selection helpers ---------------------------------------------------
-  const selectedIds = selection?.selectedIds ?? new Set<string>();
-  const visibleIds = useMemo(
-    () => registrations.map((r) => r.id),
-    [registrations],
-  );
-  const allVisibleSelected =
-    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
-  const someVisibleSelected =
-    !allVisibleSelected && visibleIds.some((id) => selectedIds.has(id));
-
-  const handleToggleRow = useCallback(
-    (id: string) => {
-      if (!selection) return;
-      const next = new Set(selection.selectedIds);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      selection.onSelectionChange(next);
-    },
-    [selection],
-  );
-
-  const handleToggleAllVisible = useCallback(() => {
-    if (!selection) return;
-    const next = new Set(selection.selectedIds);
-    if (allVisibleSelected) {
-      for (const id of visibleIds) next.delete(id);
-    } else {
-      for (const id of visibleIds) next.add(id);
-    }
-    selection.onSelectionChange(next);
-  }, [selection, allVisibleSelected, visibleIds]);
+  const handleDismiss = useCallback(() => {
+    setConfirmAction(null);
+  }, []);
 
   if (registrations.length === 0) {
     return (
@@ -301,6 +229,12 @@ export function RegistrationTable({
   const confirmVariant: "danger" | "info" =
     confirmAction?.type === "cancel" ? "danger" : "info";
 
+  // ------------------------------------------------------------------
+  // Desktop table (>= md) + mobile card view (< md). Both render the
+  // same data; CSS toggles which one is visible so we only ever render
+  // a single, accessible DOM representation per viewport.
+  // ------------------------------------------------------------------
+
   const tableCellCls =
     "px-4 py-2.5 text-sm text-[color:var(--color-text-secondary)]";
   const tableHeadCls =
@@ -325,22 +259,13 @@ export function RegistrationTable({
           <table className="min-w-full border-separate border-spacing-0">
             <thead>
               <tr>
-                {selection ? (
-                  <th className={`${tableHeadCls} w-10`}>
-                    <input
-                      type="checkbox"
-                      aria-label={tReg("selectAll")}
-                      checked={allVisibleSelected}
-                      ref={(el) => {
-                        if (el) el.indeterminate = someVisibleSelected;
-                      }}
-                      onChange={handleToggleAllVisible}
-                      className="h-4 w-4 cursor-pointer accent-[color:var(--color-accent)]"
-                    />
-                  </th>
-                ) : null}
                 <th className={tableHeadCls}>
-                  <SortableHeader label={t("name")} columnKey="name" sort={sort} onSortChange={onSortChange} />
+                  <SortableHeader
+                    label={t("name")}
+                    columnKey="name"
+                    sort={sort}
+                    onSortChange={onSortChange}
+                  />
                 </th>
                 <th className={tableHeadCls}>{t("email")}</th>
                 <th className={tableHeadCls}>{t("stay")}</th>
@@ -349,10 +274,20 @@ export function RegistrationTable({
                 <th className={tableHeadCls}>{t("accommodation")}</th>
                 <th className={tableHeadCls}>{t("notes")}</th>
                 <th className={tableHeadCls}>
-                  <SortableHeader label={t("status")} columnKey="status" sort={sort} onSortChange={onSortChange} />
+                  <SortableHeader
+                    label={t("status")}
+                    columnKey="status"
+                    sort={sort}
+                    onSortChange={onSortChange}
+                  />
                 </th>
                 <th className={tableHeadCls}>
-                  <SortableHeader label={t("created")} columnKey="createdAt" sort={sort} onSortChange={onSortChange} />
+                  <SortableHeader
+                    label={t("created")}
+                    columnKey="createdAt"
+                    sort={sort}
+                    onSortChange={onSortChange}
+                  />
                 </th>
                 <th className={`${tableHeadCls} text-right`}>{t("actions")}</th>
               </tr>
@@ -360,46 +295,18 @@ export function RegistrationTable({
             <tbody>
               {registrations.map((reg, idx) => {
                 const isCancelled = reg.status === RegistrationStatus.CANCELLED;
-                const isSelected = selectedIds.has(reg.id);
-                const stripeCls = isSelected
-                  ? "bg-[color:var(--color-accent)]/5"
-                  : idx % 2 === 1
-                    ? "bg-[color:var(--color-surface-2)]/30"
-                    : "bg-transparent";
-                const clickableCls = onRowClick
-                  ? "cursor-pointer"
-                  : "";
-                const selectedLeftBorderCls = isSelected
-                  ? "shadow-[inset_3px_0_0_0_var(--color-accent)]"
-                  : "";
-
+                const stripeCls =
+                  idx % 2 === 1 ? "bg-[color:var(--color-surface-2)]/30" : "bg-transparent";
                 return (
                   <tr
                     key={reg.id}
-                    onClick={onRowClick ? () => onRowClick(reg) : undefined}
-                    className={`${stripeCls} ${clickableCls} ${selectedLeftBorderCls} transition-colors duration-[var(--motion-fast)] hover:bg-[color:var(--color-surface-3)]/50`}
+                    className={`${stripeCls} transition-colors duration-[var(--motion-fast)] hover:bg-[color:var(--color-surface-3)]/50`}
                   >
-                    {selection ? (
-                      <td
-                        className={tableCellCls}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <input
-                          type="checkbox"
-                          aria-label={tReg("selectRow")}
-                          checked={isSelected}
-                          onChange={() => handleToggleRow(reg.id)}
-                          className="h-4 w-4 cursor-pointer accent-[color:var(--color-accent)]"
-                        />
-                      </td>
-                    ) : null}
                     <td className={`${tableCellCls} font-medium text-[color:var(--color-text-primary)]`}>
-                      {searchHighlight ? highlightMatches(reg.name, searchHighlight) : reg.name}
+                      {reg.name}
                     </td>
                     <td className={tableCellCls}>
-                      <span className="break-all">
-                        {searchHighlight ? highlightMatches(reg.email, searchHighlight) : reg.email}
-                      </span>
+                      <span className="break-all">{reg.email}</span>
                     </td>
                     <td className={`${tableCellCls} whitespace-nowrap`}>
                       {stayLabel(reg.stay, tEnums)}
@@ -413,10 +320,7 @@ export function RegistrationTable({
                     <td className={`${tableCellCls} whitespace-nowrap`}>
                       {accommodationLabel(reg.accommodation, tEnums)}
                     </td>
-                    <td
-                      className={`${tableCellCls} max-w-[260px]`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <td className={`${tableCellCls} max-w-[260px]`}>
                       <NotesCell
                         notes={reg.notes}
                         expandLabel={tReg("notesExpand")}
@@ -432,10 +336,7 @@ export function RegistrationTable({
                     <td className={`${tableCellCls} whitespace-nowrap tabular-nums`}>
                       {formatDate(reg.createdAt)}
                     </td>
-                    <td
-                      className={`${tableCellCls} whitespace-nowrap`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <td className={`${tableCellCls} whitespace-nowrap`}>
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="sm" onClick={() => onEdit(reg)}>
                           {t("edit")}
@@ -475,28 +376,18 @@ export function RegistrationTable({
       <ul className="flex flex-col gap-3 md:hidden">
         {registrations.map((reg) => {
           const isCancelled = reg.status === RegistrationStatus.CANCELLED;
-          const isSelected = selectedIds.has(reg.id);
           return (
             <li
               key={reg.id}
-              onClick={onRowClick ? () => onRowClick(reg) : undefined}
-              className={[
-                "rounded-[var(--radius-lg)] border p-4",
-                isSelected
-                  ? "border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent)]/5"
-                  : "border-[color:var(--color-border)] bg-[color:var(--color-surface-1)]",
-                onRowClick && "cursor-pointer",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className="rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-surface-1)] p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-[color:var(--color-text-primary)]">
-                    {searchHighlight ? highlightMatches(reg.name, searchHighlight) : reg.name}
+                    {reg.name}
                   </p>
                   <p className="truncate text-xs text-[color:var(--color-text-secondary)]">
-                    {searchHighlight ? highlightMatches(reg.email, searchHighlight) : reg.email}
+                    {reg.email}
                   </p>
                 </div>
                 <StatusBadge
@@ -539,10 +430,7 @@ export function RegistrationTable({
                   />
                 </div>
               ) : null}
-              <div
-                className="mt-3 flex flex-wrap items-center gap-2 border-t border-[color:var(--color-border)] pt-3"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[color:var(--color-border)] pt-3">
                 <Button variant="secondary" size="sm" onClick={() => onEdit(reg)}>
                   {t("edit")}
                 </Button>
