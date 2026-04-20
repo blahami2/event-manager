@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { RegistrationFilters } from "@/components/admin/RegistrationFilters";
 import { RegistrationTable } from "@/components/admin/RegistrationTable";
 import { EditRegistrationModal } from "@/components/admin/EditRegistrationModal";
+import { AddRegistrationModal } from "@/components/admin/AddRegistrationModal";
 import { Pagination } from "@/components/admin/Pagination";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
@@ -44,8 +45,10 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [state, setState] = useState<FetchState>({ data: null, loading: true, error: null });
   const [editing, setEditing] = useState<RegistrationOutput | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [resendFeedback, setResendFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [addFeedback, setAddFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const loadData = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
@@ -122,6 +125,21 @@ export default function AdminRegistrationsPage(): React.ReactElement {
     setEditing(registration);
   }, []);
 
+  const handleOpenAdd = useCallback(() => {
+    setAddFeedback(null);
+    setIsAdding(true);
+  }, []);
+
+  const handleCloseAdd = useCallback(() => {
+    setIsAdding(false);
+  }, []);
+
+  const handleAddCreated = useCallback(async () => {
+    setIsAdding(false);
+    setAddFeedback({ type: "success", message: t("addSuccess") });
+    await loadData();
+  }, [loadData, t]);
+
   const handleSave = useCallback(
     async (
       id: string,
@@ -147,28 +165,51 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">{t("title")}</h1>
-        <a
-          href="/api/admin/registrations/export"
-          download
-          className="group inline-flex items-center gap-2 rounded-lg border border-border-dark bg-dark-secondary/60 px-5 py-2 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/5 hover:text-white"
-        >
-          <svg
-            className="h-4 w-4 transition-transform group-hover:-translate-y-0.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleOpenAdd}
+            className="group inline-flex items-center gap-2 rounded-lg border-2 border-accent bg-accent px-5 py-2 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-300 hover:bg-transparent hover:text-accent hover:shadow-lg hover:shadow-accent/20"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"
-            />
-          </svg>
-          {t("downloadCsv")}
-        </a>
+            <svg
+              className="h-4 w-4 transition-transform group-hover:rotate-90"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            {t("addReservation")}
+          </button>
+          <a
+            href="/api/admin/registrations/export"
+            download
+            className="group inline-flex items-center gap-2 rounded-lg border border-border-dark bg-dark-secondary/60 px-5 py-2 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/5 hover:text-white"
+          >
+            <svg
+              className="h-4 w-4 transition-transform group-hover:-translate-y-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"
+              />
+            </svg>
+            {t("downloadCsv")}
+          </a>
+        </div>
       </div>
 
       <div className="mt-6">
@@ -200,6 +241,19 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           </div>
         )}
 
+        {addFeedback && (
+          <div
+            className={`mb-4 rounded-md border p-4 text-sm ${
+              addFeedback.type === "success"
+                ? "border-green-700 bg-green-900/40 text-green-400"
+                : "border-red-700 bg-red-900/40 text-red-400"
+            }`}
+            role="alert"
+          >
+            {addFeedback.message}
+          </div>
+        )}
+
         {state.loading ? (
           <div className="py-12 text-center text-sm text-admin-text-secondary">{t("loading")}</div>
         ) : state.data ? (
@@ -223,6 +277,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
       </div>
 
       {editing && <EditRegistrationModal registration={editing} onSave={handleSave} onClose={() => setEditing(null)} />}
+      {isAdding && <AddRegistrationModal onClose={handleCloseAdd} onCreated={handleAddCreated} />}
     </div>
   );
 }

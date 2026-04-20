@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ValidationError } from "@/lib/errors/app-errors";
 
 // ── Mock dependencies ──
@@ -93,6 +93,12 @@ describe("registerGuest", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("BASE_URL", "https://example.com");
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-01T10:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should create registration, generate token, store hash, send email, and return registrationId", async () => {
@@ -271,6 +277,12 @@ describe("registerGuest validation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("BASE_URL", "https://example.com");
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-01T10:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should throw ValidationError when name is empty", async () => {
@@ -378,6 +390,84 @@ describe("registerGuest validation", () => {
       expect(typeof validationError.fields).toBe("object");
       expect(Object.keys(validationError.fields).length).toBeGreaterThan(0);
     }
+    expect(mockCreateRegistration).not.toHaveBeenCalled();
+  });
+});
+
+describe("registerGuest bypassDeadline option", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv("BASE_URL", "https://example.com");
+    // - freeze system time to one day past the registration deadline
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-21T10:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("should throw ValidationError past the deadline when bypassDeadline is not provided", async () => {
+    // given
+    setupSuccessMocks();
+
+    // when
+    const { registerGuest } = await import("@/lib/usecases/register");
+
+    // then
+    await expect(registerGuest(validInput)).rejects.toThrow(ValidationError);
+    await expect(registerGuest(validInput)).rejects.toMatchObject({
+      message: "Registration is closed",
+    });
+    expect(mockCreateRegistration).not.toHaveBeenCalled();
+  });
+
+  it("should throw ValidationError past the deadline when bypassDeadline is false", async () => {
+    // given
+    setupSuccessMocks();
+
+    // when
+    const { registerGuest } = await import("@/lib/usecases/register");
+
+    // then
+    await expect(
+      registerGuest(validInput, { bypassDeadline: false }),
+    ).rejects.toThrow(ValidationError);
+    expect(mockCreateRegistration).not.toHaveBeenCalled();
+  });
+
+  it("should create the registration past the deadline when bypassDeadline is true", async () => {
+    // given
+    setupSuccessMocks();
+
+    // when
+    const { registerGuest } = await import("@/lib/usecases/register");
+    const result = await registerGuest(validInput, { bypassDeadline: true });
+
+    // then
+    expect(result).toEqual({ registrationId: "reg-1" });
+    expect(mockCreateRegistration).toHaveBeenCalledOnce();
+    expect(mockCreateToken).toHaveBeenCalledOnce();
+    expect(mockSendManageLink).toHaveBeenCalledOnce();
+  });
+
+  it("should still validate input when bypassDeadline is true (invalid payload still rejected)", async () => {
+    // given
+    setupSuccessMocks();
+    const invalid = { ...validInput, email: "not-an-email" };
+
+    // when
+    const { registerGuest } = await import("@/lib/usecases/register");
+
+    // then
+    await expect(
+      registerGuest(invalid, { bypassDeadline: true }),
+    ).rejects.toThrow(ValidationError);
+    await expect(
+      registerGuest(invalid, { bypassDeadline: true }),
+    ).rejects.toMatchObject({
+      fields: expect.objectContaining({ email: expect.any(String) }),
+    });
     expect(mockCreateRegistration).not.toHaveBeenCalled();
   });
 });

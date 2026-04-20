@@ -30,9 +30,11 @@ export async function POST(
       throw new RateLimitError(retryAfter);
     }
 
-    // Parse body and delegate to use case
+    // Parse body and delegate to use case.
+    // The public endpoint never bypasses the registration deadline;
+    // the flag is made explicit so the invariant is visible at the call site.
     const body: unknown = await request.json();
-    const result = await registerGuest(body);
+    const result = await registerGuest(body, { bypassDeadline: false });
 
     return successResponse(
       { registrationId: result.registrationId },

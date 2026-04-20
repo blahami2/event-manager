@@ -20,6 +20,18 @@ interface RegisterGuestResult {
 }
 
 /**
+ * Optional behaviour flags for {@link registerGuest}.
+ *
+ * `bypassDeadline` may ONLY be set server-side by admin-authenticated
+ * handlers. The public registration endpoint MUST never forward this
+ * flag from client input; doing so would let a guest register past the
+ * published cut-off.
+ */
+export interface RegisterGuestOptions {
+  readonly bypassDeadline?: boolean;
+}
+
+/**
  * Register a new guest for the event.
  *
  * Orchestrates the full registration flow:
@@ -30,13 +42,23 @@ interface RegisterGuestResult {
  * 5. Send the manage link (with raw token) via email
  * 6. Return only the registration ID
  *
- * @throws {ValidationError} when input fails Zod validation
+ * When `options.bypassDeadline` is `true`, the deadline check at step 0
+ * is skipped. This path is reserved for admin-authenticated callers who
+ * legitimately need to register guests after the public cut-off; all
+ * other steps (input validation, token generation, email delivery) are
+ * unchanged.
+ *
+ * @throws {ValidationError} when input fails Zod validation, or when the
+ *   deadline has passed and the caller did not opt into bypassing it.
  */
 export async function registerGuest(
   input: unknown,
+  options: RegisterGuestOptions = {},
 ): Promise<RegisterGuestResult> {
-  // Step 0: Check deadline
-  if (new Date() > REGISTRATION_DEADLINE) {
+  const bypassDeadline = options.bypassDeadline === true;
+
+  // Step 0: Check deadline (skipped for admin-authorised bypass).
+  if (!bypassDeadline && new Date() > REGISTRATION_DEADLINE) {
     throw new ValidationError("Registration is closed", {});
   }
 

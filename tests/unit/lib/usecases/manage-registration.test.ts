@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NotFoundError, ValidationError } from "@/lib/errors/app-errors";
 
 // ── Mock dependencies ──
@@ -187,6 +187,12 @@ describe("updateRegistrationByToken", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv("BASE_URL", "https://example.com");
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-01T10:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should validate input, update registration, rotate token, send email, and return new manage URL", async () => {

@@ -3,7 +3,7 @@
 ## Description
 
 An event manager project                
-# birthday-celebration
+# event-manager
 
 An event manager project
 

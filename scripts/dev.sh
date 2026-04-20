@@ -18,7 +18,7 @@ echo "Starting Supabase local stack..."
 if npx supabase status > /dev/null 2>&1; then
   echo "Supabase is already running."
 else
-  npx -y supabase start
+  npx -y supabase start -x edge-runtime
 fi
 
 # Extract credentials
