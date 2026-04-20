@@ -7,22 +7,22 @@ export interface BadgeProps {
 }
 
 /**
- * Semantic badge primitive. Colours map to semantic tokens rather than
- * specific hues so the design system can evolve centrally.
+ * Semantic badge primitive. Replaces the hardcoded green/red status pills
+ * scattered across admin pages. Colours map to semantic tokens rather than
+ * specific hues so Tier B's token overhaul flows through automatically.
  */
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   success:
-    "bg-[color:var(--color-success)]/12 text-[color:var(--color-success)] ring-1 ring-inset ring-[color:var(--color-success)]/25",
-  warning:
-    "bg-[color:var(--color-warning)]/12 text-[color:var(--color-warning)] ring-1 ring-inset ring-[color:var(--color-warning)]/25",
+    "bg-admin-success/15 text-admin-success border border-admin-success/30",
+  warning: "bg-amber-500/15 text-amber-400 border border-amber-500/30",
   danger:
-    "bg-[color:var(--color-danger)]/12 text-[color:var(--color-danger)] ring-1 ring-inset ring-[color:var(--color-danger)]/25",
+    "bg-admin-danger/15 text-admin-danger border border-admin-danger/30",
   neutral:
-    "bg-[color:var(--color-surface-3)] text-[color:var(--color-text-secondary)] ring-1 ring-inset ring-[color:var(--color-border)]",
+    "bg-admin-hover text-admin-text-secondary border border-border-dark",
 };
 
 const BASE_CLASSES =
-  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium tracking-wide";
+  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold";
 
 export function Badge({
   variant = "neutral",

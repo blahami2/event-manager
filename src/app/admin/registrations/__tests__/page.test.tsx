@@ -36,9 +36,6 @@ vi.mock("@/components/admin/EditRegistrationModal", () => ({
   EditRegistrationModal: () => <div data-testid="edit-modal-stub" />,
 }));
 
-// The page uses useToast(); mount the real ToastProvider via a helper render.
-import { ToastProvider } from "@/components/ui/admin";
-
 const fetchMock = vi.fn();
 
 beforeEach(() => {
@@ -71,11 +68,7 @@ describe("AdminRegistrationsPage — Add reservation", () => {
     mockListResponse(0);
 
     // when
-    render(
-      <ToastProvider>
-        <AdminRegistrationsPage />
-      </ToastProvider>,
-    );
+    render(<AdminRegistrationsPage />);
 
     // then
     await waitFor(() => {
@@ -86,11 +79,7 @@ describe("AdminRegistrationsPage — Add reservation", () => {
   it("should open the AddRegistrationModal when 'Add reservation' button is clicked", async () => {
     // given
     mockListResponse(0);
-    render(
-      <ToastProvider>
-        <AdminRegistrationsPage />
-      </ToastProvider>,
-    );
+    render(<AdminRegistrationsPage />);
     await waitFor(() => screen.getByRole("button", { name: "admin.registrations.addReservation" }));
 
     // when
@@ -103,11 +92,7 @@ describe("AdminRegistrationsPage — Add reservation", () => {
   it("should close the AddRegistrationModal when cancel is clicked inside it", async () => {
     // given
     mockListResponse(0);
-    render(
-      <ToastProvider>
-        <AdminRegistrationsPage />
-      </ToastProvider>,
-    );
+    render(<AdminRegistrationsPage />);
     await waitFor(() => screen.getByRole("button", { name: "admin.registrations.addReservation" }));
     fireEvent.click(screen.getByRole("button", { name: "admin.registrations.addReservation" }));
     expect(screen.getByRole("dialog")).toBeDefined();
@@ -127,11 +112,7 @@ describe("AdminRegistrationsPage — Add reservation", () => {
     const user = userEvent.setup();
     // - initial list fetch
     mockListResponse(0);
-    render(
-      <ToastProvider>
-        <AdminRegistrationsPage />
-      </ToastProvider>,
-    );
+    render(<AdminRegistrationsPage />);
     await waitFor(() => screen.getByRole("button", { name: "admin.registrations.addReservation" }));
     fetchMock.mockClear();
 

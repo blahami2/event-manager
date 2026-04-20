@@ -11,11 +11,6 @@ const navItems = [
   { href: "/admin/settings", labelKey: "settings" },
 ] as const;
 
-/**
- * Admin top navigation. Sticky, hairline-bordered, with a clear active
- * state (accent-coloured pill). Uses semantic tokens throughout so the
- * look changes in one place.
- */
 export function AdminNav(): React.ReactElement {
   const router = useRouter();
   const pathname = usePathname();
@@ -29,71 +24,50 @@ export function AdminNav(): React.ReactElement {
 
   return (
     <nav
-      className="sticky top-0 z-40 border-b border-[color:var(--color-border)] bg-[color:var(--color-surface-0)]/85 backdrop-blur-xl"
+      className="sticky top-0 z-40 border-b border-border-dark bg-dark-primary/80 font-body text-white shadow-sm backdrop-blur-md transition-all"
       aria-label="Admin navigation"
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-6">
-          <Link
-            href="/admin"
-            className="font-[var(--font-heading)] text-[15px] font-semibold uppercase tracking-[0.25em] text-[color:var(--color-text-primary)]"
-          >
-            <span className="text-[color:var(--color-accent)]">/</span>{" "}
-            {t("title")}
-          </Link>
-          <div
-            className="h-5 w-px bg-[color:var(--color-border)]"
-            aria-hidden="true"
-          />
-          <div className="flex gap-1">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center gap-8">
+            <span className="text-xl font-heading tracking-widest text-white">{t("title")}</span>
+            <div className="h-6 w-px bg-border-dark/60" aria-hidden="true" />
+            <div className="flex gap-2">
+              {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  aria-current={isActive ? "page" : undefined}
-                  className={[
-                    "relative rounded-[var(--radius-sm)] px-3 py-1.5 text-sm font-medium",
-                    "transition-colors duration-[var(--motion-fast)]",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)]/60",
-                    isActive
-                      ? "text-[color:var(--color-text-primary)]"
-                      : "text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-surface-2)] hover:text-[color:var(--color-text-primary)]",
-                  ].join(" ")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                    pathname === item.href
+                      ? "bg-accent/10 text-accent shadow-inner ring-1 ring-accent/20"
+                      : "text-admin-text-secondary hover:bg-white/5 hover:text-white"
+                  }`}
                 >
                   {t(item.labelKey)}
-                  {isActive ? (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-3 -bottom-[13px] h-[2px] bg-[color:var(--color-accent)]"
-                    />
-                  ) : null}
                 </Link>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-1.5 text-sm font-medium text-[color:var(--color-text-secondary)] transition-colors duration-[var(--motion-fast)] hover:bg-[color:var(--color-surface-2)] hover:text-[color:var(--color-text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-border-strong)]"
-        >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
+          <button
+            onClick={handleLogout}
+            className="group flex items-center gap-2 rounded-lg border border-border-dark/80 bg-white/5 px-4 py-2 text-sm font-medium text-admin-text-secondary backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/10 hover:text-white"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.75}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-          </svg>
-          {t("logout")}
-        </button>
+            <svg
+              className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+            {t("logout")}
+          </button>
+        </div>
       </div>
     </nav>
   );

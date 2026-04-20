@@ -186,7 +186,7 @@ export function Modal({
     <div
       data-testid="modal-backdrop"
       onClick={handleBackdropClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-backdrop-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
     >
       <div
         ref={panelRef}
@@ -198,19 +198,18 @@ export function Modal({
         onClick={(event) => event.stopPropagation()}
         className={[
           "w-full overflow-hidden rounded-xl",
-          "border border-[color:var(--color-border)] bg-[color:var(--color-surface-2)]",
-          "shadow-[var(--shadow-lg)]",
-          "animate-modal-in focus:outline-none",
+          "border border-border-dark bg-dark-secondary shadow-2xl",
+          "focus:outline-none",
           SIZE_CLASSES[size],
           className,
         ]
           .filter(Boolean)
           .join(" ")}
       >
-        <div className="flex items-center justify-between gap-4 border-b border-[color:var(--color-border)]/70 px-6 py-4">
+        <div className="flex items-center justify-between gap-4 border-b border-border-dark/60 px-5 py-4">
           <h2
             id={titleId}
-            className="text-[15px] font-semibold tracking-tight text-[color:var(--color-text-primary)]"
+            className="text-base font-semibold text-admin-text-primary"
           >
             {title}
           </h2>
@@ -218,7 +217,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1.5 text-[color:var(--color-text-secondary)] transition-colors duration-[var(--motion-fast)] hover:bg-[color:var(--color-surface-3)] hover:text-[color:var(--color-text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)]/70"
+            className="rounded-md p-1 text-admin-text-secondary transition-colors hover:bg-admin-hover hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
           >
             <svg
               className="h-4 w-4"
@@ -241,7 +240,7 @@ export function Modal({
             {description}
           </span>
         ) : null}
-        <div className="p-6">{children}</div>
+        <div className="p-5">{children}</div>
       </div>
     </div>
   );

@@ -33,37 +33,33 @@ export interface ButtonProps
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    "bg-[color:var(--color-accent)] text-white border border-transparent " +
-    "hover:brightness-110 active:brightness-95 " +
-    "focus-visible:ring-[color:var(--color-accent)]/70",
+    "bg-accent text-white border border-transparent " +
+    "hover:bg-accent/90 active:bg-accent/80 " +
+    "focus-visible:ring-accent/70",
   secondary:
-    "bg-[color:var(--color-surface-2)] text-[color:var(--color-text-primary)] " +
-    "border border-[color:var(--color-border)] " +
-    "hover:bg-[color:var(--color-surface-3)] hover:border-[color:var(--color-border-strong)] " +
-    "active:bg-[color:var(--color-surface-2)] " +
-    "focus-visible:ring-[color:var(--color-border-strong)]",
+    "bg-dark-secondary text-admin-text-primary border border-border-dark " +
+    "hover:bg-admin-hover hover:text-white active:bg-dark-secondary " +
+    "focus-visible:ring-border-dark",
   ghost:
-    "bg-transparent text-[color:var(--color-text-secondary)] border border-transparent " +
-    "hover:bg-[color:var(--color-surface-3)] hover:text-[color:var(--color-text-primary)] " +
-    "active:bg-[color:var(--color-surface-2)] " +
-    "focus-visible:ring-[color:var(--color-border-strong)]",
+    "bg-transparent text-admin-text-secondary border border-transparent " +
+    "hover:bg-admin-hover hover:text-white active:bg-dark-secondary " +
+    "focus-visible:ring-border-dark",
   danger:
-    "bg-[color:var(--color-danger)] text-white border border-transparent " +
-    "hover:brightness-110 active:brightness-95 " +
-    "focus-visible:ring-[color:var(--color-danger)]/70",
+    "bg-admin-danger text-white border border-transparent " +
+    "hover:bg-admin-danger/90 active:bg-admin-danger/80 " +
+    "focus-visible:ring-admin-danger/70",
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: "px-3 py-1.5 text-xs gap-1.5 rounded-[var(--radius-sm)]",
-  md: "px-4 py-2 text-sm gap-2 rounded-[var(--radius-md)]",
+  sm: "px-3 py-1.5 text-xs gap-1.5",
+  md: "px-4 py-2 text-sm gap-2",
 };
 
 const BASE_CLASSES =
-  "inline-flex items-center justify-center font-medium tracking-tight " +
-  "transition-[background-color,border-color,color,filter] " +
-  "duration-[var(--motion-fast)] ease-[var(--ease-standard)] " +
+  "inline-flex items-center justify-center rounded-md font-medium " +
+  "transition-colors duration-150 " +
   "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 " +
-  "focus-visible:ring-offset-[color:var(--color-surface-0)] " +
+  "focus-visible:ring-offset-dark-primary " +
   "disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none";
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
