@@ -203,6 +203,8 @@
       "addReservation": "Add reservation",
       "addSuccess": "Reservation added successfully.",
       "updateSuccess": "Registration updated.",
+      "reconfirmSuccess": "Registration reactivated.",
+      "reconfirmError": "Failed to reactivate registration.",
       "drawer": {
         "eyebrow": "Reservation"
       },
@@ -273,7 +275,10 @@
         "accommodation": "Accommodation",
         "adultsCount": "Adults",
         "childrenCount": "Children",
-        "notes": "Notes"
+        "notes": "Notes",
+        "cancelledStatus": "Cancelled",
+        "cancelledNotice": "This registration is currently cancelled.",
+        "reactivate": "Reactivate"
       },
       "add": {
         "title": "Add reservation",

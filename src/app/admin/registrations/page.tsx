@@ -166,6 +166,26 @@ export default function AdminRegistrationsPage(): React.ReactElement {
     [refreshAll, t, toast],
   );
 
+  const handleReconfirm = useCallback(
+    async (registrationId: string) => {
+      try {
+        const res = await fetch("/api/admin/registrations/reconfirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ registrationId }),
+        });
+        if (!res.ok) throw new Error("Failed to reconfirm registration");
+        setEditing(null);
+        setDrawer(null);
+        toast.success(t("reconfirmSuccess"));
+        await refreshAll();
+      } catch {
+        toast.error(t("reconfirmError"));
+      }
+    },
+    [refreshAll, t, toast],
+  );
+
   const handleResendEmail = useCallback(
     async (registrationId: string) => {
       setResendingId(registrationId);
@@ -381,6 +401,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         <EditRegistrationModal
           registration={editing}
           onSave={handleSave}
+          onReconfirm={handleReconfirm}
           onClose={() => setEditing(null)}
         />
       )}
@@ -396,6 +417,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         onEdit={handleEdit}
         onCancel={handleCancel}
         onResendEmail={handleResendEmail}
+        onReconfirm={handleReconfirm}
         resendingId={resendingId}
       />
       <BulkActionBar

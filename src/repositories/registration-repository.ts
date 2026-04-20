@@ -116,6 +116,17 @@ export async function cancelRegistration(
   return toOutput(row);
 }
 
+/** Reactivate a cancelled registration (sets status back to CONFIRMED). */
+export async function reconfirmRegistration(
+  id: string,
+): Promise<RegistrationOutput> {
+  const row = await prisma.registration.update({
+    where: { id },
+    data: { status: RegistrationStatus.CONFIRMED },
+  });
+  return toOutput(row);
+}
+
 /** List registrations with optional filtering and pagination. */
 export async function listRegistrations(
   filters: RegistrationFilters,

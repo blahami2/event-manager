@@ -2,6 +2,7 @@ import {
   listRegistrations,
   findRegistrationById,
   cancelRegistration,
+  reconfirmRegistration,
   updateRegistration,
 } from "@/repositories/registration-repository";
 import { revokeAllTokensForRegistration, createToken } from "@/repositories/token-repository";
@@ -79,6 +80,34 @@ export async function adminCancelRegistration(registrationId: string, adminId: s
   logger.info("Admin cancelled registration", {
     adminUserId: adminId,
     action: "cancel_registration",
+    targetId: registrationId,
+  });
+
+  return result;
+}
+
+/**
+ * Admin-reconfirm a previously cancelled registration. Logs the action.
+ *
+ * @throws {NotFoundError} when the registration doesn't exist or is not
+ *   currently cancelled (so a no-op reconfirm on a confirmed record is
+ *   treated as a bad request instead of silently succeeding).
+ */
+export async function adminReconfirmRegistration(
+  registrationId: string,
+  adminId: string,
+): Promise<RegistrationOutput> {
+  const existing = await findRegistrationById(registrationId);
+
+  if (!existing || existing.status !== RegistrationStatus.CANCELLED) {
+    throw new NotFoundError("Registration");
+  }
+
+  const result = await reconfirmRegistration(registrationId);
+
+  logger.info("Admin reconfirmed registration", {
+    adminUserId: adminId,
+    action: "reconfirm_registration",
     targetId: registrationId,
   });
 

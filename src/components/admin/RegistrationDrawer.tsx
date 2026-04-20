@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@/i18n/labels";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
-import { Badge, Button } from "@/components/ui/admin";
+import { Badge, Button, ConfirmDialog } from "@/components/ui/admin";
 
 export interface RegistrationDrawerProps {
   readonly registration: RegistrationOutput | null;
@@ -18,6 +18,7 @@ export interface RegistrationDrawerProps {
   readonly onEdit: (registration: RegistrationOutput) => void;
   readonly onCancel: (registrationId: string) => void;
   readonly onResendEmail: (registrationId: string) => void;
+  readonly onReconfirm?: (registrationId: string) => void;
   readonly resendingId?: string | null;
 }
 
@@ -43,12 +44,15 @@ export function RegistrationDrawer({
   onEdit,
   onCancel,
   onResendEmail,
+  onReconfirm,
   resendingId,
 }: RegistrationDrawerProps): React.ReactElement | null {
   const t = useTranslations("admin.registrations");
   const tTable = useTranslations("admin.registrations.table");
+  const tEdit = useTranslations("admin.registrations.edit");
   const tEnums = useTranslations();
   const panelRef = useRef<HTMLDivElement>(null);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
 
   useEffect(() => {
     if (!registration) return;
@@ -173,15 +177,29 @@ export function RegistrationDrawer({
         </div>
 
         <div className="flex items-center justify-between gap-2 border-t border-border-subtle bg-surface-base/60 px-6 py-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onCancel(registration.id)}
-            disabled={isCancelled}
-            className="text-danger hover:bg-danger-muted hover:text-danger"
-          >
-            {tTable("cancel")}
-          </Button>
+          {isCancelled ? (
+            onReconfirm ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onReconfirm(registration.id)}
+                className="text-success hover:bg-success-muted hover:text-success"
+              >
+                {tEdit("reactivate")}
+              </Button>
+            ) : (
+              <span />
+            )
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setConfirmingCancel(true)}
+              className="text-danger hover:bg-danger-muted hover:text-danger"
+            >
+              {tTable("cancel")}
+            </Button>
+          )}
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
@@ -202,6 +220,19 @@ export function RegistrationDrawer({
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmingCancel}
+        title={tTable("confirmCancel")}
+        message={tTable("confirmCancel")}
+        confirmLabel={tTable("yes")}
+        dismissLabel={tTable("no")}
+        variant="danger"
+        onConfirm={() => {
+          setConfirmingCancel(false);
+          onCancel(registration.id);
+        }}
+        onDismiss={() => setConfirmingCancel(false)}
+      />
     </div>
   );
 

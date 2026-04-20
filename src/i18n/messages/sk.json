@@ -203,6 +203,8 @@
       "addReservation": "Pridať rezerváciu",
       "addSuccess": "Rezervácia bola úspešne pridaná.",
       "updateSuccess": "Registrácia aktualizovaná.",
+      "reconfirmSuccess": "Registrácia obnovená.",
+      "reconfirmError": "Nepodarilo sa obnoviť registráciu.",
       "drawer": {
         "eyebrow": "Rezervácia"
       },
@@ -273,7 +275,10 @@
         "accommodation": "Ubytovanie",
         "adultsCount": "Dospelí",
         "childrenCount": "Deti",
-        "notes": "Poznámky"
+        "notes": "Poznámky",
+        "cancelledStatus": "Zrušené",
+        "cancelledNotice": "Táto registrácia je aktuálne zrušená.",
+        "reactivate": "Obnoviť"
       },
       "add": {
         "title": "Pridať rezerváciu",
