@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 import { locales, defaultLocale } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
 import { LOCALE_COOKIE } from "@/i18n/get-locale";
@@ -31,7 +37,14 @@ function getLocaleFromCookie(): Locale {
 }
 
 export function LanguageSwitcher(): React.ReactElement {
-  const [currentLocale] = useState<Locale>(() => getLocaleFromCookie());
+  // Read the cookie via useSyncExternalStore so SSR gets the default locale
+  // and the client gets the real cookie-backed value without triggering a
+  // "setState in effect" lint warning.
+  const currentLocale = useSyncExternalStore<Locale>(
+    () => () => undefined,
+    () => getLocaleFromCookie(),
+    () => defaultLocale,
+  );
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 

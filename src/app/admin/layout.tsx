@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { ToastProvider } from "@/components/ui/admin";
 
 export const metadata: Metadata = {
   title: "Admin | Birthday Celebration",
@@ -13,10 +14,12 @@ export default function AdminLayout({
 }>): React.ReactElement {
   return (
     <div className="min-h-screen bg-surface-base font-body text-text-primary antialiased">
-      <AdminNav />
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {children}
-      </main>
+      <ToastProvider>
+        <AdminNav />
+        <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {children}
+        </main>
+      </ToastProvider>
     </div>
   );
 }

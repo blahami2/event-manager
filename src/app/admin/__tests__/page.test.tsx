@@ -1,99 +1,25 @@
 /**
- * @vitest-environment jsdom
+ * @vitest-environment node
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 
-// Mock next-intl/server
-vi.mock("next-intl/server", () => ({
-  getTranslations: () => Promise.resolve((key: string) => key),
+const mockRedirect = vi.hoisted(() => vi.fn((url: string) => {
+  const err = new Error(`NEXT_REDIRECT:${url}`);
+  (err as unknown as { digest?: string }).digest = `NEXT_REDIRECT;${url}`;
+  throw err;
 }));
 
-// Mock admin-actions use case
-const mockGetRegistrationStats = vi.fn();
-vi.mock("@/lib/usecases/admin-actions", () => ({
-  getRegistrationStats: (...args: unknown[]) => mockGetRegistrationStats(...args),
+vi.mock("next/navigation", () => ({
+  redirect: mockRedirect,
 }));
 
-// Must import after mocks
-import AdminDashboardPage from "../page";
+import AdminIndexPage from "../page";
 
-describe("AdminDashboardPage", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should render dashboard heading when page loads", async () => {
-    mockGetRegistrationStats.mockResolvedValue({
-      total: 10,
-      confirmed: 7,
-      cancelled: 3,
-      totalAdults: 20,
-      totalChildren: 5,
-    });
-
-    const page = await AdminDashboardPage();
-    render(page);
-
-    expect(screen.getByText("title")).toBeDefined();
-  });
-
-  it("should display registration statistics when stats loaded", async () => {
-    mockGetRegistrationStats.mockResolvedValue({
-      total: 15,
-      confirmed: 10,
-      cancelled: 3,
-      totalAdults: 25,
-      totalChildren: 7,
-    });
-
-    const page = await AdminDashboardPage();
-    render(page);
-
-    expect(screen.getByText("15")).toBeDefined();
-    expect(screen.getByText("10")).toBeDefined();
-    expect(screen.getByText("3")).toBeDefined();
-    expect(screen.getByText("25")).toBeDefined();
-    expect(screen.getByText("7")).toBeDefined();
-  });
-
-  it("should display translated stat labels when page loads", async () => {
-    mockGetRegistrationStats.mockResolvedValue({
-      total: 0,
-      confirmed: 0,
-      cancelled: 0,
-      totalAdults: 0,
-      totalChildren: 0,
-    });
-
-    const page = await AdminDashboardPage();
-    render(page);
-
-    expect(screen.getByText("totalRegistrations")).toBeDefined();
-    expect(screen.getByText("confirmed")).toBeDefined();
-    expect(screen.getByText("cancelled")).toBeDefined();
-    expect(screen.getByText("totalAdults")).toBeDefined();
-    expect(screen.getByText("totalChildren")).toBeDefined();
-  });
-
-  it("should render quick links when page loads", async () => {
-    mockGetRegistrationStats.mockResolvedValue({
-      total: 0,
-      confirmed: 0,
-      cancelled: 0,
-      totalAdults: 0,
-      totalChildren: 0,
-    });
-
-    const page = await AdminDashboardPage();
-    render(page);
-
-    const regLink = screen.getByRole("link", { name: "viewRegistrations" });
-    expect(regLink).toBeDefined();
-    expect(regLink.getAttribute("href")).toBe("/admin/registrations");
-
-    const exportLink = screen.getByRole("link", { name: "exportCsv" });
-    expect(exportLink).toBeDefined();
-    expect(exportLink.getAttribute("href")).toBe("/api/admin/registrations/export");
+describe("AdminIndexPage", () => {
+  it("redirects to /admin/registrations (dashboard retired)", () => {
+    // Since the dashboard was folded into the registrations page, this
+    // route should silently forward so bookmarks still work.
+    expect(() => AdminIndexPage()).toThrow(/NEXT_REDIRECT/);
+    expect(mockRedirect).toHaveBeenCalledWith("/admin/registrations");
   });
 });

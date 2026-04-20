@@ -16,14 +16,22 @@ export interface RegistrationTableProps {
   readonly onEdit: (registration: RegistrationOutput) => void;
   readonly onCancel: (registrationId: string) => void;
   readonly onResendEmail?: (registrationId: string) => void;
+  readonly onRowClick?: (registration: RegistrationOutput) => void;
   readonly resendingId?: string | null;
+  readonly selectedIds?: ReadonlySet<string>;
+  readonly onToggleSelect?: (id: string) => void;
+  readonly onToggleSelectAll?: () => void;
+  readonly searchQuery?: string;
 }
 
 /** Character threshold above which the notes cell shows an expand affordance. */
 const NOTES_PREVIEW_CHARS = 60;
 
 function formatDate(date: Date): string {
-  return new Date(date).toLocaleDateString(undefined, {
+  // Use a fixed locale so the SSR-rendered string matches the client-side
+  // hydration; the admin UI is organizer-facing so a single locale for
+  // dates is acceptable.
+  return new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -42,6 +50,36 @@ function StatusBadge({
       {label}
     </Badge>
   );
+}
+
+/**
+ * Highlight instances of `query` in `text`. Case-insensitive, whole-match
+ * substrings only (no regex). Renders highlighted spans with a subtle accent.
+ */
+function highlight(text: string, query: string): React.ReactNode {
+  if (!query) return text;
+  const lower = text.toLowerCase();
+  const needle = query.toLowerCase();
+  if (!lower.includes(needle)) return text;
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  let idx = lower.indexOf(needle);
+  let key = 0;
+  while (idx !== -1) {
+    if (idx > cursor) parts.push(text.slice(cursor, idx));
+    parts.push(
+      <mark
+        key={key++}
+        className="rounded-sm bg-accent-muted px-0.5 text-text-primary"
+      >
+        {text.slice(idx, idx + needle.length)}
+      </mark>,
+    );
+    cursor = idx + needle.length;
+    idx = lower.indexOf(needle, cursor);
+  }
+  if (cursor < text.length) parts.push(text.slice(cursor));
+  return parts;
 }
 
 function NotesCell({
@@ -72,7 +110,10 @@ function NotesCell({
       </span>
       <button
         type="button"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setExpanded((v) => !v);
+        }}
         className="text-xs font-medium text-accent transition-colors duration-150 hover:text-accent-hover focus:outline-none focus-visible:underline"
         aria-expanded={expanded}
       >
@@ -92,12 +133,19 @@ export function RegistrationTable({
   onEdit,
   onCancel,
   onResendEmail,
+  onRowClick,
   resendingId,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
+  searchQuery = "",
 }: RegistrationTableProps): React.ReactElement {
   const t = useTranslations("admin.registrations.table");
   const tReg = useTranslations("admin.registrations");
   const tEnums = useTranslations();
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+
+  const hasSelection = !!selectedIds && !!onToggleSelect && !!onToggleSelectAll;
 
   const handleCancelClick = useCallback((id: string) => {
     setConfirmAction({ type: "cancel", id });
@@ -156,6 +204,13 @@ export function RegistrationTable({
   const confirmVariant: "danger" | "info" =
     confirmAction?.type === "cancel" ? "danger" : "info";
 
+  const allSelected =
+    hasSelection && registrations.every((r) => selectedIds.has(r.id));
+  const someSelected =
+    hasSelection &&
+    !allSelected &&
+    registrations.some((r) => selectedIds.has(r.id));
+
   return (
     <>
       <ConfirmDialog
@@ -173,50 +228,59 @@ export function RegistrationTable({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-default bg-surface-raised/80">
-                <th scope="col" className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("name")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("stay")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("adults")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("children")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("accommodation")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("notes")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("status")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("created")}
-                </th>
-                <th scope="col" className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
-                  {t("actions")}
-                </th>
+                {hasSelection ? (
+                  <th scope="col" className="w-10 px-4 py-3 text-left">
+                    <IndeterminateCheckbox
+                      checked={allSelected}
+                      indeterminate={someSelected}
+                      onChange={onToggleSelectAll}
+                      ariaLabel={t("selectAll")}
+                    />
+                  </th>
+                ) : null}
+                <HeaderCell>{t("name")}</HeaderCell>
+                <HeaderCell>{t("stay")}</HeaderCell>
+                <HeaderCell align="right">{t("adults")}</HeaderCell>
+                <HeaderCell align="right">{t("children")}</HeaderCell>
+                <HeaderCell>{t("accommodation")}</HeaderCell>
+                <HeaderCell>{t("notes")}</HeaderCell>
+                <HeaderCell>{t("status")}</HeaderCell>
+                <HeaderCell>{t("created")}</HeaderCell>
+                <HeaderCell align="right">{t("actions")}</HeaderCell>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
               {registrations.map((reg) => {
                 const isCancelled = reg.status === RegistrationStatus.CANCELLED;
+                const isSelected = hasSelection && selectedIds.has(reg.id);
                 return (
                   <tr
                     key={reg.id}
-                    className="group transition-colors duration-150 hover:bg-admin-hover/60"
+                    data-selected={isSelected || undefined}
+                    onClick={onRowClick ? () => onRowClick(reg) : undefined}
+                    className={`group transition-colors duration-150 ${
+                      onRowClick ? "cursor-pointer" : ""
+                    } ${isSelected ? "bg-accent-muted/40" : "hover:bg-admin-hover/60"}`}
                   >
+                    {hasSelection ? (
+                      <td
+                        className="w-10 px-4 py-3 align-top"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={() => onToggleSelect(reg.id)}
+                          ariaLabel={t("selectRow", { name: reg.name })}
+                        />
+                      </td>
+                    ) : null}
                     <td className="min-w-[200px] px-4 py-3 align-top">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-text-primary">
-                          {reg.name}
+                          {highlight(reg.name, searchQuery)}
                         </span>
                         <span className="mt-0.5 break-all font-mono text-xs text-text-tertiary">
-                          {reg.email}
+                          {highlight(reg.email, searchQuery)}
                         </span>
                       </div>
                     </td>
@@ -248,7 +312,10 @@ export function RegistrationTable({
                     <td className="whitespace-nowrap px-4 py-3 align-top font-mono text-xs tabular-nums text-text-tertiary">
                       {formatDate(reg.createdAt)}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-right align-top">
+                    <td
+                      className="whitespace-nowrap px-4 py-3 text-right align-top"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
@@ -288,7 +355,7 @@ export function RegistrationTable({
                               onClick={() => handleCancelClick(reg.id)}
                               aria-label={t("cancel")}
                               title={t("cancel")}
-                              className="hover:text-admin-danger"
+                              className="hover:text-danger"
                             >
                               <svg
                                 className="h-4 w-4"
@@ -317,5 +384,69 @@ export function RegistrationTable({
         </div>
       </div>
     </>
+  );
+}
+
+function HeaderCell({
+  children,
+  align = "left",
+}: {
+  readonly children: React.ReactNode;
+  readonly align?: "left" | "right";
+}): React.ReactElement {
+  return (
+    <th
+      scope="col"
+      className={`px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary ${
+        align === "right" ? "text-right" : "text-left"
+      }`}
+    >
+      {children}
+    </th>
+  );
+}
+
+function Checkbox({
+  checked,
+  onChange,
+  ariaLabel,
+}: {
+  readonly checked: boolean;
+  readonly onChange: () => void;
+  readonly ariaLabel: string;
+}): React.ReactElement {
+  return (
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      aria-label={ariaLabel}
+      className="h-4 w-4 cursor-pointer rounded border-border-strong bg-surface-sunken text-accent accent-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
+    />
+  );
+}
+
+function IndeterminateCheckbox({
+  checked,
+  indeterminate,
+  onChange,
+  ariaLabel,
+}: {
+  readonly checked: boolean;
+  readonly indeterminate: boolean;
+  readonly onChange?: () => void;
+  readonly ariaLabel: string;
+}): React.ReactElement {
+  return (
+    <input
+      ref={(el) => {
+        if (el) el.indeterminate = indeterminate && !checked;
+      }}
+      type="checkbox"
+      checked={checked}
+      onChange={() => onChange?.()}
+      aria-label={ariaLabel}
+      className="h-4 w-4 cursor-pointer rounded border-border-strong bg-surface-sunken text-accent accent-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
+    />
   );
 }

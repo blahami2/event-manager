@@ -202,6 +202,19 @@
       "downloadCsv": "Download CSV",
       "addReservation": "Add reservation",
       "addSuccess": "Reservation added successfully.",
+      "updateSuccess": "Registration updated.",
+      "drawer": {
+        "eyebrow": "Reservation"
+      },
+      "bulk": {
+        "region": "Bulk actions",
+        "selected": "selected",
+        "resend": "Resend emails",
+        "export": "Export",
+        "clear": "Clear selection",
+        "resendSuccess": "Resent {count, plural, one {# email} other {# emails}}.",
+        "resendError": "Failed to resend some emails."
+      },
       "loading": "Loading…",
       "errorLoad": "Failed to load registrations",
       "errorCancel": "Failed to cancel registration",
@@ -211,16 +224,23 @@
       "notesCollapse": "Hide full note",
       "notesCounter": "{count} / {max}",
       "filters": {
-        "statusLabel": "Filter by status",
-        "all": "All",
+        "statusLabel": "Status",
+        "stayLabel": "Stay",
+        "accommodationLabel": "Accommodation",
+        "all": "Any status",
+        "anyStay": "Any stay",
+        "anyAccommodation": "Any accommodation",
         "confirmed": "Confirmed",
         "cancelled": "Cancelled",
         "searchPlaceholder": "Search by name or email…",
-        "searchLabel": "Search by name or email"
+        "searchLabel": "Search by name or email",
+        "clear": "Clear filters"
       },
       "table": {
         "name": "Name",
         "email": "Email",
+        "selectRow": "Select {name}",
+        "selectAll": "Select all on this page",
         "status": "Status",
         "created": "Created",
         "actions": "Actions",

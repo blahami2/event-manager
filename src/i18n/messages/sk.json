@@ -202,6 +202,19 @@
       "downloadCsv": "Stiahnuť CSV",
       "addReservation": "Pridať rezerváciu",
       "addSuccess": "Rezervácia bola úspešne pridaná.",
+      "updateSuccess": "Registrácia aktualizovaná.",
+      "drawer": {
+        "eyebrow": "Rezervácia"
+      },
+      "bulk": {
+        "region": "Hromadné akcie",
+        "selected": "vybraných",
+        "resend": "Znovu odoslať e-maily",
+        "export": "Export",
+        "clear": "Zrušiť výber",
+        "resendSuccess": "Odoslané {count, plural, one {# e-mail} few {# e-maily} other {# e-mailov}}.",
+        "resendError": "Niektoré e-maily sa nepodarilo odoslať."
+      },
       "loading": "Načítava sa…",
       "errorLoad": "Nepodarilo sa načítať registrácie",
       "errorCancel": "Nepodarilo sa zrušiť registráciu",
@@ -211,16 +224,23 @@
       "notesCollapse": "Skryť celú poznámku",
       "notesCounter": "{count} / {max}",
       "filters": {
-        "statusLabel": "Filtrovať podľa stavu",
-        "all": "Všetko",
+        "statusLabel": "Stav",
+        "stayLabel": "Pobyt",
+        "accommodationLabel": "Ubytovanie",
+        "all": "Akýkoľvek stav",
+        "anyStay": "Akýkoľvek pobyt",
+        "anyAccommodation": "Akékoľvek ubytovanie",
         "confirmed": "Potvrdené",
         "cancelled": "Zrušené",
         "searchPlaceholder": "Hľadať podľa mena alebo e-mailu…",
-        "searchLabel": "Hľadať podľa mena alebo e-mailu"
+        "searchLabel": "Hľadať podľa mena alebo e-mailu",
+        "clear": "Vymazať filtre"
       },
       "table": {
         "name": "Meno",
         "email": "E-mail",
+        "selectRow": "Vybrať {name}",
+        "selectAll": "Vybrať všetko na stránke",
         "status": "Stav",
         "created": "Vytvorené",
         "actions": "Akcie",
