@@ -17,7 +17,7 @@ import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { Button, SkeletonRow, useToast } from "@/components/ui/admin";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
-const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 50;
 
 const EMPTY_FILTERS: RegistrationFiltersValue = {
   status: "",
