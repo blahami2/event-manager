@@ -31,23 +31,33 @@
     "goHome": "Na úvodní stránku",
     "tooManyAttempts": "Příliš mnoho pokusů. Zkuste to prosím později."
   },
+  "enums": {
+    "accommodation": {
+      "PRIVATE_ROOM": "Samostatný pokoj",
+      "COMMON_ROOM": "Společný pokoj",
+      "OWN_TENT": "Vlastní stan",
+      "ANYWHERE": "Kdekoliv",
+      "NONE": "Žádné"
+    },
+    "stay": {
+      "FRI_SAT": "Pátek – Sobota",
+      "SAT_SUN": "Sobota – Neděle",
+      "FRI_SUN": "Pátek – Neděle",
+      "SAT_ONLY": "Pouze sobota"
+    },
+    "status": {
+      "CONFIRMED": "Potvrzeno",
+      "CANCELLED": "Zrušeno"
+    }
+  },
   "form": {
     "email": "E-mail",
     "name": "Účastník",
     "namePlaceholder": "Např. Petr Novák",
     "stay": "Pobyt",
     "stayPlaceholder": "Vyberte pobyt…",
-    "stayFriSat": "Pátek – Sobota",
-    "staySatSun": "Sobota – Neděle",
-    "stayFriSun": "Pátek – Neděle",
-    "staySatOnly": "Pouze sobota",
     "accommodation": "Ubytování",
     "accommodationPlaceholder": "Vyberte ubytování…",
-    "accommodationPrivateRoom": "Vlastní pokoj",
-    "accommodationCommonRoom": "Společenská místnost",
-    "accommodationOwnTent": "Vlastní stan",
-    "accommodationAnywhere": "Kdekoliv",
-    "accommodationNone": "Žádné",
     "adultsCount": "Počet dospělých",
     "childrenCount": "Počet dětí",
     "notes": "Poznámka (co se jinam nevešlo)",
@@ -165,36 +175,74 @@
       "error": "Neplatné přihlašovací údaje"
     },
     "dashboard": {
+      "eyebrow": "Přehled",
       "title": "Přehled",
-      "totalRegistrations": "Celkem registrací",
+      "totalRegistrations": "Celkem",
       "confirmed": "Potvrzené",
       "cancelled": "Zrušené",
       "viewRegistrations": "Zobrazit registrace",
       "exportCsv": "Exportovat CSV",
-      "totalAdults": "Celkem dospělých",
-      "totalChildren": "Celkem dětí"
+      "totalAdults": "Dospělí",
+      "totalChildren": "Děti"
+    },
+    "pagination": {
+      "showing": "Zobrazeno",
+      "to": "–",
+      "of": "z",
+      "results": "záznamů",
+      "previous": "Předchozí",
+      "next": "Další",
+      "pageOfPages": "Strana {page} z {total}",
+      "label": "Stránkování"
     },
     "registrations": {
+      "eyebrow": "Seznam hostů",
       "title": "Registrace",
+      "totalCount": "{count, plural, =0 {Zatím žádné záznamy} one {# záznam} few {# záznamy} other {# záznamů}}",
       "downloadCsv": "Stáhnout CSV",
       "addReservation": "Přidat rezervaci",
       "addSuccess": "Rezervace byla úspěšně přidána.",
+      "updateSuccess": "Registrace aktualizována.",
+      "reconfirmSuccess": "Registrace obnovena.",
+      "reconfirmError": "Nepodařilo se obnovit registraci.",
+      "drawer": {
+        "eyebrow": "Rezervace"
+      },
+      "bulk": {
+        "region": "Hromadné akce",
+        "selected": "vybráno",
+        "resend": "Odeslat e-maily znovu",
+        "export": "Export",
+        "clear": "Zrušit výběr",
+        "resendSuccess": "Odesláno {count, plural, one {# e-mail} few {# e-maily} other {# e-mailů}}.",
+        "resendError": "Některé e-maily se nepodařilo odeslat."
+      },
       "loading": "Načítání…",
       "errorLoad": "Nepodařilo se načíst registrace",
       "errorCancel": "Nepodařilo se zrušit registraci",
       "errorUpdate": "Nepodařilo se aktualizovat registraci",
       "noResults": "Žádné registrace nenalezeny.",
+      "notesExpand": "Zobrazit celou poznámku",
+      "notesCollapse": "Skrýt celou poznámku",
+      "notesCounter": "{count} / {max}",
       "filters": {
-        "statusLabel": "Filtrovat podle stavu",
-        "all": "Vše",
+        "statusLabel": "Stav",
+        "stayLabel": "Pobyt",
+        "accommodationLabel": "Ubytování",
+        "all": "Jakýkoli stav",
+        "anyStay": "Jakýkoli pobyt",
+        "anyAccommodation": "Jakékoli ubytování",
         "confirmed": "Potvrzené",
         "cancelled": "Zrušené",
         "searchPlaceholder": "Hledat podle jména nebo e-mailu…",
-        "searchLabel": "Hledat podle jména nebo e-mailu"
+        "searchLabel": "Hledat podle jména nebo e-mailu",
+        "clear": "Vymazat filtry"
       },
       "table": {
         "name": "Jméno",
         "email": "E-mail",
+        "selectRow": "Vybrat {name}",
+        "selectAll": "Vybrat vše na stránce",
         "status": "Stav",
         "created": "Vytvořeno",
         "actions": "Akce",
@@ -209,6 +257,7 @@
         "accommodation": "Ubytování",
         "notes": "Poznámky",
         "resendEmail": "Znovu odeslat e-mail",
+        "resendingEmail": "Odesílání…",
         "confirmResend": "Znovu odeslat registrační e-mail?",
         "resendSuccess": "Registrační e-mail byl úspěšně znovu odeslán.",
         "resendError": "Nepodařilo se znovu odeslat registrační e-mail."
@@ -223,19 +272,13 @@
         "cancel": "Zrušit",
         "save": "Uložit",
         "stay": "Pobyt",
-        "stayFriSat": "Pá–So",
-        "staySatSun": "So–Ne",
-        "stayFriSun": "Pá–Ne",
-        "staySatOnly": "So",
         "accommodation": "Ubytování",
-        "accommodationPrivateRoom": "Pokoj",
-        "accommodationCommonRoom": "Spol.",
-        "accommodationOwnTent": "Stan",
-        "accommodationAnywhere": "Kde.",
-        "accommodationNone": "Žádné",
         "adultsCount": "Dospělí",
         "childrenCount": "Děti",
-        "notes": "Poznámky"
+        "notes": "Poznámky",
+        "cancelledStatus": "Zrušeno",
+        "cancelledNotice": "Tato registrace je aktuálně zrušena.",
+        "reactivate": "Obnovit"
       },
       "add": {
         "title": "Přidat rezervaci",
@@ -243,14 +286,7 @@
         "email": "E-mail",
         "stay": "Pobyt",
         "stayPlaceholder": "Vyberte pobyt…",
-        "staySatSun": "Sobota – Neděle",
-        "staySatOnly": "Pouze sobota",
         "accommodation": "Ubytování",
-        "accommodationPrivateRoom": "Samostatný pokoj",
-        "accommodationCommonRoom": "Společný pokoj",
-        "accommodationOwnTent": "Vlastní stan",
-        "accommodationAnywhere": "Kdekoli",
-        "accommodationNone": "Žádné",
         "adultsCount": "Dospělí",
         "childrenCount": "Děti",
         "notes": "Poznámky",
@@ -269,6 +305,7 @@
       }
     },
     "settings": {
+      "eyebrow": "Účet",
       "title": "Nastavení",
       "changePassword": "Změna hesla",
       "currentPassword": "Současné heslo",

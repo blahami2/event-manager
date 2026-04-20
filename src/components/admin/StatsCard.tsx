@@ -1,22 +1,36 @@
 interface StatsCardProps {
   readonly label: string;
   readonly value: number;
+  readonly accent?: boolean;
   readonly className?: string;
 }
 
-export function StatsCard({ label, value, className = "" }: StatsCardProps): React.ReactElement {
+/**
+ * A single compact statistic panel. Numbers use a tabular mono face so a row
+ * of cards visually aligns even when values differ in width.
+ */
+export function StatsCard({
+  label,
+  value,
+  accent = false,
+  className = "",
+}: StatsCardProps): React.ReactElement {
   return (
     <div
-      className={`group relative overflow-hidden rounded-xl border border-border-dark bg-dark-secondary/60 p-6 shadow-lg backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-accent/10 hover:border-border-dark/80 ${className}`}
+      className={`relative overflow-hidden rounded-lg border border-border-default bg-surface-raised/50 px-5 py-4 transition-colors duration-200 hover:border-border-strong ${className}`}
     >
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent to-red-600 opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-accent/5 blur-2xl transition-all duration-300 group-hover:bg-accent/15" />
-      <div className="relative z-10">
-        <p className="text-sm font-medium uppercase tracking-wider text-admin-text-secondary transition-colors duration-300 group-hover:text-admin-text-primary/80">
-          {label}
-        </p>
-        <p className="mt-3 text-4xl font-bold tracking-tight text-white">{value}</p>
-      </div>
+      {accent ? (
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-0 left-0 w-0.5 bg-accent"
+        />
+      ) : null}
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary">
+        {label}
+      </p>
+      <p className="mt-2 font-mono text-3xl font-medium tabular-nums text-text-primary">
+        {value}
+      </p>
     </div>
   );
 }

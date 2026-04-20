@@ -1,20 +1,34 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { RegistrationFilters } from "@/components/admin/RegistrationFilters";
+import {
+  RegistrationFilters,
+  type RegistrationFiltersValue,
+} from "@/components/admin/RegistrationFilters";
 import { RegistrationTable } from "@/components/admin/RegistrationTable";
 import { EditRegistrationModal } from "@/components/admin/EditRegistrationModal";
+import type { EditRegistrationPayload } from "@/components/admin/EditRegistrationModal";
 import { AddRegistrationModal } from "@/components/admin/AddRegistrationModal";
 import { Pagination } from "@/components/admin/Pagination";
+import { StatsStrip, type RegistrationStats } from "@/components/admin/StatsStrip";
+import { RegistrationDrawer } from "@/components/admin/RegistrationDrawer";
+import { BulkActionBar } from "@/components/admin/BulkActionBar";
+import { Button, SkeletonRow, useToast } from "@/components/ui/admin";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
-const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 50;
+
+const EMPTY_FILTERS: RegistrationFiltersValue = {
+  status: "",
+  stay: "",
+  accommodation: "",
+  search: "",
+};
 
 interface FetchState {
   readonly data: PaginatedResult<RegistrationOutput> | null;
   readonly loading: boolean;
-  readonly error: string | null;
 }
 
 async function fetchRegistrations(
@@ -30,47 +44,98 @@ async function fetchRegistrations(
   params.set("pageSize", String(pageSize));
 
   const res = await fetch(`/api/admin/registrations?${params.toString()}`);
-  if (!res.ok) {
-    throw new Error("Failed to fetch registrations");
-  }
+  if (!res.ok) throw new Error("Failed to fetch registrations");
   const json = (await res.json()) as { data: PaginatedResult<RegistrationOutput> };
   return json.data;
 }
 
+async function fetchStats(): Promise<RegistrationStats> {
+  const res = await fetch("/api/admin/registrations/stats");
+  if (!res.ok) throw new Error("Failed to fetch stats");
+  const json = (await res.json()) as { data: RegistrationStats };
+  return json.data;
+}
+
+/**
+ * Stay + accommodation filters are applied client-side because the list
+ * endpoint only accepts `status` + `search` today. Stats reflect the full
+ * dataset so totals stay honest; the table is filtered to the current page.
+ */
+function applyClientFilters(
+  items: ReadonlyArray<RegistrationOutput>,
+  filters: RegistrationFiltersValue,
+): ReadonlyArray<RegistrationOutput> {
+  if (!filters.stay && !filters.accommodation) return items;
+  return items.filter((r) => {
+    if (filters.stay && r.stay !== filters.stay) return false;
+    if (filters.accommodation && r.accommodation !== filters.accommodation) return false;
+    return true;
+  });
+}
+
 export default function AdminRegistrationsPage(): React.ReactElement {
   const t = useTranslations("admin.registrations");
-  const [status, setStatus] = useState("");
-  const [search, setSearch] = useState("");
+  const tBulk = useTranslations("admin.registrations.bulk");
+  const toast = useToast();
+
+  const [filters, setFilters] = useState<RegistrationFiltersValue>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [state, setState] = useState<FetchState>({ data: null, loading: true, error: null });
+  const [state, setState] = useState<FetchState>({ data: null, loading: true });
+  const [stats, setStats] = useState<RegistrationStats | null>(null);
   const [editing, setEditing] = useState<RegistrationOutput | null>(null);
+  const [drawer, setDrawer] = useState<RegistrationOutput | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
-  const [resendFeedback, setResendFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [addFeedback, setAddFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [bulkResending, setBulkResending] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
 
   const loadData = useCallback(async () => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true }));
     try {
-      const data = await fetchRegistrations(status, search, page, pageSize);
-      setState({ data, loading: false, error: null });
+      const data = await fetchRegistrations(
+        filters.status,
+        filters.search,
+        page,
+        pageSize,
+      );
+      setState({ data, loading: false });
     } catch {
-      setState((prev) => ({ ...prev, loading: false, error: t("errorLoad") }));
+      setState((prev) => ({ ...prev, loading: false }));
+      toast.error(t("errorLoad"));
     }
-  }, [status, search, page, pageSize, t]);
+  }, [filters.status, filters.search, page, pageSize, t, toast]);
+
+  const loadStats = useCallback(async () => {
+    try {
+      const s = await fetchStats();
+      setStats(s);
+    } catch {
+      // Non-fatal — stats strip simply stays at its previous values or
+      // skeleton. A toast would be excessive noise for a secondary widget.
+    }
+  }, []);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
 
-  const handleStatusChange = useCallback((newStatus: string) => {
-    setStatus(newStatus);
-    setPage(1);
-  }, []);
+  useEffect(() => {
+    void loadStats();
+  }, [loadStats]);
 
-  const handleSearchChange = useCallback((newSearch: string) => {
-    setSearch(newSearch);
+  const handleFiltersChange = useCallback(
+    (next: RegistrationFiltersValue) => {
+      setFilters(next);
+      setPage(1);
+    },
+    [],
+  );
+
+  const handleFiltersReset = useCallback(() => {
+    setFilters(EMPTY_FILTERS);
     setPage(1);
   }, []);
 
@@ -78,6 +143,10 @@ export default function AdminRegistrationsPage(): React.ReactElement {
     setPageSize(newPageSize);
     setPage(1);
   }, []);
+
+  const refreshAll = useCallback(async () => {
+    await Promise.all([loadData(), loadStats()]);
+  }, [loadData, loadStats]);
 
   const handleCancel = useCallback(
     async (registrationId: string) => {
@@ -87,183 +156,235 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ registrationId }),
         });
-        if (!res.ok) {
-          throw new Error("Failed to cancel registration");
-        }
-        await loadData();
+        if (!res.ok) throw new Error("Failed to cancel registration");
+        setDrawer(null);
+        await refreshAll();
       } catch {
-        setState((prev) => ({ ...prev, error: t("errorCancel") }));
+        toast.error(t("errorCancel"));
       }
     },
-    [loadData, t],
+    [refreshAll, t, toast],
+  );
+
+  const handleReconfirm = useCallback(
+    async (registrationId: string) => {
+      try {
+        const res = await fetch("/api/admin/registrations/reconfirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ registrationId }),
+        });
+        if (!res.ok) throw new Error("Failed to reconfirm registration");
+        setEditing(null);
+        setDrawer(null);
+        toast.success(t("reconfirmSuccess"));
+        await refreshAll();
+      } catch {
+        toast.error(t("reconfirmError"));
+      }
+    },
+    [refreshAll, t, toast],
   );
 
   const handleResendEmail = useCallback(
     async (registrationId: string) => {
       setResendingId(registrationId);
-      setResendFeedback(null);
       try {
         const res = await fetch("/api/admin/registrations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ registrationId }),
         });
-        if (!res.ok) {
-          throw new Error("Failed to resend email");
-        }
-        setResendFeedback({ type: "success", message: t("table.resendSuccess") });
+        if (!res.ok) throw new Error("Failed to resend email");
+        toast.success(t("table.resendSuccess"));
       } catch {
-        setResendFeedback({ type: "error", message: t("table.resendError") });
+        toast.error(t("table.resendError"));
       } finally {
         setResendingId(null);
       }
     },
-    [t],
+    [t, toast],
   );
 
   const handleEdit = useCallback((registration: RegistrationOutput) => {
+    setDrawer(null);
     setEditing(registration);
   }, []);
 
-  const handleOpenAdd = useCallback(() => {
-    setAddFeedback(null);
-    setIsAdding(true);
-  }, []);
-
-  const handleCloseAdd = useCallback(() => {
-    setIsAdding(false);
-  }, []);
+  const handleOpenAdd = useCallback(() => setIsAdding(true), []);
+  const handleCloseAdd = useCallback(() => setIsAdding(false), []);
 
   const handleAddCreated = useCallback(async () => {
     setIsAdding(false);
-    setAddFeedback({ type: "success", message: t("addSuccess") });
-    await loadData();
-  }, [loadData, t]);
+    toast.success(t("addSuccess"));
+    await refreshAll();
+  }, [refreshAll, t, toast]);
 
   const handleSave = useCallback(
-    async (
-      id: string,
-      data: { name: string; email: string; stay: string; accommodation: string; adultsCount: number; childrenCount: number; notes?: string },
-    ) => {
+    async (id: string, data: EditRegistrationPayload) => {
       try {
         const res = await fetch("/api/admin/registrations", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ registrationId: id, ...data }),
         });
-        if (!res.ok) {
-          throw new Error("Failed to update registration");
-        }
+        if (!res.ok) throw new Error("Failed to update registration");
         setEditing(null);
-        await loadData();
+        toast.success(t("updateSuccess"));
+        await refreshAll();
       } catch {
-        setState((prev) => ({ ...prev, error: t("errorUpdate") }));
+        toast.error(t("errorUpdate"));
       }
     },
-    [loadData, t],
+    [refreshAll, t, toast],
   );
 
+  const handleRowClick = useCallback((registration: RegistrationOutput) => {
+    setDrawer(registration);
+  }, []);
+
+  const visibleItems = useMemo(
+    () => applyClientFilters(state.data?.items ?? [], filters),
+    [state.data?.items, filters],
+  );
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleToggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const allVisibleIds = visibleItems.map((r) => r.id);
+      const allSelected = allVisibleIds.every((id) => prev.has(id));
+      if (allSelected) {
+        const next = new Set(prev);
+        for (const id of allVisibleIds) next.delete(id);
+        return next;
+      }
+      const next = new Set(prev);
+      for (const id of allVisibleIds) next.add(id);
+      return next;
+    });
+  }, [visibleItems]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBulkResend = useCallback(async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkResending(true);
+    let successCount = 0;
+    let anyError = false;
+    for (const id of ids) {
+      try {
+        const res = await fetch("/api/admin/registrations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ registrationId: id }),
+        });
+        if (res.ok) successCount += 1;
+        else anyError = true;
+      } catch {
+        anyError = true;
+      }
+    }
+    setBulkResending(false);
+    setSelectedIds(new Set());
+    if (successCount > 0) {
+      toast.success(tBulk("resendSuccess", { count: successCount }));
+    }
+    if (anyError) toast.error(tBulk("resendError"));
+  }, [selectedIds, toast, tBulk]);
+
+  const bulkExportHref = useMemo(() => {
+    if (selectedIds.size === 0) return "/api/admin/registrations/export";
+    const params = new URLSearchParams();
+    for (const id of selectedIds) params.append("id", id);
+    return `/api/admin/registrations/export?${params.toString()}`;
+  }, [selectedIds]);
+
   return (
-    <div>
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">{t("title")}</h1>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleOpenAdd}
-            className="group inline-flex items-center gap-2 rounded-lg border-2 border-accent bg-accent px-5 py-2 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-300 hover:bg-transparent hover:text-accent hover:shadow-lg hover:shadow-accent/20"
-          >
-            <svg
-              className="h-4 w-4 transition-transform group-hover:rotate-90"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            {t("addReservation")}
-          </button>
+    <div className="space-y-6">
+      <header className="flex flex-col items-start justify-between gap-4 border-b border-border-subtle pb-6 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-text-tertiary">
+            {t("eyebrow")}
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">
+            {t("title")}
+          </h1>
+          {stats ? (
+            <p className="mt-1 text-sm text-text-secondary">
+              {t("totalCount", { count: stats.total })}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-2">
           <a
             href="/api/admin/registrations/export"
             download
-            className="group inline-flex items-center gap-2 rounded-lg border border-border-dark bg-dark-secondary/60 px-5 py-2 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/5 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-md border border-border-default bg-transparent px-3 py-2 text-sm font-medium text-text-secondary transition-colors duration-150 hover:border-border-strong hover:bg-surface-raised hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base"
           >
-            <svg
-              className="h-4 w-4 transition-transform group-hover:-translate-y-0.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3"
-              />
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3" />
             </svg>
             {t("downloadCsv")}
           </a>
+          <Button variant="primary" onClick={handleOpenAdd}>
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            {t("addReservation")}
+          </Button>
         </div>
-      </div>
+      </header>
 
-      <div className="mt-6">
-        <RegistrationFilters
-          status={status}
-          search={search}
-          onStatusChange={handleStatusChange}
-          onSearchChange={handleSearchChange}
-        />
-      </div>
+      <StatsStrip stats={stats} />
 
-      <div className="mt-4">
-        {state.error && (
-          <div className="mb-4 rounded-md border border-red-700 bg-red-900/40 p-4 text-sm text-red-400" role="alert">
-            {state.error}
-          </div>
-        )}
+      <RegistrationFilters
+        value={filters}
+        onChange={handleFiltersChange}
+        onReset={handleFiltersReset}
+      />
 
-        {resendFeedback && (
-          <div
-            className={`mb-4 rounded-md border p-4 text-sm ${
-              resendFeedback.type === "success"
-                ? "border-green-700 bg-green-900/40 text-green-400"
-                : "border-red-700 bg-red-900/40 text-red-400"
-            }`}
-            role="alert"
-          >
-            {resendFeedback.message}
-          </div>
-        )}
-
-        {addFeedback && (
-          <div
-            className={`mb-4 rounded-md border p-4 text-sm ${
-              addFeedback.type === "success"
-                ? "border-green-700 bg-green-900/40 text-green-400"
-                : "border-red-700 bg-red-900/40 text-red-400"
-            }`}
-            role="alert"
-          >
-            {addFeedback.message}
-          </div>
-        )}
-
+      <div>
         {state.loading ? (
-          <div className="py-12 text-center text-sm text-admin-text-secondary">{t("loading")}</div>
+          <div
+            className="overflow-hidden rounded-lg border border-border-default bg-surface-raised/40"
+            role="status"
+            aria-live="polite"
+          >
+            <span className="sr-only">{t("loading")}</span>
+            <div className="admin-scroll overflow-x-auto">
+              <table className="w-full text-sm">
+                <tbody className="divide-y divide-border-subtle">
+                  <SkeletonRow />
+                  <SkeletonRow />
+                  <SkeletonRow />
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : state.data ? (
           <>
             <RegistrationTable
-              registrations={state.data.items}
+              registrations={visibleItems}
               onEdit={handleEdit}
               onCancel={handleCancel}
               onResendEmail={handleResendEmail}
+              onRowClick={handleRowClick}
               resendingId={resendingId}
+              selectedIds={selectedIds}
+              onToggleSelect={handleToggleSelect}
+              onToggleSelectAll={handleToggleSelectAll}
+              searchQuery={filters.search}
             />
             <Pagination
               page={state.data.page}
@@ -276,8 +397,36 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         ) : null}
       </div>
 
-      {editing && <EditRegistrationModal registration={editing} onSave={handleSave} onClose={() => setEditing(null)} />}
-      {isAdding && <AddRegistrationModal onClose={handleCloseAdd} onCreated={handleAddCreated} />}
+      {editing && (
+        <EditRegistrationModal
+          registration={editing}
+          onSave={handleSave}
+          onReconfirm={handleReconfirm}
+          onClose={() => setEditing(null)}
+        />
+      )}
+      {isAdding && (
+        <AddRegistrationModal
+          onClose={handleCloseAdd}
+          onCreated={handleAddCreated}
+        />
+      )}
+      <RegistrationDrawer
+        registration={drawer}
+        onClose={() => setDrawer(null)}
+        onEdit={handleEdit}
+        onCancel={handleCancel}
+        onResendEmail={handleResendEmail}
+        onReconfirm={handleReconfirm}
+        resendingId={resendingId}
+      />
+      <BulkActionBar
+        count={selectedIds.size}
+        onClear={handleClearSelection}
+        onResend={handleBulkResend}
+        resending={bulkResending}
+        exportHref={bulkExportHref}
+      />
     </div>
   );
 }

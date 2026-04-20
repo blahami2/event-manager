@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { createBrowserClient } from "@/lib/auth/supabase-client";
+import { Button, Input } from "@/components/ui/admin";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 export default function LoginPage(): React.ReactElement {
   const t = useTranslations("admin.login");
@@ -40,60 +42,67 @@ export default function LoginPage(): React.ReactElement {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-dark-primary px-4 font-body relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/5 blur-[100px]" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-base px-4 font-body">
+      <div className="fixed right-4 top-4 z-50">
+        <LanguageSwitcher />
+      </div>
+      {/* Ambient backdrop glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.06] blur-[120px]"
+      />
 
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border-dark bg-dark-secondary/60 p-8 shadow-2xl backdrop-blur-md">
-        <h1 className="mb-8 text-center font-heading text-4xl uppercase tracking-widest text-white">{t("title")}</h1>
+      <div className="relative z-10 w-full max-w-md rounded-xl border border-border-default bg-surface-raised/70 p-8 shadow-overlay backdrop-blur-md">
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="flex h-10 w-10 items-center justify-center rounded-md bg-accent"
+          >
+            <span className="h-4 w-4 rounded-sm bg-surface-base" />
+          </span>
+          <h1 className="font-heading text-2xl tracking-[0.22em] text-text-primary">
+            {t("title")}
+          </h1>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
-              {t("email")}
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-4 py-3 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-              disabled={isSubmitting}
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label={t("email")}
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isSubmitting}
+          />
 
-          <div>
-            <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
-              {t("password")}
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-4 py-3 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-              disabled={isSubmitting}
-            />
-          </div>
+          <Input
+            label={t("password")}
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isSubmitting}
+          />
 
           {error && (
             <div
-              className="rounded-lg border border-red-700/50 bg-red-900/20 p-3 text-sm text-red-400 backdrop-blur-sm"
+              className="rounded-md border border-admin-danger/40 bg-admin-danger/10 p-3 text-sm text-admin-danger"
               role="alert"
             >
               {error}
             </div>
           )}
 
-          <button
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="mt-4 flex w-full items-center justify-center rounded-lg border-2 border-accent bg-accent px-6 py-3 text-sm font-bold tracking-wide text-white shadow-lg shadow-accent/20 transition-all duration-300 hover:bg-transparent hover:text-accent hover:shadow-none focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-dark-primary disabled:opacity-50"
+            variant="primary"
+            className="mt-4 w-full"
+            loading={isSubmitting}
           >
             {isSubmitting ? t("submitting") : t("submit")}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

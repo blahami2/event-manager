@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/admin";
 import { PageSizeSelector } from "./PageSizeSelector";
 
 export interface PaginationProps {
@@ -10,7 +12,14 @@ export interface PaginationProps {
   readonly onPageSizeChange: (pageSize: number) => void;
 }
 
-export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChange }: PaginationProps): React.ReactElement | null {
+export function Pagination({
+  page,
+  pageSize,
+  total,
+  onPageChange,
+  onPageSizeChange,
+}: PaginationProps): React.ReactElement | null {
+  const t = useTranslations("admin.pagination");
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   if (totalPages <= 1) {
@@ -21,35 +30,46 @@ export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChan
   const end = Math.min(page * pageSize, total);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border-dark/50 px-6 py-4">
-      <div className="flex items-center gap-6">
-        <p className="text-sm text-admin-text-secondary">
-          Showing <span className="font-medium text-admin-text-primary">{start}</span> to{" "}
-          <span className="font-medium text-admin-text-primary">{end}</span> of{" "}
-          <span className="font-medium text-admin-text-primary">{total}</span> results
+    <div className="flex flex-col items-center justify-between gap-4 px-1 pt-4 sm:flex-row">
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+        <p className="text-sm text-text-secondary">
+          {t("showing")}{" "}
+          <span className="font-mono tabular-nums font-medium text-text-primary">{start}</span>
+          <span className="mx-0.5 text-text-tertiary">{"–"}</span>
+          <span className="font-mono tabular-nums font-medium text-text-primary">{end}</span>{" "}
+          {t("of")}{" "}
+          <span className="font-mono tabular-nums font-medium text-text-primary">{total}</span>
         </p>
         <PageSizeSelector pageSize={pageSize} onPageSizeChange={onPageSizeChange} />
       </div>
-      <nav className="flex items-center gap-2" aria-label="Pagination">
-        <button
-          type="button"
+      <nav className="flex items-center gap-2" aria-label={t("label")}>
+        <Button
+          variant="secondary"
+          size="sm"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
-          className="rounded-lg border border-border-dark bg-dark-secondary/60 px-4 py-2 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-200 hover:border-white/20 hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border-dark disabled:hover:bg-dark-secondary/60"
+          aria-label={t("previous")}
         >
-          Previous
-        </button>
-        <span className="flex items-center px-4 text-sm font-medium text-admin-text-secondary">
-          Page {page} of {totalPages}
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          {t("previous")}
+        </Button>
+        <span className="px-2 text-sm font-medium text-text-secondary">
+          {t("pageOfPages", { page, total: totalPages })}
         </span>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="rounded-lg border border-border-dark bg-dark-secondary/60 px-4 py-2 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-200 hover:border-white/20 hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border-dark disabled:hover:bg-dark-secondary/60"
+          aria-label={t("next")}
         >
-          Next
-        </button>
+          {t("next")}
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Button>
       </nav>
     </div>
   );

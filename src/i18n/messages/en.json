@@ -31,23 +31,33 @@
     "goHome": "Go home",
     "tooManyAttempts": "Too many attempts. Please try again later."
   },
+  "enums": {
+    "accommodation": {
+      "PRIVATE_ROOM": "Private room",
+      "COMMON_ROOM": "Common room",
+      "OWN_TENT": "Own tent",
+      "ANYWHERE": "Anywhere",
+      "NONE": "None"
+    },
+    "stay": {
+      "FRI_SAT": "Friday – Saturday",
+      "SAT_SUN": "Saturday – Sunday",
+      "FRI_SUN": "Friday – Sunday",
+      "SAT_ONLY": "Saturday only"
+    },
+    "status": {
+      "CONFIRMED": "Confirmed",
+      "CANCELLED": "Cancelled"
+    }
+  },
   "form": {
     "email": "Email",
     "name": "Participant",
     "namePlaceholder": "E.g. John Doe",
     "stay": "Stay",
     "stayPlaceholder": "Select your stay…",
-    "stayFriSat": "Friday – Saturday",
-    "staySatSun": "Saturday – Sunday",
-    "stayFriSun": "Friday – Sunday",
-    "staySatOnly": "Saturday only",
     "accommodation": "Accommodation",
     "accommodationPlaceholder": "Select accommodation…",
-    "accommodationPrivateRoom": "Private Room",
-    "accommodationCommonRoom": "Common Room",
-    "accommodationOwnTent": "Own Tent",
-    "accommodationAnywhere": "Anywhere",
-    "accommodationNone": "None",
     "adultsCount": "Number of Adults",
     "childrenCount": "Number of Children",
     "notes": "Notes (anything else)",
@@ -165,36 +175,74 @@
       "error": "Invalid credentials"
     },
     "dashboard": {
+      "eyebrow": "Overview",
       "title": "Dashboard",
-      "totalRegistrations": "Total Registrations",
+      "totalRegistrations": "Total",
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",
-      "viewRegistrations": "View Registrations",
+      "viewRegistrations": "View registrations",
       "exportCsv": "Export CSV",
-      "totalAdults": "Total Adults",
-      "totalChildren": "Total Children"
+      "totalAdults": "Adults",
+      "totalChildren": "Children"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "results": "results",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOfPages": "Page {page} of {total}",
+      "label": "Pagination"
     },
     "registrations": {
+      "eyebrow": "Guest list",
       "title": "Registrations",
+      "totalCount": "{count, plural, =0 {No entries yet} one {# entry} other {# entries}}",
       "downloadCsv": "Download CSV",
       "addReservation": "Add reservation",
       "addSuccess": "Reservation added successfully.",
+      "updateSuccess": "Registration updated.",
+      "reconfirmSuccess": "Registration reactivated.",
+      "reconfirmError": "Failed to reactivate registration.",
+      "drawer": {
+        "eyebrow": "Reservation"
+      },
+      "bulk": {
+        "region": "Bulk actions",
+        "selected": "selected",
+        "resend": "Resend emails",
+        "export": "Export",
+        "clear": "Clear selection",
+        "resendSuccess": "Resent {count, plural, one {# email} other {# emails}}.",
+        "resendError": "Failed to resend some emails."
+      },
       "loading": "Loading…",
       "errorLoad": "Failed to load registrations",
       "errorCancel": "Failed to cancel registration",
       "errorUpdate": "Failed to update registration",
       "noResults": "No registrations found.",
+      "notesExpand": "Read full note",
+      "notesCollapse": "Hide full note",
+      "notesCounter": "{count} / {max}",
       "filters": {
-        "statusLabel": "Filter by status",
-        "all": "All",
+        "statusLabel": "Status",
+        "stayLabel": "Stay",
+        "accommodationLabel": "Accommodation",
+        "all": "Any status",
+        "anyStay": "Any stay",
+        "anyAccommodation": "Any accommodation",
         "confirmed": "Confirmed",
         "cancelled": "Cancelled",
         "searchPlaceholder": "Search by name or email…",
-        "searchLabel": "Search by name or email"
+        "searchLabel": "Search by name or email",
+        "clear": "Clear filters"
       },
       "table": {
         "name": "Name",
         "email": "Email",
+        "selectRow": "Select {name}",
+        "selectAll": "Select all on this page",
         "status": "Status",
         "created": "Created",
         "actions": "Actions",
@@ -209,6 +257,7 @@
         "accommodation": "Accommodation",
         "notes": "Notes",
         "resendEmail": "Resend Email",
+        "resendingEmail": "Resending…",
         "confirmResend": "Resend registration email?",
         "resendSuccess": "Registration email resent successfully.",
         "resendError": "Failed to resend registration email."
@@ -223,19 +272,13 @@
         "cancel": "Cancel",
         "save": "Save",
         "stay": "Stay",
-        "stayFriSat": "Fri–Sat",
-        "staySatSun": "Sat–Sun",
-        "stayFriSun": "Fri–Sun",
-        "staySatOnly": "Sat",
         "accommodation": "Accommodation",
-        "accommodationPrivateRoom": "Private",
-        "accommodationCommonRoom": "Common",
-        "accommodationOwnTent": "Tent",
-        "accommodationAnywhere": "Any",
-        "accommodationNone": "None",
         "adultsCount": "Adults",
         "childrenCount": "Children",
-        "notes": "Notes"
+        "notes": "Notes",
+        "cancelledStatus": "Cancelled",
+        "cancelledNotice": "This registration is currently cancelled.",
+        "reactivate": "Reactivate"
       },
       "add": {
         "title": "Add reservation",
@@ -243,14 +286,7 @@
         "email": "Email",
         "stay": "Stay",
         "stayPlaceholder": "Select stay…",
-        "staySatSun": "Saturday – Sunday",
-        "staySatOnly": "Saturday only",
         "accommodation": "Accommodation",
-        "accommodationPrivateRoom": "Private room",
-        "accommodationCommonRoom": "Common room",
-        "accommodationOwnTent": "Own tent",
-        "accommodationAnywhere": "Anywhere",
-        "accommodationNone": "None",
         "adultsCount": "Adults",
         "childrenCount": "Children",
         "notes": "Notes",
@@ -269,6 +305,7 @@
       }
     },
     "settings": {
+      "eyebrow": "Account",
       "title": "Settings",
       "changePassword": "Change Password",
       "currentPassword": "Current Password",

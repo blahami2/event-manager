@@ -49,10 +49,11 @@ describe("AdminNav", () => {
     vi.clearAllMocks();
   });
 
-  it("should render dashboard link when component mounts", () => {
+  it("should render a brand link pointing to /admin", () => {
     render(<AdminNav />);
-    const link = screen.getByRole("link", { name: "dashboard" });
-    expect(link).toBeDefined();
+    // The dashboard page was retired; the brand mark still links to /admin
+    // (which silently redirects to /admin/registrations).
+    const link = screen.getByRole("link", { name: "title" });
     expect(link.getAttribute("href")).toBe("/admin");
   });
 

@@ -4,16 +4,30 @@ import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
+import {
+  accommodationLabel,
+  stayLabel,
+  statusLabel,
+} from "@/i18n/labels";
+import { Badge, Button, ConfirmDialog } from "@/components/ui/admin";
 
 export interface RegistrationTableProps {
   readonly registrations: ReadonlyArray<RegistrationOutput>;
   readonly onEdit: (registration: RegistrationOutput) => void;
   readonly onCancel: (registrationId: string) => void;
   readonly onResendEmail?: (registrationId: string) => void;
+  readonly onRowClick?: (registration: RegistrationOutput) => void;
   readonly resendingId?: string | null;
+  readonly selectedIds?: ReadonlySet<string>;
+  readonly onToggleSelect?: (id: string) => void;
+  readonly onToggleSelectAll?: () => void;
+  readonly searchQuery?: string;
 }
 
 function formatDate(date: Date): string {
+  // Use a fixed locale so the SSR-rendered string matches the client-side
+  // hydration; the admin UI is organizer-facing so a single locale for
+  // dates is acceptable.
   return new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -21,101 +35,128 @@ function formatDate(date: Date): string {
   });
 }
 
-function formatAccommodation(accommodation: string): string {
-  switch (accommodation) {
-    case "PRIVATE_ROOM":
-      return "Private";
-    case "COMMON_ROOM":
-      return "Common";
-    case "OWN_TENT":
-      return "Tent";
-    case "ANYWHERE":
-      return "Any";
-    case "NONE":
-      return "None";
-    default:
-      return accommodation;
-  }
-}
-
-function formatStay(stay: string): string {
-  switch (stay) {
-    case "FRI_SAT":
-      return "Fri–Sat";
-    case "SAT_SUN":
-      return "Sat–Sun";
-    case "FRI_SUN":
-      return "Fri–Sun";
-    case "SAT_ONLY":
-      return "Sat";
-    default:
-      return stay;
-  }
-}
-
-function StatusBadge({ status }: { readonly status: RegistrationStatus }): React.ReactElement {
-  const styles =
-    status === RegistrationStatus.CONFIRMED
-      ? "bg-green-900/40 text-green-400 border border-green-700"
-      : "bg-red-900/40 text-red-400 border border-red-700";
-
-  return <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${styles}`}>{status}</span>;
-}
-
-type ConfirmAction = { type: "cancel"; id: string } | { type: "resend"; id: string } | null;
-
-function ConfirmDialog({
-  action,
-  message,
-  onConfirm,
-  onDismiss,
-  confirmLabel,
-  dismissLabel,
-  variant,
+function StatusBadge({
+  status,
+  label,
 }: {
-  readonly action: ConfirmAction;
-  readonly message: string;
-  readonly onConfirm: () => void;
-  readonly onDismiss: () => void;
-  readonly confirmLabel: string;
-  readonly dismissLabel: string;
-  readonly variant: "danger" | "info";
-}): React.ReactElement | null {
-  if (!action) return null;
+  readonly status: RegistrationStatus;
+  readonly label: string;
+}): React.ReactElement {
+  return (
+    <Badge variant={status === RegistrationStatus.CONFIRMED ? "success" : "danger"}>
+      {label}
+    </Badge>
+  );
+}
 
-  const confirmStyles = variant === "danger"
-    ? "bg-red-600 hover:bg-red-700"
-    : "bg-blue-600 hover:bg-blue-700";
+/**
+ * Highlight instances of `query` in `text`. Case-insensitive, whole-match
+ * substrings only (no regex). Renders highlighted spans with a subtle accent.
+ */
+function highlight(text: string, query: string): React.ReactNode {
+  if (!query) return text;
+  const lower = text.toLowerCase();
+  const needle = query.toLowerCase();
+  if (!lower.includes(needle)) return text;
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  let idx = lower.indexOf(needle);
+  let key = 0;
+  while (idx !== -1) {
+    if (idx > cursor) parts.push(text.slice(cursor, idx));
+    parts.push(
+      <mark
+        key={key++}
+        className="rounded-sm bg-accent-muted px-0.5 text-text-primary"
+      >
+        {text.slice(idx, idx + needle.length)}
+      </mark>,
+    );
+    cursor = idx + needle.length;
+    idx = lower.indexOf(needle, cursor);
+  }
+  if (cursor < text.length) parts.push(text.slice(cursor));
+  return parts;
+}
+
+function NotesCell({
+  notes,
+  expandLabel,
+  collapseLabel,
+}: {
+  readonly notes: string | null;
+  readonly expandLabel: string;
+  readonly collapseLabel: string;
+}): React.ReactElement {
+  const [expanded, setExpanded] = useState(false);
+  if (!notes)
+    return <span className="text-text-tertiary">{"\u2014"}</span>;
+
+  if (!expanded) {
+    // Collapsed: single line, ellipsis. Clicking "Read" expands in place.
+    return (
+      <div className="flex items-center gap-2">
+        <span className="truncate text-text-secondary" title={notes}>
+          {notes}
+        </span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpanded(true);
+          }}
+          className="shrink-0 text-xs font-medium text-accent transition-colors duration-150 hover:text-accent-hover focus:outline-none focus-visible:underline"
+          aria-expanded={false}
+        >
+          {expandLabel}
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onDismiss}>
-      <div className="mx-4 w-full max-w-sm rounded-xl border border-border-dark bg-dark-secondary p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <p className="mb-6 text-sm text-admin-text-primary">{message}</p>
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="rounded-lg border border-border-dark bg-transparent px-4 py-2 text-sm text-admin-text-secondary transition-colors hover:text-white"
-          >
-            {dismissLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className={`rounded-lg px-4 py-2 text-sm text-white transition-colors ${confirmStyles}`}
-          >
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col items-start gap-1">
+      <span className="whitespace-pre-wrap break-words text-text-secondary">
+        {notes}
+      </span>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setExpanded(false);
+        }}
+        className="text-xs font-medium text-accent transition-colors duration-150 hover:text-accent-hover focus:outline-none focus-visible:underline"
+        aria-expanded={true}
+      >
+        {collapseLabel}
+      </button>
     </div>
   );
 }
 
-export function RegistrationTable({ registrations, onEdit, onCancel, onResendEmail, resendingId }: RegistrationTableProps): React.ReactElement {
+type ConfirmAction =
+  | { type: "cancel"; id: string }
+  | { type: "resend"; id: string }
+  | null;
+
+export function RegistrationTable({
+  registrations,
+  onEdit,
+  onCancel,
+  onResendEmail,
+  onRowClick,
+  resendingId,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
+  searchQuery = "",
+}: RegistrationTableProps): React.ReactElement {
   const t = useTranslations("admin.registrations.table");
   const tReg = useTranslations("admin.registrations");
+  const tEnums = useTranslations();
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+
+  const hasSelection = !!selectedIds && !!onToggleSelect && !!onToggleSelectAll;
 
   const handleCancelClick = useCallback((id: string) => {
     setConfirmAction({ type: "cancel", id });
@@ -141,112 +182,284 @@ export function RegistrationTable({ registrations, onEdit, onCancel, onResendEma
 
   if (registrations.length === 0) {
     return (
-      <div className="rounded-xl border border-border-dark bg-dark-secondary/50 py-16 text-center text-sm text-admin-text-secondary shadow-sm backdrop-blur-sm">
-        <p className="opacity-80">{tReg("noResults")}</p>
+      <div className="rounded-lg border border-border-default bg-surface-raised/40 px-6 py-16 text-center">
+        <div
+          aria-hidden="true"
+          className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-border-default bg-surface-base text-text-tertiary"
+        >
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9 17v-2a4 4 0 014-4h4m-4 4l4-4m0 0l-4-4m4 4H3"
+            />
+          </svg>
+        </div>
+        <p className="text-sm text-text-secondary">{tReg("noResults")}</p>
       </div>
     );
   }
 
+  const confirmMessage =
+    confirmAction?.type === "cancel"
+      ? t("confirmCancel")
+      : confirmAction?.type === "resend"
+        ? t("confirmResend")
+        : "";
+  const confirmVariant: "danger" | "info" =
+    confirmAction?.type === "cancel" ? "danger" : "info";
+
+  const allSelected =
+    hasSelection && registrations.every((r) => selectedIds.has(r.id));
+  const someSelected =
+    hasSelection &&
+    !allSelected &&
+    registrations.some((r) => selectedIds.has(r.id));
+
   return (
     <>
       <ConfirmDialog
-        action={confirmAction}
-        message={confirmAction?.type === "cancel" ? t("confirmCancel") : t("confirmResend")}
-        onConfirm={handleConfirm}
-        onDismiss={handleDismiss}
+        open={confirmAction !== null}
+        title={confirmMessage}
+        message={confirmMessage}
         confirmLabel={t("yes")}
         dismissLabel={t("no")}
-        variant={confirmAction?.type === "cancel" ? "danger" : "info"}
+        onConfirm={handleConfirm}
+        onDismiss={handleDismiss}
+        variant={confirmVariant}
       />
-      <div className="overflow-hidden rounded-xl border border-border-dark bg-dark-secondary/50 shadow-sm backdrop-blur-sm">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border-dark">
-            <thead className="bg-dark-secondary/80">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("name")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("email")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("stay")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("adults")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("children")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("accommodation")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("notes")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("status")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("created")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-admin-text-secondary">
-                  {t("actions")}
-                </th>
+      <div className="overflow-hidden rounded-lg border border-border-default bg-surface-raised/40">
+        <div className="admin-scroll overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border-default bg-surface-raised/80">
+                {hasSelection ? (
+                  <th scope="col" className="w-10 px-4 py-3 text-left">
+                    <IndeterminateCheckbox
+                      checked={allSelected}
+                      indeterminate={someSelected}
+                      onChange={onToggleSelectAll}
+                      ariaLabel={t("selectAll")}
+                    />
+                  </th>
+                ) : null}
+                <HeaderCell>{t("name")}</HeaderCell>
+                <HeaderCell>{t("stay")}</HeaderCell>
+                <HeaderCell align="right">{t("adults")}</HeaderCell>
+                <HeaderCell align="right">{t("children")}</HeaderCell>
+                <HeaderCell>{t("accommodation")}</HeaderCell>
+                <HeaderCell width="w-[260px] min-w-[260px]">{t("notes")}</HeaderCell>
+                <HeaderCell>{t("status")}</HeaderCell>
+                <HeaderCell>{t("created")}</HeaderCell>
+                <HeaderCell align="right">{t("actions")}</HeaderCell>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-dark bg-transparent">
-              {registrations.map((reg) => (
-                <tr key={reg.id} className="group transition-all duration-200 hover:bg-admin-hover/80 hover:shadow-sm">
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-admin-text-primary">{reg.name}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{reg.email}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{formatStay(reg.stay)}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{reg.adultsCount}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{reg.childrenCount}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{formatAccommodation(reg.accommodation)}</td>
-                  <td className="max-w-xs truncate px-6 py-4 text-sm text-[#c8c8c8]" title={reg.notes ?? undefined}>
-                    {reg.notes ?? "\u2014"}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm">
-                    <StatusBadge status={reg.status} />
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-[#c8c8c8]">{formatDate(reg.createdAt)}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm">
-                    <span className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => onEdit(reg)}
-                        className="text-accent transition-colors hover:text-red-400 group-hover:scale-105"
+            <tbody className="divide-y divide-border-subtle">
+              {registrations.map((reg) => {
+                const isCancelled = reg.status === RegistrationStatus.CANCELLED;
+                const isSelected = hasSelection && selectedIds.has(reg.id);
+                return (
+                  <tr
+                    key={reg.id}
+                    data-selected={isSelected || undefined}
+                    onClick={onRowClick ? () => onRowClick(reg) : undefined}
+                    className={`group transition-colors duration-150 ${
+                      onRowClick ? "cursor-pointer" : ""
+                    } ${isSelected ? "bg-accent-muted/40" : "hover:bg-admin-hover/60"}`}
+                  >
+                    {hasSelection ? (
+                      <td
+                        className="w-10 px-4 py-3 align-top"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        {t("edit")}
-                      </button>
-                      {reg.status !== RegistrationStatus.CANCELLED && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => handleCancelClick(reg.id)}
-                            className="text-red-500 transition-colors hover:text-red-300 group-hover:scale-105"
-                          >
-                            {t("cancel")}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleResendClick(reg.id)}
-                            disabled={resendingId === reg.id}
-                            className="text-blue-400 transition-colors hover:text-blue-300 group-hover:scale-105 disabled:opacity-50"
-                          >
-                            {resendingId === reg.id ? t("resendEmail") + "..." : t("resendEmail")}
-                          </button>
-                        </>
-                      )}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={() => onToggleSelect(reg.id)}
+                          ariaLabel={t("selectRow", { name: reg.name })}
+                        />
+                      </td>
+                    ) : null}
+                    <td className="min-w-[200px] px-4 py-3 align-top">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-text-primary">
+                          {highlight(reg.name, searchQuery)}
+                        </span>
+                        <span className="mt-0.5 break-all font-mono text-xs text-text-tertiary">
+                          {highlight(reg.email, searchQuery)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-top text-sm text-text-secondary">
+                      {stayLabel(reg.stay, tEnums)}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-sm tabular-nums text-text-primary">
+                      {reg.adultsCount}
+                    </td>
+                    <td className={`whitespace-nowrap px-4 py-3 text-right align-top font-mono text-sm tabular-nums ${reg.childrenCount === 0 ? "text-text-tertiary" : "text-text-primary"}`}>
+                      {reg.childrenCount}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-top text-sm text-text-secondary">
+                      {accommodationLabel(reg.accommodation, tEnums)}
+                    </td>
+                    <td className="w-[260px] min-w-[260px] max-w-[260px] px-4 py-3 align-top text-sm">
+                      <NotesCell
+                        notes={reg.notes}
+                        expandLabel={tReg("notesExpand")}
+                        collapseLabel={tReg("notesCollapse")}
+                      />
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-top">
+                      <StatusBadge
+                        status={reg.status}
+                        label={statusLabel(reg.status, tEnums)}
+                      />
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-top font-mono text-xs tabular-nums text-text-tertiary">
+                      {formatDate(reg.createdAt)}
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-4 py-3 text-right align-top"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(reg)}
+                        >
+                          {t("edit")}
+                        </Button>
+                        {!isCancelled ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              loading={resendingId === reg.id}
+                              onClick={() => handleResendClick(reg.id)}
+                              aria-label={t("resendEmail")}
+                              title={t("resendEmail")}
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                />
+                              </svg>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCancelClick(reg.id)}
+                              aria-label={t("cancel")}
+                              title={t("cancel")}
+                              className="hover:text-danger"
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                            </Button>
+                          </>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
     </>
+  );
+}
+
+function HeaderCell({
+  children,
+  align = "left",
+  width,
+}: {
+  readonly children: React.ReactNode;
+  readonly align?: "left" | "right";
+  readonly width?: string;
+}): React.ReactElement {
+  return (
+    <th
+      scope="col"
+      className={`px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-text-tertiary ${
+        align === "right" ? "text-right" : "text-left"
+      } ${width ?? ""}`.trim()}
+    >
+      {children}
+    </th>
+  );
+}
+
+function Checkbox({
+  checked,
+  onChange,
+  ariaLabel,
+}: {
+  readonly checked: boolean;
+  readonly onChange: () => void;
+  readonly ariaLabel: string;
+}): React.ReactElement {
+  return (
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      aria-label={ariaLabel}
+      className="h-4 w-4 cursor-pointer rounded border-border-strong bg-surface-sunken text-accent accent-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
+    />
+  );
+}
+
+function IndeterminateCheckbox({
+  checked,
+  indeterminate,
+  onChange,
+  ariaLabel,
+}: {
+  readonly checked: boolean;
+  readonly indeterminate: boolean;
+  readonly onChange?: () => void;
+  readonly ariaLabel: string;
+}): React.ReactElement {
+  return (
+    <input
+      ref={(el) => {
+        if (el) el.indeterminate = indeterminate && !checked;
+      }}
+      type="checkbox"
+      checked={checked}
+      onChange={() => onChange?.()}
+      aria-label={ariaLabel}
+      className="h-4 w-4 cursor-pointer rounded border-border-strong bg-surface-sunken text-accent accent-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
+    />
   );
 }

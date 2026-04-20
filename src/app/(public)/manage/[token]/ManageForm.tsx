@@ -6,12 +6,16 @@ import { registrationSchema } from "@/lib/validation/registration";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { StayOption } from "@/types/registration";
+import { AccommodationOption, StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 import type { ApiErrorResponse } from "@/types/api";
-
-/** Stay options hidden from new selections but shown for legacy registrations. */
-const LEGACY_STAY_OPTIONS: ReadonlyArray<StayOption> = [StayOption.FRI_SAT, StayOption.FRI_SUN] as const;
+import {
+  ACCOMMODATION_OPTIONS,
+  CURRENT_STAY_OPTIONS,
+  LEGACY_STAY_OPTIONS,
+  accommodationLabel,
+  stayLabel,
+} from "@/i18n/labels";
 
 interface ManageFormProps {
   readonly registration: RegistrationOutput;
@@ -35,11 +39,14 @@ export function ManageForm({
   const t = useTranslations("manage");
   const tForm = useTranslations("form");
   const tErrors = useTranslations("errors");
+  const tEnums = useTranslations();
 
   const [name, setName] = useState(registration.name);
   const [email, setEmail] = useState(registration.email);
-  const [stay, setStay] = useState(registration.stay as string);
-  const [accommodation, setAccommodation] = useState(registration.accommodation as string);
+  const [stay, setStay] = useState<StayOption>(registration.stay);
+  const [accommodation, setAccommodation] = useState<AccommodationOption>(
+    registration.accommodation,
+  );
   const [adultsCount, setAdultsCount] = useState(
     String(registration.adultsCount),
   );
@@ -57,10 +64,13 @@ export function ManageForm({
   const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
-    if (stay === "SAT_ONLY") {
-      setAccommodation("NONE");
-    } else if (accommodation === "NONE" && stay !== "") {
-      setAccommodation("ANYWHERE");
+    if (stay === StayOption.SAT_ONLY) {
+      setAccommodation(AccommodationOption.NONE);
+    } else if (
+      accommodation === AccommodationOption.NONE &&
+      stay !== registration.stay
+    ) {
+      setAccommodation(AccommodationOption.ANYWHERE);
     }
   }, [stay]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -190,6 +200,9 @@ export function ManageForm({
     );
   }
 
+  const isOnLegacyStay = LEGACY_STAY_OPTIONS.includes(registration.stay);
+  const accommodationDisabled = stay === StayOption.SAT_ONLY;
+
   return (
     <div>
       <form onSubmit={handleSave} noValidate>
@@ -223,17 +236,19 @@ export function ManageForm({
           <select
             id="stay"
             value={stay}
-            onChange={(e) => setStay(e.target.value)}
+            onChange={(e) => setStay(e.target.value as StayOption)}
             className="form-input w-full border-2 border-border-dark bg-input-bg p-[15px] font-body text-base text-white transition-colors duration-200"
           >
-            <option value="">{tForm("stayPlaceholder")}</option>
-            {LEGACY_STAY_OPTIONS.includes(registration.stay) && (
+            {isOnLegacyStay ? (
               <option value={registration.stay}>
-                {registration.stay === StayOption.FRI_SAT ? tForm("stayFriSat") : tForm("stayFriSun")}
+                {stayLabel(registration.stay, tEnums)}
               </option>
-            )}
-            <option value="SAT_SUN">{tForm("staySatSun")}</option>
-            <option value="SAT_ONLY">{tForm("staySatOnly")}</option>
+            ) : null}
+            {CURRENT_STAY_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {stayLabel(opt, tEnums)}
+              </option>
+            ))}
           </select>
         </FormField>
 
@@ -245,20 +260,22 @@ export function ManageForm({
           <select
             id="accommodation"
             value={accommodation}
-            onChange={(e) => setAccommodation(e.target.value)}
+            onChange={(e) =>
+              setAccommodation(e.target.value as AccommodationOption)
+            }
             className="form-input w-full border-2 border-border-dark bg-input-bg p-[15px] font-body text-base text-white transition-colors duration-200"
-            disabled={stay === "SAT_ONLY"}
+            disabled={accommodationDisabled}
           >
-            {stay === "SAT_ONLY" ? (
-              <option value="NONE">{tForm("accommodationNone")}</option>
+            {accommodationDisabled ? (
+              <option value={AccommodationOption.NONE}>
+                {accommodationLabel(AccommodationOption.NONE, tEnums)}
+              </option>
             ) : (
-              <>
-                <option value="ANYWHERE">{tForm("accommodationAnywhere")}</option>
-                <option value="PRIVATE_ROOM">{tForm("accommodationPrivateRoom")}</option>
-                <option value="COMMON_ROOM">{tForm("accommodationCommonRoom")}</option>
-                <option value="OWN_TENT">{tForm("accommodationOwnTent")}</option>
-                <option value="NONE">{tForm("accommodationNone")}</option>
-              </>
+              ACCOMMODATION_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {accommodationLabel(opt, tEnums)}
+                </option>
+              ))
             )}
           </select>
         </FormField>
