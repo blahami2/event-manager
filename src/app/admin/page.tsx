@@ -6,38 +6,43 @@ import { getRegistrationStats } from "@/lib/usecases/admin-actions";
 import { StatsCard } from "@/components/admin/StatsCard";
 
 export default async function AdminDashboardPage(): Promise<React.ReactElement> {
-  const [stats, t] = await Promise.all([getRegistrationStats(), getTranslations("admin.dashboard")]);
+  const [stats, t] = await Promise.all([
+    getRegistrationStats(),
+    getTranslations("admin.dashboard"),
+  ]);
 
   return (
     <div className="space-y-8">
-      <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">{t("title")}</h1>
+      <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">
+        {t("title")}
+      </h1>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard label={t("totalRegistrations")} value={stats.total} />
-        <StatsCard label="Admins" value={4} />
         <StatsCard label={t("confirmed")} value={stats.confirmed} />
         <StatsCard label={t("cancelled")} value={stats.cancelled} />
         <StatsCard label={t("totalAdults")} value={stats.totalAdults} />
         <StatsCard label={t("totalChildren")} value={stats.totalChildren} />
       </div>
 
-      <div className="flex gap-4 pt-4">
+      <div className="flex flex-wrap gap-3 pt-4">
         <Link
           href="/admin/registrations"
-          className="inline-flex items-center justify-center rounded-lg border-2 border-accent bg-accent px-6 py-2.5 text-sm font-bold tracking-wide text-white shadow-lg shadow-accent/20 transition-all duration-300 hover:bg-transparent hover:text-accent hover:shadow-none"
+          className="inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-primary"
         >
           {t("viewRegistrations")}
         </Link>
         <a
           href="/api/admin/registrations/export"
           download
-          className="group inline-flex items-center gap-2 rounded-lg border border-border-dark bg-dark-secondary/60 px-6 py-2.5 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/5 hover:text-white"
+          className="inline-flex items-center gap-2 rounded-md border border-border-dark bg-dark-secondary px-4 py-2 text-sm font-medium text-admin-text-primary transition-colors hover:bg-admin-hover hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-border-dark focus-visible:ring-offset-2 focus-visible:ring-offset-dark-primary"
         >
           <svg
-            className="h-4 w-4 transition-transform group-hover:-translate-y-0.5"
+            className="h-4 w-4"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"

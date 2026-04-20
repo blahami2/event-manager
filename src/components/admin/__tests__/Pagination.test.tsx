@@ -5,9 +5,19 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Pagination } from "../Pagination";
 
-// Mock next-intl
+// Mock next-intl: return the requested key verbatim. Where the translator is
+// called with values (e.g., `pageOfPages({ page, total })`), we render a
+// predictable template so the test can assert the dynamic parts.
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => (key: string, values?: Record<string, unknown>) => {
+    if (values) {
+      return Object.entries(values).reduce(
+        (acc, [name, val]) => acc.replaceAll(`{${name}}`, String(val)),
+        key === "pageOfPages" ? "Page {page} of {total}" : key,
+      );
+    }
+    return key;
+  },
 }));
 
 describe("Pagination", () => {
@@ -20,37 +30,37 @@ describe("Pagination", () => {
 
   it("renders page info and navigation", () => {
     render(<Pagination page={1} pageSize={20} total={50} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} />);
-    const showingText = screen.getByText(/Showing/);
-    expect(showingText).toBeDefined();
-    expect(showingText.textContent).toContain("1");
-    expect(showingText.textContent).toContain("20");
-    expect(showingText.textContent).toContain("50");
+    // The aggregate paragraph contains every dynamic fragment.
+    const paragraph = screen.getByText(/showing/);
+    expect(paragraph.textContent).toContain("1");
+    expect(paragraph.textContent).toContain("20");
+    expect(paragraph.textContent).toContain("50");
     expect(screen.getByText("Page 1 of 3")).toBeDefined();
   });
 
   it("disables Previous on first page", () => {
     render(<Pagination page={1} pageSize={20} total={50} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} />);
-    const prev = screen.getByText("Previous") as HTMLButtonElement;
+    const prev = screen.getByRole("button", { name: "previous" }) as HTMLButtonElement;
     expect(prev.disabled).toBe(true);
   });
 
   it("disables Next on last page", () => {
     render(<Pagination page={3} pageSize={20} total={50} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} />);
-    const next = screen.getByText("Next") as HTMLButtonElement;
+    const next = screen.getByRole("button", { name: "next" }) as HTMLButtonElement;
     expect(next.disabled).toBe(true);
   });
 
   it("calls onPageChange when Next is clicked", () => {
     const onPageChange = vi.fn();
     render(<Pagination page={1} pageSize={20} total={50} onPageChange={onPageChange} onPageSizeChange={vi.fn()} />);
-    fireEvent.click(screen.getByText("Next"));
+    fireEvent.click(screen.getByRole("button", { name: "next" }));
     expect(onPageChange).toHaveBeenCalledWith(2);
   });
 
   it("calls onPageChange when Previous is clicked", () => {
     const onPageChange = vi.fn();
     render(<Pagination page={2} pageSize={20} total={50} onPageChange={onPageChange} onPageSizeChange={vi.fn()} />);
-    fireEvent.click(screen.getByText("Previous"));
+    fireEvent.click(screen.getByRole("button", { name: "previous" }));
     expect(onPageChange).toHaveBeenCalledWith(1);
   });
 

@@ -5,8 +5,10 @@ import { useTranslations } from "next-intl";
 import { RegistrationFilters } from "@/components/admin/RegistrationFilters";
 import { RegistrationTable } from "@/components/admin/RegistrationTable";
 import { EditRegistrationModal } from "@/components/admin/EditRegistrationModal";
+import type { EditRegistrationPayload } from "@/components/admin/EditRegistrationModal";
 import { AddRegistrationModal } from "@/components/admin/AddRegistrationModal";
 import { Pagination } from "@/components/admin/Pagination";
+import { Button } from "@/components/ui/admin";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -141,10 +143,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   }, [loadData, t]);
 
   const handleSave = useCallback(
-    async (
-      id: string,
-      data: { name: string; email: string; stay: string; accommodation: string; adultsCount: number; childrenCount: number; notes?: string },
-    ) => {
+    async (id: string, data: EditRegistrationPayload) => {
       try {
         const res = await fetch("/api/admin/registrations", {
           method: "PUT",
@@ -165,16 +164,14 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">{t("title")}</h1>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleOpenAdd}
-            className="group inline-flex items-center gap-2 rounded-lg border-2 border-accent bg-accent px-5 py-2 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-300 hover:bg-transparent hover:text-accent hover:shadow-lg hover:shadow-accent/20"
-          >
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+        <h1 className="font-heading text-3xl uppercase tracking-widest text-admin-text-primary">
+          {t("title")}
+        </h1>
+        <div className="flex items-center gap-2">
+          <Button variant="primary" onClick={handleOpenAdd}>
             <svg
-              className="h-4 w-4 transition-transform group-hover:rotate-90"
+              className="h-4 w-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -188,17 +185,18 @@ export default function AdminRegistrationsPage(): React.ReactElement {
               />
             </svg>
             {t("addReservation")}
-          </button>
+          </Button>
           <a
             href="/api/admin/registrations/export"
             download
-            className="group inline-flex items-center gap-2 rounded-lg border border-border-dark bg-dark-secondary/60 px-5 py-2 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/5 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-md border border-border-dark bg-dark-secondary px-4 py-2 text-sm font-medium text-admin-text-primary transition-colors hover:bg-admin-hover hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-border-dark focus-visible:ring-offset-2 focus-visible:ring-offset-dark-primary"
           >
             <svg
-              className="h-4 w-4 transition-transform group-hover:-translate-y-0.5"
+              className="h-4 w-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -223,7 +221,10 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
       <div className="mt-4">
         {state.error && (
-          <div className="mb-4 rounded-md border border-red-700 bg-red-900/40 p-4 text-sm text-red-400" role="alert">
+          <div
+            className="mb-4 rounded-md border border-admin-danger/40 bg-admin-danger/10 p-4 text-sm text-admin-danger"
+            role="alert"
+          >
             {state.error}
           </div>
         )}
@@ -232,8 +233,8 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           <div
             className={`mb-4 rounded-md border p-4 text-sm ${
               resendFeedback.type === "success"
-                ? "border-green-700 bg-green-900/40 text-green-400"
-                : "border-red-700 bg-red-900/40 text-red-400"
+                ? "border-admin-success/40 bg-admin-success/10 text-admin-success"
+                : "border-admin-danger/40 bg-admin-danger/10 text-admin-danger"
             }`}
             role="alert"
           >
@@ -245,8 +246,8 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           <div
             className={`mb-4 rounded-md border p-4 text-sm ${
               addFeedback.type === "success"
-                ? "border-green-700 bg-green-900/40 text-green-400"
-                : "border-red-700 bg-red-900/40 text-red-400"
+                ? "border-admin-success/40 bg-admin-success/10 text-admin-success"
+                : "border-admin-danger/40 bg-admin-danger/10 text-admin-danger"
             }`}
             role="alert"
           >
@@ -255,7 +256,9 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         )}
 
         {state.loading ? (
-          <div className="py-12 text-center text-sm text-admin-text-secondary">{t("loading")}</div>
+          <div className="py-12 text-center text-sm text-admin-text-secondary">
+            {t("loading")}
+          </div>
         ) : state.data ? (
           <>
             <RegistrationTable
@@ -276,8 +279,19 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         ) : null}
       </div>
 
-      {editing && <EditRegistrationModal registration={editing} onSave={handleSave} onClose={() => setEditing(null)} />}
-      {isAdding && <AddRegistrationModal onClose={handleCloseAdd} onCreated={handleAddCreated} />}
+      {editing && (
+        <EditRegistrationModal
+          registration={editing}
+          onSave={handleSave}
+          onClose={() => setEditing(null)}
+        />
+      )}
+      {isAdding && (
+        <AddRegistrationModal
+          onClose={handleCloseAdd}
+          onCreated={handleAddCreated}
+        />
+      )}
     </div>
   );
 }

@@ -11,6 +11,11 @@ export interface RegistrationFiltersProps {
   readonly onSearchChange: (search: string) => void;
 }
 
+/**
+ * Compact filter bar for the registrations list. The search input is allowed
+ * to grow to fill available space so typical search queries aren't clipped;
+ * the status selector has a fixed width because its options are short.
+ */
 export function RegistrationFilters({
   status,
   search,
@@ -39,9 +44,20 @@ export function RegistrationFilters({
     [onSearchChange],
   );
 
+  // NOTE: the inputs are rendered as plain <select>/<input> (not the Input /
+  // Select primitives) because the filter bar relies on visually-hidden
+  // labels — the primitives always render a visible label above the field,
+  // which would look odd in a compact filter strip. The classes are kept in
+  // sync with the primitive's look via the shared CONTROL_CLASSES constant.
+  const controlClasses =
+    "block w-full rounded-md border border-border-dark bg-input-bg px-3 py-2 " +
+    "text-sm text-admin-text-primary placeholder:text-admin-text-secondary/60 " +
+    "shadow-sm transition-colors duration-150 " +
+    "focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/40";
+
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-      <div>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+      <div className="sm:w-48">
         <label htmlFor="status-filter" className="sr-only">
           {t("statusLabel")}
         </label>
@@ -49,7 +65,7 @@ export function RegistrationFilters({
           id="status-filter"
           value={status}
           onChange={handleStatusChange}
-          className="rounded-lg border border-border-dark bg-dark-secondary/80 px-4 py-2.5 text-sm text-admin-text-primary shadow-sm backdrop-blur-sm transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className={controlClasses}
         >
           {statusOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -68,7 +84,7 @@ export function RegistrationFilters({
           placeholder={t("searchPlaceholder")}
           value={search}
           onChange={handleSearchChange}
-          className="w-full rounded-lg border border-border-dark bg-dark-secondary/80 px-4 py-2.5 text-sm text-admin-text-primary placeholder:text-admin-text-secondary/70 shadow-sm backdrop-blur-sm transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 sm:max-w-xs"
+          className={controlClasses}
         />
       </div>
     </div>

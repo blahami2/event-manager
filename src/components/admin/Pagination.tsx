@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/admin";
 import { PageSizeSelector } from "./PageSizeSelector";
 
 export interface PaginationProps {
@@ -10,7 +12,14 @@ export interface PaginationProps {
   readonly onPageSizeChange: (pageSize: number) => void;
 }
 
-export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChange }: PaginationProps): React.ReactElement | null {
+export function Pagination({
+  page,
+  pageSize,
+  total,
+  onPageChange,
+  onPageSizeChange,
+}: PaginationProps): React.ReactElement | null {
+  const t = useTranslations("admin.pagination");
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   if (totalPages <= 1) {
@@ -21,35 +30,39 @@ export function Pagination({ page, pageSize, total, onPageChange, onPageSizeChan
   const end = Math.min(page * pageSize, total);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border-dark/50 px-6 py-4">
-      <div className="flex items-center gap-6">
+    <div className="flex flex-col items-center justify-between gap-4 border-t border-border-dark/50 px-6 py-4 sm:flex-row">
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
         <p className="text-sm text-admin-text-secondary">
-          Showing <span className="font-medium text-admin-text-primary">{start}</span> to{" "}
-          <span className="font-medium text-admin-text-primary">{end}</span> of{" "}
-          <span className="font-medium text-admin-text-primary">{total}</span> results
+          {t("showing")}{" "}
+          <span className="font-medium text-admin-text-primary">{start}</span>{" "}
+          {t("to")}{" "}
+          <span className="font-medium text-admin-text-primary">{end}</span>{" "}
+          {t("of")}{" "}
+          <span className="font-medium text-admin-text-primary">{total}</span>{" "}
+          {t("results")}
         </p>
         <PageSizeSelector pageSize={pageSize} onPageSizeChange={onPageSizeChange} />
       </div>
-      <nav className="flex items-center gap-2" aria-label="Pagination">
-        <button
-          type="button"
+      <nav className="flex items-center gap-2" aria-label={t("label")}>
+        <Button
+          variant="secondary"
+          size="sm"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
-          className="rounded-lg border border-border-dark bg-dark-secondary/60 px-4 py-2 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-200 hover:border-white/20 hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border-dark disabled:hover:bg-dark-secondary/60"
         >
-          Previous
-        </button>
-        <span className="flex items-center px-4 text-sm font-medium text-admin-text-secondary">
-          Page {page} of {totalPages}
+          {t("previous")}
+        </Button>
+        <span className="px-2 text-sm font-medium text-admin-text-secondary">
+          {t("pageOfPages", { page, total: totalPages })}
         </span>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="rounded-lg border border-border-dark bg-dark-secondary/60 px-4 py-2 text-sm font-medium text-admin-text-secondary shadow-sm backdrop-blur-md transition-all duration-200 hover:border-white/20 hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border-dark disabled:hover:bg-dark-secondary/60"
         >
-          Next
-        </button>
+          {t("next")}
+        </Button>
       </nav>
     </div>
   );

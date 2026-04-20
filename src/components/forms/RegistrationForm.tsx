@@ -6,6 +6,13 @@ import { registrationSchema } from "@/lib/validation/registration";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import {
+  ACCOMMODATION_OPTIONS,
+  CURRENT_STAY_OPTIONS,
+  accommodationLabel,
+  stayLabel,
+} from "@/i18n/labels";
+import { AccommodationOption, StayOption } from "@/types/registration";
 import type { ApiErrorResponse } from "@/types/api";
 
 interface FieldErrors {
@@ -44,15 +51,21 @@ const submitStyle: React.CSSProperties = {
   transition: "all 0.3s ease",
 };
 
+/** Sentinel used to represent "no stay selected" in local state. */
+type StaySelection = StayOption | "";
+
 export function RegistrationForm(): React.ReactElement {
   const t = useTranslations("registration");
   const tForm = useTranslations("form");
   const tErrors = useTranslations("errors");
+  const tEnums = useTranslations();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [stay, setStay] = useState("");
-  const [accommodation, setAccommodation] = useState("ANYWHERE");
+  const [stay, setStay] = useState<StaySelection>("");
+  const [accommodation, setAccommodation] = useState<AccommodationOption>(
+    AccommodationOption.ANYWHERE,
+  );
   const [adultsCount, setAdultsCount] = useState("1");
   const [childrenCount, setChildrenCount] = useState("0");
   const [notes, setNotes] = useState("");
@@ -62,10 +75,13 @@ export function RegistrationForm(): React.ReactElement {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (stay === "SAT_ONLY") {
-      setAccommodation("NONE");
-    } else if (accommodation === "NONE" && stay !== "") {
-      setAccommodation("ANYWHERE");
+    if (stay === StayOption.SAT_ONLY) {
+      setAccommodation(AccommodationOption.NONE);
+    } else if (
+      accommodation === AccommodationOption.NONE &&
+      stay !== ""
+    ) {
+      setAccommodation(AccommodationOption.ANYWHERE);
     }
   }, [stay]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -80,7 +96,7 @@ export function RegistrationForm(): React.ReactElement {
     const parsed = registrationSchema.safeParse({
       name: name.trim(),
       email: email.trim(),
-      stay: stay || undefined,
+      stay: stay === "" ? undefined : stay,
       accommodation,
       adultsCount: Number(adultsCount),
       childrenCount: Number(childrenCount),
@@ -145,6 +161,8 @@ export function RegistrationForm(): React.ReactElement {
     );
   }
 
+  const accommodationDisabled = stay === StayOption.SAT_ONLY;
+
   return (
     <form onSubmit={handleSubmit} noValidate>
       <FormField label={tForm("name")} htmlFor="name" error={fieldErrors.name}>
@@ -182,13 +200,16 @@ export function RegistrationForm(): React.ReactElement {
         <select
           id="stay"
           value={stay}
-          onChange={(e) => setStay(e.target.value)}
+          onChange={(e) => setStay(e.target.value as StaySelection)}
           className="form-input"
           style={selectStyle}
         >
           <option value="">{tForm("stayPlaceholder")}</option>
-          <option value="SAT_SUN">{tForm("staySatSun")}</option>
-          <option value="SAT_ONLY">{tForm("staySatOnly")}</option>
+          {CURRENT_STAY_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>
+              {stayLabel(opt, tEnums)}
+            </option>
+          ))}
         </select>
       </FormField>
 
@@ -200,21 +221,23 @@ export function RegistrationForm(): React.ReactElement {
         <select
           id="accommodation"
           value={accommodation}
-          onChange={(e) => setAccommodation(e.target.value)}
+          onChange={(e) =>
+            setAccommodation(e.target.value as AccommodationOption)
+          }
           className="form-input"
           style={selectStyle}
-          disabled={stay === "SAT_ONLY"}
+          disabled={accommodationDisabled}
         >
-          {stay === "SAT_ONLY" ? (
-            <option value="NONE">{tForm("accommodationNone")}</option>
+          {accommodationDisabled ? (
+            <option value={AccommodationOption.NONE}>
+              {accommodationLabel(AccommodationOption.NONE, tEnums)}
+            </option>
           ) : (
-            <>
-              <option value="ANYWHERE">{tForm("accommodationAnywhere")}</option>
-              <option value="PRIVATE_ROOM">{tForm("accommodationPrivateRoom")}</option>
-              <option value="COMMON_ROOM">{tForm("accommodationCommonRoom")}</option>
-              <option value="OWN_TENT">{tForm("accommodationOwnTent")}</option>
-              <option value="NONE">{tForm("accommodationNone")}</option>
-            </>
+            ACCOMMODATION_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {accommodationLabel(opt, tEnums)}
+              </option>
+            ))
           )}
         </select>
       </FormField>

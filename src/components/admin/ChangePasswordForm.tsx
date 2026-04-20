@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Button, Input } from "@/components/ui/admin";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -69,53 +70,40 @@ export function ChangePasswordForm(): React.ReactElement {
   }
 
   return (
-    <div className="max-w-md rounded-xl border border-border-dark bg-dark-secondary/60 p-8 shadow-lg backdrop-blur-md">
-      <h2 className="mb-6 text-xl font-semibold tracking-wide text-admin-text-primary">{t("changePassword")}</h2>
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label htmlFor="currentPassword" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
-            {t("currentPassword")}
-          </label>
-          <input
-            id="currentPassword"
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-            className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-          />
-        </div>
-        <div>
-          <label htmlFor="newPassword" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
-            {t("newPassword")}
-          </label>
-          <input
-            id="newPassword"
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-            minLength={8}
-            className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-          />
-        </div>
-        <div>
-          <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-admin-text-secondary">
-            {t("confirmPassword")}
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="block w-full rounded-lg border border-border-dark bg-dark-primary/50 px-3.5 py-2.5 text-sm text-admin-text-primary transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-          />
-        </div>
+    <div className="max-w-md rounded-xl border border-border-dark bg-dark-secondary/60 p-8 shadow-lg">
+      <h2 className="mb-6 text-xl font-semibold tracking-wide text-admin-text-primary">
+        {t("changePassword")}
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          label={t("currentPassword")}
+          id="currentPassword"
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          required
+        />
+        <Input
+          label={t("newPassword")}
+          id="newPassword"
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+          minLength={8}
+        />
+        <Input
+          label={t("confirmPassword")}
+          id="confirmPassword"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
 
         {errorMessage && (
           <div
-            className="rounded-lg border border-red-700/50 bg-red-900/20 p-3 text-sm text-red-400 backdrop-blur-sm"
+            className="rounded-md border border-admin-danger/40 bg-admin-danger/10 p-3 text-sm text-admin-danger"
             role="alert"
           >
             {errorMessage}
@@ -124,20 +112,21 @@ export function ChangePasswordForm(): React.ReactElement {
 
         {status === "success" && (
           <div
-            className="rounded-lg border border-green-700/50 bg-green-900/20 p-3 text-sm text-green-400 backdrop-blur-sm"
+            className="rounded-md border border-admin-success/40 bg-admin-success/10 p-3 text-sm text-admin-success"
             role="status"
           >
             {t("success")}
           </div>
         )}
 
-        <button
+        <Button
           type="submit"
-          disabled={status === "submitting"}
-          className="mt-6 inline-flex w-full items-center justify-center rounded-lg border-2 border-accent bg-accent px-6 py-2.5 text-sm font-bold tracking-wide text-white shadow-lg shadow-accent/20 transition-all duration-300 hover:bg-transparent hover:text-accent hover:shadow-none disabled:opacity-50"
+          variant="primary"
+          className="w-full"
+          loading={status === "submitting"}
         >
           {status === "submitting" ? t("submitting") : t("submit")}
-        </button>
+        </Button>
       </form>
     </div>
   );

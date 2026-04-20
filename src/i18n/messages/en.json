@@ -31,23 +31,33 @@
     "goHome": "Go home",
     "tooManyAttempts": "Too many attempts. Please try again later."
   },
+  "enums": {
+    "accommodation": {
+      "PRIVATE_ROOM": "Private room",
+      "COMMON_ROOM": "Common room",
+      "OWN_TENT": "Own tent",
+      "ANYWHERE": "Anywhere",
+      "NONE": "None"
+    },
+    "stay": {
+      "FRI_SAT": "Friday – Saturday",
+      "SAT_SUN": "Saturday – Sunday",
+      "FRI_SUN": "Friday – Sunday",
+      "SAT_ONLY": "Saturday only"
+    },
+    "status": {
+      "CONFIRMED": "Confirmed",
+      "CANCELLED": "Cancelled"
+    }
+  },
   "form": {
     "email": "Email",
     "name": "Participant",
     "namePlaceholder": "E.g. John Doe",
     "stay": "Stay",
     "stayPlaceholder": "Select your stay…",
-    "stayFriSat": "Friday – Saturday",
-    "staySatSun": "Saturday – Sunday",
-    "stayFriSun": "Friday – Sunday",
-    "staySatOnly": "Saturday only",
     "accommodation": "Accommodation",
     "accommodationPlaceholder": "Select accommodation…",
-    "accommodationPrivateRoom": "Private Room",
-    "accommodationCommonRoom": "Common Room",
-    "accommodationOwnTent": "Own Tent",
-    "accommodationAnywhere": "Anywhere",
-    "accommodationNone": "None",
     "adultsCount": "Number of Adults",
     "childrenCount": "Number of Children",
     "notes": "Notes (anything else)",
@@ -174,6 +184,16 @@
       "totalAdults": "Total Adults",
       "totalChildren": "Total Children"
     },
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "results": "results",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOfPages": "Page {page} of {total}",
+      "label": "Pagination"
+    },
     "registrations": {
       "title": "Registrations",
       "downloadCsv": "Download CSV",
@@ -184,6 +204,9 @@
       "errorCancel": "Failed to cancel registration",
       "errorUpdate": "Failed to update registration",
       "noResults": "No registrations found.",
+      "notesExpand": "Read full note",
+      "notesCollapse": "Hide full note",
+      "notesCounter": "{count} / {max}",
       "filters": {
         "statusLabel": "Filter by status",
         "all": "All",
@@ -209,6 +232,7 @@
         "accommodation": "Accommodation",
         "notes": "Notes",
         "resendEmail": "Resend Email",
+        "resendingEmail": "Resending…",
         "confirmResend": "Resend registration email?",
         "resendSuccess": "Registration email resent successfully.",
         "resendError": "Failed to resend registration email."
@@ -223,16 +247,7 @@
         "cancel": "Cancel",
         "save": "Save",
         "stay": "Stay",
-        "stayFriSat": "Fri–Sat",
-        "staySatSun": "Sat–Sun",
-        "stayFriSun": "Fri–Sun",
-        "staySatOnly": "Sat",
         "accommodation": "Accommodation",
-        "accommodationPrivateRoom": "Private",
-        "accommodationCommonRoom": "Common",
-        "accommodationOwnTent": "Tent",
-        "accommodationAnywhere": "Any",
-        "accommodationNone": "None",
         "adultsCount": "Adults",
         "childrenCount": "Children",
         "notes": "Notes"
@@ -243,14 +258,7 @@
         "email": "Email",
         "stay": "Stay",
         "stayPlaceholder": "Select stay…",
-        "staySatSun": "Saturday – Sunday",
-        "staySatOnly": "Saturday only",
         "accommodation": "Accommodation",
-        "accommodationPrivateRoom": "Private room",
-        "accommodationCommonRoom": "Common room",
-        "accommodationOwnTent": "Own tent",
-        "accommodationAnywhere": "Anywhere",
-        "accommodationNone": "None",
         "adultsCount": "Adults",
         "childrenCount": "Children",
         "notes": "Notes",

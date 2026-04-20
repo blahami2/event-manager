@@ -31,23 +31,33 @@
     "goHome": "Na úvodnú stránku",
     "tooManyAttempts": "Príliš veľa pokusov. Skúste to prosím neskôr."
   },
+  "enums": {
+    "accommodation": {
+      "PRIVATE_ROOM": "Samostatná izba",
+      "COMMON_ROOM": "Spoločná izba",
+      "OWN_TENT": "Vlastný stan",
+      "ANYWHERE": "Kdekoľvek",
+      "NONE": "Žiadne"
+    },
+    "stay": {
+      "FRI_SAT": "Piatok – Sobota",
+      "SAT_SUN": "Sobota – Nedeľa",
+      "FRI_SUN": "Piatok – Nedeľa",
+      "SAT_ONLY": "Iba sobota"
+    },
+    "status": {
+      "CONFIRMED": "Potvrdené",
+      "CANCELLED": "Zrušené"
+    }
+  },
   "form": {
     "email": "E-mail",
     "name": "Účastník",
     "namePlaceholder": "Napr. Peter Novák",
     "stay": "Pobyt",
     "stayPlaceholder": "Vyberte pobyt…",
-    "stayFriSat": "Piatok – Sobota",
-    "staySatSun": "Sobota – Nedeľa",
-    "stayFriSun": "Piatok – Nedeľa",
-    "staySatOnly": "Iba sobota",
     "accommodation": "Ubytovanie",
     "accommodationPlaceholder": "Vyberte ubytovanie…",
-    "accommodationPrivateRoom": "Vlastná izba",
-    "accommodationCommonRoom": "Spoločenská miestnosť",
-    "accommodationOwnTent": "Vlastný stan",
-    "accommodationAnywhere": "Kdekoľvek",
-    "accommodationNone": "Žiadne",
     "adultsCount": "Počet dospelých",
     "childrenCount": "Počet detí",
     "notes": "Poznámka (čo sa inam nezmestilo)",
@@ -174,6 +184,16 @@
       "totalAdults": "Celkom dospelých",
       "totalChildren": "Celkom detí"
     },
+    "pagination": {
+      "showing": "Zobrazené",
+      "to": "–",
+      "of": "z",
+      "results": "záznamov",
+      "previous": "Predchádzajúca",
+      "next": "Ďalšia",
+      "pageOfPages": "Strana {page} z {total}",
+      "label": "Stránkovanie"
+    },
     "registrations": {
       "title": "Registrácie",
       "downloadCsv": "Stiahnuť CSV",
@@ -184,6 +204,9 @@
       "errorCancel": "Nepodarilo sa zrušiť registráciu",
       "errorUpdate": "Nepodarilo sa aktualizovať registráciu",
       "noResults": "Žiadne registrácie nenájdené.",
+      "notesExpand": "Zobraziť celú poznámku",
+      "notesCollapse": "Skryť celú poznámku",
+      "notesCounter": "{count} / {max}",
       "filters": {
         "statusLabel": "Filtrovať podľa stavu",
         "all": "Všetko",
@@ -209,6 +232,7 @@
         "accommodation": "Ubytovanie",
         "notes": "Poznámky",
         "resendEmail": "Znovu odoslať e-mail",
+        "resendingEmail": "Odosielanie…",
         "confirmResend": "Znovu odoslať registračný e-mail?",
         "resendSuccess": "Registračný e-mail bol úspešne znovu odoslaný.",
         "resendError": "Nepodarilo sa znovu odoslať registračný e-mail."
@@ -223,16 +247,7 @@
         "cancel": "Zrušiť",
         "save": "Uložiť",
         "stay": "Pobyt",
-        "stayFriSat": "Pi–So",
-        "staySatSun": "So–Ne",
-        "stayFriSun": "Pi–Ne",
-        "staySatOnly": "So",
         "accommodation": "Ubytovanie",
-        "accommodationPrivateRoom": "Izba",
-        "accommodationCommonRoom": "Spol.",
-        "accommodationOwnTent": "Stan",
-        "accommodationAnywhere": "Kde.",
-        "accommodationNone": "Žiadne",
         "adultsCount": "Dospelí",
         "childrenCount": "Deti",
         "notes": "Poznámky"
@@ -243,14 +258,7 @@
         "email": "E-mail",
         "stay": "Pobyt",
         "stayPlaceholder": "Vyberte pobyt…",
-        "staySatSun": "Sobota – Nedeľa",
-        "staySatOnly": "Iba sobota",
         "accommodation": "Ubytovanie",
-        "accommodationPrivateRoom": "Samostatná izba",
-        "accommodationCommonRoom": "Spoločná izba",
-        "accommodationOwnTent": "Vlastný stan",
-        "accommodationAnywhere": "Kdekoľvek",
-        "accommodationNone": "Žiadne",
         "adultsCount": "Dospelí",
         "childrenCount": "Deti",
         "notes": "Poznámky",

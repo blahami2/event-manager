@@ -2322,4 +2322,132 @@ are a separate, clearly-scoped cleanup ticket.
 
 ---
 
+## T-ADMIN-A: Admin UI Tier A — Consolidate Labels and Extract Primitives
+
+**Status:** DONE
+
+### Description
+
+A prior audit of the admin UI surfaced three categories of pain:
+
+1. **Duplicated enum labels.** Accommodation and stay labels lived in
+   four divergent forms (`form.*`, `admin.registrations.edit.*`,
+   `admin.registrations.add.*`, and hardcoded `formatAccommodation` /
+   `formatStay` functions in `RegistrationTable`). Status values were
+   rendered as raw `"CONFIRMED"` / `"CANCELLED"` enums, never
+   translated.
+2. **Overflow bugs.** The notes cell used `truncate + title` so users
+   did not realize long notes were cut off. The email column used
+   `whitespace-nowrap` without a max-width. The search input was
+   constrained by `sm:max-w-xs` inside a `flex-1` container.
+3. **Inlined styling.** Every button was a unique 150-char Tailwind
+   string; every input/select repeated the same 6-line snippet.
+   Modals duplicated the same overlay/panel markup three times.
+
+Tier A eliminates the duplication and overflow without touching the
+visual design system — that's Tier B.
+
+### Files Added
+
+- `src/i18n/labels.ts` — canonical translator helpers
+  (`accommodationLabel`, `stayLabel`, `statusLabel`) plus pure key
+  helpers (`accommodationEnumKey`, etc.) and ordered option lists
+  (`ACCOMMODATION_OPTIONS`, `CURRENT_STAY_OPTIONS`,
+  `LEGACY_STAY_OPTIONS`).
+- `src/components/ui/admin/Badge.tsx` — semantic badge
+  (`success|warning|danger|neutral`).
+- `src/components/ui/admin/Button.tsx` — the single button primitive
+  (`primary|secondary|ghost|danger`, `sm|md`, `loading`).
+- `src/components/ui/admin/ConfirmDialog.tsx` — ConfirmDialog built on
+  Modal.
+- `src/components/ui/admin/Input.tsx` — label + control + helper /
+  error / counter with accessible wiring; also exports
+  `shouldShowCounter`.
+- `src/components/ui/admin/Modal.tsx` — focus-trapped dialog with
+  Escape-to-close, backdrop-to-close, focus restoration on close,
+  body-scroll lock, `createPortal` mount.
+- `src/components/ui/admin/Select.tsx` — dropdown primitive.
+- `src/components/ui/admin/Spinner.tsx` — sm/md spinner with
+  `role="status"`.
+- `src/components/ui/admin/Textarea.tsx` — multi-line input with
+  counter.
+- `src/components/ui/admin/field-classes.ts` — shared class strings
+  for form fields so focus ring / invalid state stays consistent.
+- `src/components/ui/admin/index.ts` — barrel.
+- `tests/unit/i18n/labels.test.ts` — 7 tests for the label helpers.
+- `src/components/ui/admin/__tests__/` — 41 tests across 8 primitives
+  (render, interactions, focus trap, error/loading states, variant
+  markers).
+
+### Files Modified (call sites swapped to primitives)
+
+- `src/i18n/messages/{en,cs,sk}.json` — added `enums.accommodation.*`,
+  `enums.stay.*`, `enums.status.*`, and `admin.pagination.*` keys.
+  Removed the duplicated `form.accommodation*`, `form.stay*`,
+  `admin.registrations.edit.accommodation*`,
+  `admin.registrations.edit.stay*`,
+  `admin.registrations.add.accommodation*`, and
+  `admin.registrations.add.stay*` keys. All three locales kept in
+  lockstep (enforced by `tests/unit/i18n/messages.test.ts`).
+- `src/components/admin/RegistrationTable.tsx` — dropped
+  `formatAccommodation` / `formatStay` helpers; reads from
+  `accommodationLabel` / `stayLabel` / `statusLabel`; replaces the
+  inline ConfirmDialog with the shared primitive; replaces status
+  pill with `Badge`; notes cell now shows short notes inline and a
+  `notesExpand` toggle for long notes (no more `truncate + title`);
+  email column wraps (`break-all`) so no horizontal scroll at
+  1280px.
+- `src/components/admin/RegistrationFilters.tsx` — removed
+  `sm:max-w-xs` from the search input so it fills available space;
+  status filter fixed at `sm:w-48`.
+- `src/components/admin/Pagination.tsx` — every string localized
+  (`admin.pagination.*`); buttons use `Button variant="secondary"`.
+- `src/components/admin/EditRegistrationModal.tsx` — rewritten on
+  `Modal + Input + Select + Textarea + Button`; form state typed
+  with proper enums (no more `as string` casting); notes textarea
+  height unified to 4 rows with a 500-char counter.
+- `src/components/admin/AddRegistrationModal.tsx` — same treatment;
+  notes height also 4 rows with counter.
+- `src/components/admin/ChangePasswordForm.tsx` — swapped to `Input`
+  + `Button`.
+- `src/app/admin/registrations/page.tsx` — top-right action buttons
+  use `Button`.
+- `src/app/admin/login/page.tsx` — swapped to `Input` + `Button`.
+- `src/app/admin/page.tsx` — removed the hardcoded `"Admins"` card
+  that read `value={4}` (it never reflected real data); buttons use
+  the admin styling.
+- `src/components/forms/RegistrationForm.tsx` — public registration
+  form now reads from `stayLabel` / `accommodationLabel`.
+- `src/app/(public)/manage/[token]/ManageForm.tsx` — same treatment
+  on the manage page.
+
+### Test Updates
+
+- `src/components/admin/__tests__/Pagination.test.tsx` — mock translator
+  now handles ICU-style values for `pageOfPages`; navigation buttons
+  queried by role + accessible name.
+- `src/components/admin/__tests__/RegistrationTable.test.tsx` — asserts
+  canonical enum keys (`enums.stay.FRI_SUN` etc.); updated notes
+  assertions for the new expand/collapse affordance.
+
+### Verification
+
+- `npx tsc --noEmit` — passes (0 errors).
+- `npm run lint` — passes (0 errors; the same 1 pre-existing warning
+  in `src/app/layout.tsx` unrelated to this change).
+- `npx vitest run` — **531 passed** (+48 over the 483 baseline).
+- `npx vitest run tests/security/ tests/architecture/` — 24 passed.
+- `npx prisma validate` — passes (with placeholder env vars).
+
+### Intentional Deviations
+
+- **`Admins` stat card removed from dashboard.** The previous
+  `AdminDashboardPage` rendered a `value={4}` hardcoded card labelled
+  `"Admins"`. It was not localized, was not driven by data, and is
+  out of scope for this admin overhaul. Rather than carry over a
+  placeholder, it was removed. If admin-count display is desired,
+  it should be a real ticket with a real query.
+
+---
+
 End of Execution Backlog.
