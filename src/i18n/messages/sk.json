@@ -177,7 +177,7 @@
     "dashboard": {
       "eyebrow": "Prehľad",
       "title": "Prehľad",
-      "totalRegistrations": "Celkom",
+      "totalRegistrations": "Celkom registrácií",
       "confirmed": "Potvrdené",
       "cancelled": "Zrušené",
       "viewRegistrations": "Zobraziť registrácie",
