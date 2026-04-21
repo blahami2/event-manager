@@ -93,3 +93,18 @@ export const LEGACY_STAY_OPTIONS: ReadonlyArray<StayOption> = [
   StayOption.FRI_SAT,
   StayOption.FRI_SUN,
 ] as const;
+
+/**
+ * All stay options, in weekend-chronological display order.
+ *
+ * Admin surfaces (Add / Edit registration modals) render this full list so
+ * an admin can enter or correct a registration to any stay value, including
+ * the legacy options no longer sold on the public form. The public
+ * `RegistrationForm` must keep using `CURRENT_STAY_OPTIONS` instead.
+ */
+export const ALL_STAY_OPTIONS: ReadonlyArray<StayOption> = [
+  StayOption.FRI_SAT,
+  StayOption.SAT_SUN,
+  StayOption.FRI_SUN,
+  StayOption.SAT_ONLY,
+] as const;

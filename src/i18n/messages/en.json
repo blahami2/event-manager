@@ -177,7 +177,7 @@
     "dashboard": {
       "eyebrow": "Overview",
       "title": "Dashboard",
-      "totalRegistrations": "Total",
+      "totalRegistrations": "Total registrations",
       "confirmed": "Confirmed",
       "cancelled": "Cancelled",
       "viewRegistrations": "View registrations",

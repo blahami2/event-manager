@@ -177,7 +177,7 @@
     "dashboard": {
       "eyebrow": "Přehled",
       "title": "Přehled",
-      "totalRegistrations": "Celkem",
+      "totalRegistrations": "Celkem registrací",
       "confirmed": "Potvrzené",
       "cancelled": "Zrušené",
       "viewRegistrations": "Zobrazit registrace",

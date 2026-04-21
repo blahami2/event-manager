@@ -268,6 +268,50 @@ describe("AddRegistrationModal", () => {
     expect(onCreated).not.toHaveBeenCalled();
   });
 
+  it("should offer all four stay options in the stay dropdown", () => {
+    // given
+    // - the admin modal must expose every StayOption value so admins can
+    //   set or correct registrations to legacy stays (FRI_SAT, FRI_SUN) as
+    //   well as the currently sold ones (SAT_SUN, SAT_ONLY)
+    render(<AddRegistrationModal onClose={vi.fn()} onCreated={vi.fn()} />);
+
+    // when
+    const select = screen.getByLabelText("stay") as HTMLSelectElement;
+    const values = Array.from(select.options).map((o) => o.value);
+
+    // then
+    expect(values).toContain("FRI_SAT");
+    expect(values).toContain("SAT_SUN");
+    expect(values).toContain("FRI_SUN");
+    expect(values).toContain("SAT_ONLY");
+  });
+
+  it("should allow admin to submit a FRI_SAT stay", async () => {
+    // given
+    // - admin chooses a legacy stay option that is no longer publicly offered
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      status: 201,
+      json: async () => ({ data: { registrationId: "r-4" }, message: "ok" }),
+    });
+    render(<AddRegistrationModal onClose={vi.fn()} onCreated={vi.fn()} />);
+
+    // when
+    await user.type(screen.getByLabelText("name"), "Carol");
+    await user.type(screen.getByLabelText("email"), "carol@example.com");
+    await user.selectOptions(screen.getByLabelText("stay"), "FRI_SAT");
+    await user.click(screen.getByRole("button", { name: "submit" }));
+
+    // then
+    await waitFor(() => {
+      const lastCall = fetchMock.mock.calls.at(-1);
+      if (!lastCall) throw new Error("fetch was not called");
+      const body = JSON.parse(lastCall[1].body) as { stay: string };
+      expect(body.stay).toBe("FRI_SAT");
+    });
+  });
+
   it("should force accommodation to NONE when SAT_ONLY stay is selected", async () => {
     // given
     const user = userEvent.setup();

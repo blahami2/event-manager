@@ -7,7 +7,7 @@ import { AccommodationOption, StayOption } from "@/types/registration";
 import type { ApiErrorResponse } from "@/types/api";
 import {
   ACCOMMODATION_OPTIONS,
-  CURRENT_STAY_OPTIONS,
+  ALL_STAY_OPTIONS,
   accommodationLabel,
   stayLabel,
 } from "@/i18n/labels";
@@ -193,7 +193,7 @@ export function AddRegistrationModal({
           error={renderFieldError(fieldErrors.stay)}
         >
           <option value="">{t("stayPlaceholder")}</option>
-          {CURRENT_STAY_OPTIONS.map((opt) => (
+          {ALL_STAY_OPTIONS.map((opt) => (
             <option key={opt} value={opt}>
               {stayLabel(opt, tEnums)}
             </option>

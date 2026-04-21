@@ -6,6 +6,7 @@ import {
   accommodationEnumKey,
   stayEnumKey,
   statusEnumKey,
+  ALL_STAY_OPTIONS,
 } from "@/i18n/labels";
 import {
   AccommodationOption,
@@ -87,6 +88,41 @@ describe("i18n canonical labels", () => {
         "enums.stay.SAT_SUN",
         "enums.stay.FRI_SUN",
         "enums.stay.SAT_ONLY",
+      ]);
+    });
+  });
+
+  describe("ALL_STAY_OPTIONS", () => {
+    test("should list every StayOption value exactly once", () => {
+      // given
+      // - the enum defines four stay options
+      const enumValues = Object.values(StayOption);
+
+      // when
+      const uniqueOptions = new Set(ALL_STAY_OPTIONS);
+
+      // then
+      expect(ALL_STAY_OPTIONS.length).toBe(enumValues.length);
+      expect(uniqueOptions.size).toBe(enumValues.length);
+      for (const value of enumValues) {
+        expect(ALL_STAY_OPTIONS).toContain(value);
+      }
+    });
+
+    test("should order stays chronologically (FRI_SAT, SAT_SUN, FRI_SUN, SAT_ONLY)", () => {
+      // given
+      // - admin surfaces display stays in weekend-chronological order:
+      //   the shortest early start first (FRI_SAT), then SAT_SUN,
+      //   then the full-weekend FRI_SUN, then the daytime-only SAT_ONLY
+      // when
+      const order = Array.from(ALL_STAY_OPTIONS);
+
+      // then
+      expect(order).toEqual([
+        StayOption.FRI_SAT,
+        StayOption.SAT_SUN,
+        StayOption.FRI_SUN,
+        StayOption.SAT_ONLY,
       ]);
     });
   });
