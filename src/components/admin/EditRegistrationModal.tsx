@@ -10,8 +10,7 @@ import {
 import type { RegistrationOutput } from "@/types/registration";
 import {
   ACCOMMODATION_OPTIONS,
-  CURRENT_STAY_OPTIONS,
-  LEGACY_STAY_OPTIONS,
+  ALL_STAY_OPTIONS,
   accommodationLabel,
   stayLabel,
 } from "@/i18n/labels";
@@ -85,9 +84,6 @@ export function EditRegistrationModal({
     [registration.id, name, email, stay, accommodation, adultsCount, childrenCount, notes, onSave],
   );
 
-  // Only show legacy stay options if the registration actually uses one.
-  const showLegacyOption = LEGACY_STAY_OPTIONS.includes(registration.stay);
-
   return (
     <Modal open onClose={onClose} title={t("title")} size="md">
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -131,12 +127,7 @@ export function EditRegistrationModal({
           onChange={(e) => setStay(e.target.value as StayOption)}
           required
         >
-          {showLegacyOption ? (
-            <option value={registration.stay}>
-              {stayLabel(registration.stay, tEnums)}
-            </option>
-          ) : null}
-          {CURRENT_STAY_OPTIONS.map((opt) => (
+          {ALL_STAY_OPTIONS.map((opt) => (
             <option key={opt} value={opt}>
               {stayLabel(opt, tEnums)}
             </option>

@@ -71,27 +71,40 @@ describe("EditRegistrationModal", () => {
     expect(screen.getByRole("dialog")).toBeDefined();
   });
 
-  it("should show legacy FRI_SUN option when registration has that stay", () => {
+  it("should offer all four stay options when registration has a legacy stay", () => {
+    // given
+    // - registration currently uses a legacy stay (FRI_SUN)
     render(<EditRegistrationModal registration={mockReg} onSave={vi.fn()} onClose={vi.fn()} />);
+
+    // when
     const select = screen.getByLabelText("stay") as HTMLSelectElement;
     const values = Array.from(select.options).map((o) => o.value);
-    // - legacy option preserved for existing registration
-    expect(values).toContain("FRI_SUN");
-    // - other legacy option not shown
-    expect(values).not.toContain("FRI_SAT");
-    // - current options available
+
+    // then
+    // - admin can pick any of the four stay options regardless of the
+    //   registration's current value (legacy stays included)
+    expect(values).toContain("FRI_SAT");
     expect(values).toContain("SAT_SUN");
+    expect(values).toContain("FRI_SUN");
     expect(values).toContain("SAT_ONLY");
   });
 
-  it("should not show legacy options when registration has current stay", () => {
+  it("should offer all four stay options when registration has a current stay", () => {
+    // given
+    // - registration currently uses a sold stay option (SAT_SUN)
     const satSunReg: RegistrationOutput = { ...mockReg, stay: StayOption.SAT_SUN };
     render(<EditRegistrationModal registration={satSunReg} onSave={vi.fn()} onClose={vi.fn()} />);
+
+    // when
     const select = screen.getByLabelText("stay") as HTMLSelectElement;
     const values = Array.from(select.options).map((o) => o.value);
-    expect(values).not.toContain("FRI_SAT");
-    expect(values).not.toContain("FRI_SUN");
+
+    // then
+    // - admin can still access the legacy stay options (FRI_SAT, FRI_SUN)
+    //   for data-entry / correction scenarios
+    expect(values).toContain("FRI_SAT");
     expect(values).toContain("SAT_SUN");
+    expect(values).toContain("FRI_SUN");
     expect(values).toContain("SAT_ONLY");
   });
 });
