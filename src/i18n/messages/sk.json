@@ -260,7 +260,9 @@
         "resendingEmail": "Odosielanie…",
         "confirmResend": "Znovu odoslať registračný e-mail?",
         "resendSuccess": "Registračný e-mail bol úspešne znovu odoslaný.",
-        "resendError": "Nepodarilo sa znovu odoslať registračný e-mail."
+        "resendError": "Nepodarilo sa znovu odoslať registračný e-mail.",
+        "dateRange": "Rozsah dátumov",
+        "dateRangeDefault": "Podľa typu pobytu"
       },
       "pagination": {
         "rowsPerPage": "Riadkov na stránku"
@@ -278,7 +280,14 @@
         "notes": "Poznámky",
         "cancelledStatus": "Zrušené",
         "cancelledNotice": "Táto registrácia je aktuálne zrušená.",
-        "reactivate": "Obnoviť"
+        "reactivate": "Obnoviť",
+        "customDates": "Vlastný rozsah dátumov",
+        "customDatesHelp": "Nahradí dátum príchodu a odchodu odvodený z typu pobytu. Nechajte vypnuté, ak chcete použiť dátumy podľa typu pobytu.",
+        "arrivalDate": "Dátum príchodu",
+        "departureDate": "Dátum odchodu",
+        "errorDateRangeIncomplete": "Zadajte dátum príchodu aj odchodu.",
+        "errorDateRangeOrder": "Dátum odchodu nesmie predchádzať dátumu príchodu.",
+        "errorDateRangeBounds": "Dátumy musia byť medzi {min} a {max}."
       },
       "add": {
         "title": "Pridať rezerváciu",

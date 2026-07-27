@@ -104,7 +104,7 @@ export async function registerGuest(
     guestName: name,
     registrationId: registration.id,
     emailType: "manage-link",
-    stay: stay as StayOption,
+    stayDates: registration,
   });
 
   // Step 6: Log registration creation (with masked email)

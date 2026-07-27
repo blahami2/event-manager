@@ -88,6 +88,8 @@ describe("createRegistration", () => {
       childrenCount: 0,
       notes: null,
       status: RegistrationStatus.CONFIRMED,
+      stayStartDate: null,
+      stayEndDate: null,
       createdAt: now,
       updatedAt: now,
     });
@@ -215,6 +217,148 @@ describe("updateRegistration", () => {
     });
     expect(result.name).toBe("Alice Smith");
     expect(result.adultsCount).toBe(3);
+  });
+});
+
+/**
+ * Custom stay date ranges cross the repository boundary as `YYYY-MM-DD`
+ * strings and are stored as date-only columns. `undefined` means "leave the
+ * stored range alone" (public manage edits never send the fields), while
+ * `null` means "clear the range and fall back to the stay option".
+ */
+describe("registration custom stay date range", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should persist the custom range as UTC-midnight dates when creating with a range", async () => {
+    // given
+    mockRegistration.create.mockResolvedValue(dbRegistration);
+
+    // when
+    await createRegistration({
+      name: "Alice Johnson",
+      email: "alice@example.com",
+      stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
+      adultsCount: 2,
+      childrenCount: 0,
+      stayStartDate: "2026-07-10",
+      stayEndDate: "2026-07-13",
+    });
+
+    // then
+    expect(mockRegistration.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        stayStartDate: new Date("2026-07-10T00:00:00.000Z"),
+        stayEndDate: new Date("2026-07-13T00:00:00.000Z"),
+      }),
+    });
+  });
+
+  it("should persist the custom range when updating with a range", async () => {
+    // given
+    mockRegistration.update.mockResolvedValue(dbRegistration);
+
+    // when
+    await updateRegistration("reg-1", {
+      name: "Alice Johnson",
+      email: "alice@example.com",
+      stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
+      adultsCount: 2,
+      childrenCount: 0,
+      stayStartDate: "2026-07-10",
+      stayEndDate: "2026-07-13",
+    });
+
+    // then
+    expect(mockRegistration.update).toHaveBeenCalledWith({
+      where: { id: "reg-1" },
+      data: expect.objectContaining({
+        stayStartDate: new Date("2026-07-10T00:00:00.000Z"),
+        stayEndDate: new Date("2026-07-13T00:00:00.000Z"),
+      }),
+    });
+  });
+
+  it("should clear the stored range when updating with explicit nulls", async () => {
+    // given
+    mockRegistration.update.mockResolvedValue(dbRegistration);
+
+    // when
+    await updateRegistration("reg-1", {
+      name: "Alice Johnson",
+      email: "alice@example.com",
+      stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
+      adultsCount: 2,
+      childrenCount: 0,
+      stayStartDate: null,
+      stayEndDate: null,
+    });
+
+    // then
+    expect(mockRegistration.update).toHaveBeenCalledWith({
+      where: { id: "reg-1" },
+      data: expect.objectContaining({ stayStartDate: null, stayEndDate: null }),
+    });
+  });
+
+  it("should leave the stored range untouched when the range fields are omitted", async () => {
+    // given
+    // - the public manage form submits no range fields; an admin-set range
+    //   must survive a guest editing their own registration
+    mockRegistration.update.mockResolvedValue(dbRegistration);
+
+    // when
+    await updateRegistration("reg-1", {
+      name: "Alice Johnson",
+      email: "alice@example.com",
+      stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
+      adultsCount: 2,
+      childrenCount: 0,
+    });
+
+    // then
+    const call = mockRegistration.update.mock.calls[0]?.[0] as {
+      data: Record<string, unknown>;
+    };
+    expect(Object.keys(call.data)).not.toContain("stayStartDate");
+    expect(Object.keys(call.data)).not.toContain("stayEndDate");
+  });
+
+  it("should map stored date columns to calendar-date strings when reading", async () => {
+    // given
+    mockRegistration.findUnique.mockResolvedValue({
+      ...dbRegistration,
+      stayStartDate: new Date("2026-07-10T00:00:00.000Z"),
+      stayEndDate: new Date("2026-07-13T00:00:00.000Z"),
+    });
+
+    // when
+    const result = await findRegistrationById("reg-1");
+
+    // then
+    expect(result?.stayStartDate).toBe("2026-07-10");
+    expect(result?.stayEndDate).toBe("2026-07-13");
+  });
+
+  it("should map an absent stored range to nulls when reading", async () => {
+    // given
+    mockRegistration.findUnique.mockResolvedValue({
+      ...dbRegistration,
+      stayStartDate: null,
+      stayEndDate: null,
+    });
+
+    // when
+    const result = await findRegistrationById("reg-1");
+
+    // then
+    expect(result?.stayStartDate).toBeNull();
+    expect(result?.stayEndDate).toBeNull();
   });
 });
 

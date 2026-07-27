@@ -23,6 +23,8 @@ const mockRegistration: RegistrationOutput = {
   adultsCount: 2,
   childrenCount: 1,
   notes: "Vegetarian",
+  stayStartDate: null,
+  stayEndDate: null,
   status: RegistrationStatus.CONFIRMED,
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),

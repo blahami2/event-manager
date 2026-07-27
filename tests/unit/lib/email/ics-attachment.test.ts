@@ -44,7 +44,7 @@ describe("ICS calendar attachment in registration email", () => {
     guestName: "Bob Smith",
     registrationId: "00000000-0000-0000-0000-000000000002",
     emailType: "manage-link" as const,
-    stay: StayOption.FRI_SUN,
+    stayDates: { stay: StayOption.FRI_SUN },
   } as const;
 
   const mockTranslator = vi.fn((key: string) => {
@@ -119,7 +119,7 @@ describe("ICS calendar attachment in registration email", () => {
   });
 
   test("should use FRI_SUN dates when stay is FRI_SUN", async () => {
-    await sendManageLink({ ...baseParams, stay: StayOption.FRI_SUN });
+    await sendManageLink({ ...baseParams, stayDates: { stay: StayOption.FRI_SUN } });
 
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
     const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
@@ -130,7 +130,7 @@ describe("ICS calendar attachment in registration email", () => {
   });
 
   test("should use FRI_SAT dates when stay is FRI_SAT", async () => {
-    await sendManageLink({ ...baseParams, stay: StayOption.FRI_SAT });
+    await sendManageLink({ ...baseParams, stayDates: { stay: StayOption.FRI_SAT } });
 
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
     const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;
@@ -141,7 +141,7 @@ describe("ICS calendar attachment in registration email", () => {
   });
 
   test("should use SAT_SUN dates when stay is SAT_SUN", async () => {
-    await sendManageLink({ ...baseParams, stay: StayOption.SAT_SUN });
+    await sendManageLink({ ...baseParams, stayDates: { stay: StayOption.SAT_SUN } });
 
     const callArgs = mockSend.mock.calls[0]?.[0] as Record<string, unknown>;
     const attachments = callArgs["attachments"] as ReadonlyArray<Record<string, unknown>>;

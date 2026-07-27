@@ -7,6 +7,7 @@ import type {
 } from "@/types/registration";
 import { RegistrationStatus } from "@/types/registration";
 import type { StayOption, AccommodationOption } from "@/types/registration";
+import { formatIsoDate, parseIsoDate } from "@/lib/date/iso-date";
 
 /**
  * Registration data-access layer.
@@ -27,6 +28,8 @@ function toOutput(row: {
   childrenCount: number;
   notes: string | null;
   status: string;
+  stayStartDate?: Date | null;
+  stayEndDate?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }): RegistrationOutput {
@@ -40,8 +43,34 @@ function toOutput(row: {
     childrenCount: row.childrenCount,
     notes: row.notes,
     status: row.status as RegistrationStatus,
+    stayStartDate: row.stayStartDate ? formatIsoDate(row.stayStartDate) : null,
+    stayEndDate: row.stayEndDate ? formatIsoDate(row.stayEndDate) : null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+  };
+}
+
+/**
+ * Translate the optional custom stay range into a Prisma data fragment.
+ *
+ * Omitting both fields yields an empty fragment, which Prisma interprets as
+ * "do not touch these columns" — that is what keeps a guest's manage-form edit
+ * from clearing an administrator's custom range. An explicit `null` clears the
+ * range; a date pair pins it. Values are expected to be pre-validated
+ * (`stayDateRangeSchema`); an unparseable date degrades to `null` rather than
+ * writing an Invalid Date to the column.
+ */
+function toStayDateRangeData(data: RegistrationInput): {
+  stayStartDate?: Date | null;
+  stayEndDate?: Date | null;
+} {
+  if (data.stayStartDate === undefined && data.stayEndDate === undefined) {
+    return {};
+  }
+
+  return {
+    stayStartDate: data.stayStartDate ? parseIsoDate(data.stayStartDate) : null,
+    stayEndDate: data.stayEndDate ? parseIsoDate(data.stayEndDate) : null,
   };
 }
 
@@ -64,6 +93,7 @@ export async function createRegistration(
       childrenCount: data.childrenCount,
       notes: data.notes,
       status: RegistrationStatus.CONFIRMED,
+      ...toStayDateRangeData(data),
     },
   });
   return toOutput(row);
@@ -100,6 +130,7 @@ export async function updateRegistration(
       adultsCount: data.adultsCount,
       childrenCount: data.childrenCount,
       notes: data.notes,
+      ...toStayDateRangeData(data),
     },
   });
   return toOutput(row);

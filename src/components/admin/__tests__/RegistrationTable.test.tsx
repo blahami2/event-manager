@@ -23,6 +23,8 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
     adultsCount: 2,
     childrenCount: 0,
     notes: null,
+    stayStartDate: null,
+    stayEndDate: null,
     status: RegistrationStatus.CONFIRMED,
     createdAt: new Date("2026-01-15"),
     updatedAt: new Date("2026-01-15"),

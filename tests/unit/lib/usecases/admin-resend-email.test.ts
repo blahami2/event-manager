@@ -6,7 +6,8 @@ import type { RegistrationOutput } from "@/types/registration";
 // ── Mock dependencies ──
 
 const mockFindRegistrationById = vi.hoisted(() => vi.fn());
-const mockRevokeAllTokensForRegistration = vi.hoisted(() => vi.fn());
+const mockRevokeAllTokensForRegistrationExcept = vi.hoisted(() => vi.fn());
+const mockRevokeToken = vi.hoisted(() => vi.fn());
 const mockCreateToken = vi.hoisted(() => vi.fn());
 const mockGenerateToken = vi.hoisted(() => vi.fn());
 const mockSendManageLink = vi.hoisted(() => vi.fn());
@@ -26,7 +27,8 @@ vi.mock("@/repositories/registration-repository", () => ({
 }));
 
 vi.mock("@/repositories/token-repository", () => ({
-  revokeAllTokensForRegistration: mockRevokeAllTokensForRegistration,
+  revokeAllTokensForRegistrationExcept: mockRevokeAllTokensForRegistrationExcept,
+  revokeToken: mockRevokeToken,
   createToken: mockCreateToken,
 }));
 
@@ -62,6 +64,8 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
     adultsCount: 2,
     childrenCount: 0,
     notes: null,
+    stayStartDate: null,
+    stayEndDate: null,
     status: RegistrationStatus.CONFIRMED,
     createdAt: now,
     updatedAt: now,
@@ -75,6 +79,8 @@ const cancelledRegistration = makeRegistration({
   name: "Carol Davis",
   email: "carol@example.com",
   stay: StayOption.SAT_SUN,
+  stayStartDate: null,
+  stayEndDate: null,
   status: RegistrationStatus.CANCELLED,
 });
 
@@ -112,8 +118,8 @@ describe("adminResendEmail", () => {
     // given
     // - confirmed registration exists
     mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
-    // - old tokens are revoked successfully
-    mockRevokeAllTokensForRegistration.mockResolvedValue(1);
+    // - superseded tokens are revoked successfully
+    mockRevokeAllTokensForRegistrationExcept.mockResolvedValue(1);
     // - new token is generated
     mockGenerateToken.mockReturnValue(tokenPair);
     // - new token is stored
@@ -129,7 +135,9 @@ describe("adminResendEmail", () => {
     // then
     expect(result).toEqual({ success: true });
     expect(mockFindRegistrationById).toHaveBeenCalledWith("reg-1");
-    expect(mockRevokeAllTokensForRegistration).toHaveBeenCalledWith("reg-1");
+    // - the delivered token supersedes every earlier one
+    expect(mockRevokeAllTokensForRegistrationExcept).toHaveBeenCalledWith("reg-1", "tok-1");
+    expect(mockRevokeToken).not.toHaveBeenCalled();
     expect(mockGenerateToken).toHaveBeenCalledOnce();
     expect(mockCreateToken).toHaveBeenCalledWith(
       "reg-1",
@@ -143,7 +151,7 @@ describe("adminResendEmail", () => {
         guestName: "Alice Johnson",
         registrationId: "reg-1",
         emailType: "manage-link",
-        stay: StayOption.FRI_SUN,
+        stayDates: expect.objectContaining({ stay: StayOption.FRI_SUN }),
       }),
     );
   });
@@ -155,7 +163,7 @@ describe("adminResendEmail", () => {
 
     // when / then
     await expect(adminResendEmail("nonexistent-id", adminId)).rejects.toThrow(NotFoundError);
-    expect(mockRevokeAllTokensForRegistration).not.toHaveBeenCalled();
+    expect(mockRevokeAllTokensForRegistrationExcept).not.toHaveBeenCalled();
     expect(mockGenerateToken).not.toHaveBeenCalled();
     expect(mockSendManageLink).not.toHaveBeenCalled();
   });
@@ -171,7 +179,7 @@ describe("adminResendEmail", () => {
       code: "INVALID_STATUS",
       statusCode: 400,
     });
-    expect(mockRevokeAllTokensForRegistration).not.toHaveBeenCalled();
+    expect(mockRevokeAllTokensForRegistrationExcept).not.toHaveBeenCalled();
     expect(mockGenerateToken).not.toHaveBeenCalled();
     expect(mockSendManageLink).not.toHaveBeenCalled();
   });
@@ -180,7 +188,6 @@ describe("adminResendEmail", () => {
     // given
     // - confirmed registration exists
     mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
-    mockRevokeAllTokensForRegistration.mockResolvedValue(1);
     mockGenerateToken.mockReturnValue(tokenPair);
     mockCreateToken.mockResolvedValue(createdTokenData);
     // - email sending fails
@@ -193,11 +200,122 @@ describe("adminResendEmail", () => {
     expect(result).toEqual({ success: false, error: "Resend API error" });
   });
 
+  /**
+   * Rotation is the *consequence* of a delivered email, never a precondition of
+   * attempting one. Revoking first meant a Resend outage — or any throw on the
+   * send path — left the guest holding a dead link and no replacement, with no
+   * way back short of an admin noticing and retrying.
+   */
+  it("should leave the existing tokens valid when the email fails to send", async () => {
+    // given
+    // - a confirmed registration whose guest holds a working manage link
+    mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
+    mockGenerateToken.mockReturnValue(tokenPair);
+    mockCreateToken.mockResolvedValue(createdTokenData);
+    // - the email provider rejects the send
+    mockSendManageLink.mockResolvedValue({ success: false, error: "Resend API error" });
+    mockMaskEmail.mockReturnValue("a***@example.com");
+
+    // when
+    await adminResendEmail("reg-1", adminId);
+
+    // then
+    // - nothing the guest already holds was revoked
+    expect(mockRevokeAllTokensForRegistrationExcept).not.toHaveBeenCalled();
+    // - and the undelivered token is not left live
+    expect(mockRevokeToken).toHaveBeenCalledWith("tok-1");
+  });
+
+  it("should leave the existing tokens valid when the send path throws", async () => {
+    // given
+    // - an unexpected failure inside the email path, not a returned result
+    mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
+    mockGenerateToken.mockReturnValue(tokenPair);
+    mockCreateToken.mockResolvedValue(createdTokenData);
+    mockSendManageLink.mockRejectedValue(new Error("network down"));
+    mockMaskEmail.mockReturnValue("a***@example.com");
+
+    // when / then
+    await expect(adminResendEmail("reg-1", adminId)).rejects.toThrow("network down");
+    expect(mockRevokeAllTokensForRegistrationExcept).not.toHaveBeenCalled();
+    expect(mockRevokeToken).toHaveBeenCalledWith("tok-1");
+  });
+
+  /**
+   * The compensating revoke runs precisely when something is already failing —
+   * often the same outage. If it rejects unguarded it replaces the original
+   * error, which is then never reported, and the caller learns nothing about
+   * why the send failed.
+   */
+  it("should still report the send failure when discarding the undelivered token fails", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
+    mockGenerateToken.mockReturnValue(tokenPair);
+    mockCreateToken.mockResolvedValue(createdTokenData);
+    mockSendManageLink.mockResolvedValue({ success: false, error: "Resend API error" });
+    // - the database is unreachable too
+    mockRevokeToken.mockRejectedValue(new Error("connection pool exhausted"));
+    mockMaskEmail.mockReturnValue("a***@example.com");
+
+    // when
+    const result = await adminResendEmail("reg-1", adminId);
+
+    // then
+    expect(result).toEqual({ success: false, error: "Resend API error" });
+    expect(mockRevokeAllTokensForRegistrationExcept).not.toHaveBeenCalled();
+  });
+
+  it("should preserve the original error when discarding the undelivered token fails", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
+    mockGenerateToken.mockReturnValue(tokenPair);
+    mockCreateToken.mockResolvedValue(createdTokenData);
+    mockSendManageLink.mockRejectedValue(new Error("network down"));
+    mockRevokeToken.mockRejectedValue(new Error("connection pool exhausted"));
+    mockMaskEmail.mockReturnValue("a***@example.com");
+
+    // when / then
+    // - the send failure is the cause worth surfacing, not the cleanup failure
+    await expect(adminResendEmail("reg-1", adminId)).rejects.toThrow("network down");
+  });
+
+  it("should create the replacement token before attempting the send", async () => {
+    // given
+    // - ordering is the whole guarantee: the old token stays usable until the
+    //   new one has actually been delivered
+    const callOrder: string[] = [];
+    mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
+    mockGenerateToken.mockReturnValue(tokenPair);
+    mockCreateToken.mockImplementation(() => {
+      callOrder.push("createToken");
+      return Promise.resolve(createdTokenData);
+    });
+    mockSendManageLink.mockImplementation(() => {
+      callOrder.push("sendManageLink");
+      return Promise.resolve({ success: true });
+    });
+    mockRevokeAllTokensForRegistrationExcept.mockImplementation(() => {
+      callOrder.push("revokeAllTokensForRegistrationExcept");
+      return Promise.resolve(1);
+    });
+    mockMaskEmail.mockReturnValue("a***@example.com");
+
+    // when
+    await adminResendEmail("reg-1", adminId);
+
+    // then
+    expect(callOrder).toEqual([
+      "createToken",
+      "sendManageLink",
+      "revokeAllTokensForRegistrationExcept",
+    ]);
+  });
+
   it("should log admin action with adminUserId, action, and targetId with masked email", async () => {
     // given
     // - confirmed registration exists
     mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
-    mockRevokeAllTokensForRegistration.mockResolvedValue(1);
+    mockRevokeAllTokensForRegistrationExcept.mockResolvedValue(1);
     mockGenerateToken.mockReturnValue(tokenPair);
     mockCreateToken.mockResolvedValue(createdTokenData);
     mockSendManageLink.mockResolvedValue({ success: true });
@@ -223,7 +341,7 @@ describe("adminResendEmail", () => {
     // given
     vi.stubEnv("BASE_URL", "https://my-party.com");
     mockFindRegistrationById.mockResolvedValue(confirmedRegistration);
-    mockRevokeAllTokensForRegistration.mockResolvedValue(1);
+    mockRevokeAllTokensForRegistrationExcept.mockResolvedValue(1);
     mockGenerateToken.mockReturnValue(tokenPair);
     mockCreateToken.mockResolvedValue(createdTokenData);
     mockSendManageLink.mockResolvedValue({ success: true });

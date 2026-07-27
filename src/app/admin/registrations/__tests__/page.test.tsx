@@ -25,15 +25,69 @@ vi.mock("@/components/admin/RegistrationFilters", () => ({
   RegistrationFilters: () => <div data-testid="filters-stub" />,
 }));
 vi.mock("@/components/admin/RegistrationTable", () => ({
-  RegistrationTable: ({ registrations }: { readonly registrations: ReadonlyArray<{ id: string }> }) => (
-    <div data-testid="table-stub">{registrations.length} rows</div>
+  RegistrationTable: ({
+    registrations,
+    onEdit,
+  }: {
+    readonly registrations: ReadonlyArray<{ id: string }>;
+    readonly onEdit: (registration: { id: string }) => void;
+  }) => (
+    <div data-testid="table-stub">
+      {registrations.length} rows
+      {registrations.map((r) => (
+        <button key={r.id} type="button" onClick={() => onEdit(r)}>
+          {`edit-${r.id}`}
+        </button>
+      ))}
+    </div>
   ),
 }));
 vi.mock("@/components/admin/Pagination", () => ({
   Pagination: () => <div data-testid="pagination-stub" />,
 }));
+// The edit modal is stubbed down to the two things the page owns: it triggers
+// a save, and it renders whatever server-side field errors the page hands back.
 vi.mock("@/components/admin/EditRegistrationModal", () => ({
-  EditRegistrationModal: () => <div data-testid="edit-modal-stub" />,
+  // The page filters server field errors against this list, so the stub has to
+  // carry it too — otherwise the test would exercise an empty allow-list rather
+  // than the real one.
+  EDITABLE_FIELDS: [
+    "name",
+    "email",
+    "stay",
+    "accommodation",
+    "adultsCount",
+    "childrenCount",
+    "notes",
+    "stayStartDate",
+    "stayEndDate",
+  ],
+  EditRegistrationModal: ({
+    registration,
+    onSave,
+    serverFieldErrors,
+  }: {
+    readonly registration: { id: string };
+    readonly onSave: (id: string, data: Record<string, unknown>) => void;
+    readonly serverFieldErrors?: Readonly<Record<string, string>>;
+  }) => (
+    <div data-testid="edit-modal-stub">
+      <button
+        type="button"
+        onClick={() =>
+          onSave(registration.id, {
+            stayStartDate: "2026-07-13",
+            stayEndDate: "2026-07-10",
+          })
+        }
+      >
+        save-stub
+      </button>
+      <span data-testid="server-field-errors">
+        {serverFieldErrors ? JSON.stringify(serverFieldErrors) : "none"}
+      </span>
+    </div>
+  ),
 }));
 
 const fetchMock = vi.fn();
@@ -178,5 +232,171 @@ describe("AdminRegistrationsPage — Add reservation", () => {
       // - modal closes after successful add
       expect(screen.queryByRole("dialog")).toBeNull();
     });
+  });
+});
+
+/**
+ * A `400` from the edit endpoint carries field-level detail (for example an
+ * inverted custom stay range). The page must route that detail back into the
+ * modal rather than collapsing it into a generic toast and closing the form,
+ * which would discard the admin's unsaved input.
+ */
+describe("AdminRegistrationsPage — edit validation errors", () => {
+  function mockEditResponse(
+    ok: boolean,
+    status: number,
+    body: Record<string, unknown>,
+  ): void {
+    fetchMock.mockResolvedValueOnce({
+      ok,
+      status,
+      json: async () => body,
+    });
+  }
+
+  async function openEditModal(): Promise<void> {
+    mockListResponse(1);
+    renderPage();
+    await waitFor(() => screen.getByRole("button", { name: "edit-r-0" }));
+    fireEvent.click(screen.getByRole("button", { name: "edit-r-0" }));
+    await waitFor(() => screen.getByTestId("edit-modal-stub"));
+  }
+
+  it("should keep the modal open and surface field errors when the save is rejected", async () => {
+    // given
+    await openEditModal();
+    mockEditResponse(false, 400, {
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Validation failed",
+        fields: { stayEndDate: "End date must not be before the start date" },
+      },
+    });
+
+    // when
+    fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+
+    // then
+    await waitFor(() => {
+      expect(screen.getByTestId("server-field-errors").textContent).toContain("stayEndDate");
+    });
+    expect(screen.getByTestId("edit-modal-stub")).toBeDefined();
+  });
+
+  it("should close the modal and clear field errors after a successful save", async () => {
+    // given
+    await openEditModal();
+    mockEditResponse(true, 200, { data: { id: "r-0" }, message: "ok" });
+    mockListResponse(1);
+
+    // when
+    fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+
+    // then
+    await waitFor(() => {
+      expect(screen.queryByTestId("edit-modal-stub")).toBeNull();
+    });
+  });
+
+  /**
+   * Only a `400` carries field-level detail. Treating any failing response with
+   * a `fields`-shaped body as a validation failure would leave the modal open
+   * and silent on an expired session or a server fault — the admin would keep
+   * pressing save against a request that can never succeed.
+   */
+  it.each([
+    ["401", 401, "UNAUTHENTICATED"],
+    ["403", 403, "UNAUTHORIZED"],
+    ["500", 500, "INTERNAL_ERROR"],
+  ])("should not treat a %s as a field-level validation failure", async (_label, status, code) => {
+    // given
+    await openEditModal();
+    mockEditResponse(false, status, {
+      error: { code, message: "Nope", fields: { stayEndDate: "should be ignored" } },
+    });
+
+    // when
+    fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+
+    // then
+    // - the generic failure toast is the observable end of that path; waiting
+    //   for it first means the "no field errors" assertion cannot pass merely
+    //   because the state has not updated yet
+    await waitFor(() => {
+      expect(screen.getByText("admin.registrations.errorUpdate")).toBeDefined();
+    });
+    expect(screen.getByTestId("server-field-errors").textContent).toBe("none");
+  });
+
+  /**
+   * A `400` can name a field the modal has no input for — `body` (malformed
+   * JSON) or `registrationId` (a client bug). Routing those into the modal
+   * closed the loop on nothing: the modal renders per-input messages only, so
+   * Save appeared to do nothing at all, with no message anywhere.
+   */
+  it.each([["body"], ["registrationId"]])(
+    "should fall back to the generic error when the only rejected field is %s",
+    async (field) => {
+      // given
+      await openEditModal();
+      mockEditResponse(false, 400, {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Validation failed",
+          fields: { [field]: "Request body must be valid JSON" },
+        },
+      });
+
+      // when
+      fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+
+      // then
+      await waitFor(() => {
+        expect(screen.getByText("admin.registrations.errorUpdate")).toBeDefined();
+      });
+      expect(screen.getByTestId("server-field-errors").textContent).toBe("none");
+    },
+  );
+
+  it("should still surface field errors when the response names a rendered field too", async () => {
+    // given
+    // - a mixed map must not lose the part the admin can act on
+    await openEditModal();
+    mockEditResponse(false, 400, {
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Validation failed",
+        fields: { registrationId: "bad id", email: "Invalid email format" },
+      },
+    });
+
+    // when
+    fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+
+    // then
+    await waitFor(() => {
+      expect(screen.getByTestId("server-field-errors").textContent).toContain("email");
+    });
+    expect(screen.getByTestId("edit-modal-stub")).toBeDefined();
+  });
+
+  it("should drop stale field errors when the modal is reopened", async () => {
+    // given
+    // - a rejected save leaves errors on screen
+    await openEditModal();
+    mockEditResponse(false, 400, {
+      error: { code: "VALIDATION_ERROR", message: "Validation failed", fields: { stayEndDate: "bad" } },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("server-field-errors").textContent).toContain("stayEndDate");
+    });
+
+    // when
+    // - the admin re-opens the row without saving
+    fireEvent.click(screen.getByRole("button", { name: "edit-r-0" }));
+
+    // then
+    expect(screen.getByTestId("server-field-errors").textContent).toBe("none");
   });
 });

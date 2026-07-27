@@ -4,6 +4,7 @@ import {
   findByTokenHash,
   revokeToken,
   revokeAllTokensForRegistration,
+  revokeAllTokensForRegistrationExcept,
   findActiveTokenForRegistration,
 } from "@/repositories/token-repository";
 
@@ -216,6 +217,62 @@ describe("revokeAllTokensForRegistration", () => {
 
     // then
     expect(result).toBe(0);
+  });
+});
+
+/**
+ * Rotation on the email-resend paths creates the replacement token *before*
+ * sending the email that carries it, so the guest's existing link keeps working
+ * if the send fails. Revocation is therefore the last step, and it has to spare
+ * the token just issued — revoking it too would deliver a link that is already
+ * dead.
+ */
+describe("revokeAllTokensForRegistrationExcept", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should revoke every token for the registration except the given one", async () => {
+    // given
+    // - two superseded tokens alongside the newly issued one
+    mockRegistrationToken.updateMany.mockResolvedValue({ count: 2 });
+
+    // when
+    const result = await revokeAllTokensForRegistrationExcept("reg-1", "token-new");
+
+    // then
+    expect(mockRegistrationToken.updateMany).toHaveBeenCalledWith({
+      where: { registrationId: "reg-1", id: { not: "token-new" } },
+      data: { isRevoked: true },
+    });
+    expect(result).toBe(2);
+  });
+
+  it("should return zero when the registration has no other tokens", async () => {
+    // given
+    // - the replacement is the only token this registration has ever had
+    mockRegistrationToken.updateMany.mockResolvedValue({ count: 0 });
+
+    // when
+    const result = await revokeAllTokensForRegistrationExcept("reg-1", "token-new");
+
+    // then
+    expect(result).toBe(0);
+  });
+
+  it("should scope revocation to the given registration", async () => {
+    // given
+    // - other guests' tokens must never be touched by one guest's rotation
+    mockRegistrationToken.updateMany.mockResolvedValue({ count: 1 });
+
+    // when
+    await revokeAllTokensForRegistrationExcept("reg-2", "token-new");
+
+    // then
+    const where = mockRegistrationToken.updateMany.mock.calls[0]?.[0]?.where as {
+      registrationId: string;
+    };
+    expect(where.registrationId).toBe("reg-2");
   });
 });
 

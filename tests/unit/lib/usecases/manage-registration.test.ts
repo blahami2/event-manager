@@ -261,7 +261,7 @@ describe("updateRegistrationByToken", () => {
         guestName: "Alice Updated",
         registrationId: "reg-1",
         emailType: "manage-link",
-        stay: "FRI_SAT",
+        stayDates: expect.objectContaining({ stay: "FRI_SAT" }),
       }),
     );
     // eventName and eventDate should NOT be passed - they are resolved from i18n
@@ -278,6 +278,96 @@ describe("updateRegistrationByToken", () => {
     const result = await updateRegistrationByToken("raw-token-abc123", validUpdateInput);
 
     expect(result.newManageUrl).toBe("https://my-party.com/manage/new-raw-token-xyz789");
+  });
+
+  /**
+   * The guest edits their registration from a page reached by their capability
+   * token, and nothing in the browser ever reads the URL this returns — the
+   * replacement link exists only in the email. Revoking the old token before
+   * that email is accepted therefore locks the guest out of their own
+   * registration whenever the mail provider is down: the token they arrived
+   * with is dead, the replacement was never delivered, and the API still
+   * answers `200 "Registration updated"`.
+   *
+   * The registration edit itself has already been persisted at this point, so a
+   * failed email must not undo it either — the guest keeps the link they came
+   * with, and the failure is recorded for operators.
+   */
+  it("should keep the guest's current token valid when the email fails to send", async () => {
+    // given
+    // - the update succeeds but the provider rejects the email
+    setupUpdateMocks();
+    mockSendManageLink.mockResolvedValue({ success: false, error: "Resend API error" });
+
+    // when
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    const result = await updateRegistrationByToken("raw-token-abc123", validUpdateInput);
+
+    // then
+    // - the token the guest is holding is untouched
+    expect(mockRevokeToken).not.toHaveBeenCalledWith("tok-1");
+    // - the undelivered replacement is not left live
+    expect(mockRevokeToken).toHaveBeenCalledWith("tok-2");
+    // - and the caller is pointed at a link that actually works
+    expect(result.newManageUrl).toBe("https://example.com/manage/raw-token-abc123");
+  });
+
+  it("should not record a successful update email when the email fails to send", async () => {
+    // given
+    setupUpdateMocks();
+    mockSendManageLink.mockResolvedValue({ success: false, error: "Resend API error" });
+    mockMaskEmail.mockReturnValue("a***@example.com");
+
+    // when
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await updateRegistrationByToken("raw-token-abc123", validUpdateInput);
+
+    // then
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      "Registration update email failed",
+      expect.objectContaining({ registrationId: "reg-1", email: "a***@example.com" }),
+    );
+  });
+
+  it("should keep the guest's current token valid when the send path throws", async () => {
+    // given
+    setupUpdateMocks();
+    mockSendManageLink.mockRejectedValue(new Error("network down"));
+
+    // when / then
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await expect(
+      updateRegistrationByToken("raw-token-abc123", validUpdateInput),
+    ).rejects.toThrow("network down");
+    expect(mockRevokeToken).not.toHaveBeenCalledWith("tok-1");
+    expect(mockRevokeToken).toHaveBeenCalledWith("tok-2");
+  });
+
+  it("should revoke the old token only after the email has been accepted", async () => {
+    // given
+    // - ordering is the guarantee: the guest's link stays usable until a
+    //   replacement has actually been delivered
+    const callOrder: string[] = [];
+    setupUpdateMocks();
+    mockCreateToken.mockImplementation(() => {
+      callOrder.push("createToken");
+      return Promise.resolve(newTokenData);
+    });
+    mockSendManageLink.mockImplementation(() => {
+      callOrder.push("sendManageLink");
+      return Promise.resolve({ success: true });
+    });
+    mockRevokeToken.mockImplementation(() => {
+      callOrder.push("revokeToken");
+      return Promise.resolve({ ...validTokenData, isRevoked: true });
+    });
+
+    // when
+    const { updateRegistrationByToken } = await import("@/lib/usecases/manage-registration");
+    await updateRegistrationByToken("raw-token-abc123", validUpdateInput);
+
+    // then
+    expect(callOrder).toEqual(["createToken", "sendManageLink", "revokeToken"]);
   });
 });
 

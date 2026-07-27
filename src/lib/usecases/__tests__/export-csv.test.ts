@@ -26,7 +26,7 @@ describe("exportRegistrationsCsv", () => {
     });
 
     const csv = await exportRegistrationsCsv();
-    expect(csv).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt");
+    expect(csv).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt,stayStartDate,stayEndDate");
   });
 
   it("includes registration data rows", async () => {
@@ -41,6 +41,8 @@ describe("exportRegistrationsCsv", () => {
           adultsCount: 2,
           childrenCount: 0,
           notes: null,
+          stayStartDate: null,
+          stayEndDate: null,
           status: RegistrationStatus.CONFIRMED,
           createdAt: new Date("2026-01-15T10:00:00.000Z"),
           updatedAt: new Date("2026-01-15T10:00:00.000Z"),
@@ -54,7 +56,43 @@ describe("exportRegistrationsCsv", () => {
     const csv = await exportRegistrationsCsv();
     const lines = csv.split("\n");
     expect(lines).toHaveLength(2);
-    expect(lines[1]).toBe("Jane,jane@example.com,FRI_SAT,ANYWHERE,2,0,,CONFIRMED,2026-01-15T10:00:00.000Z");
+    expect(lines[1]).toBe("Jane,jane@example.com,FRI_SAT,ANYWHERE,2,0,,CONFIRMED,2026-01-15T10:00:00.000Z,,");
+  });
+
+  it("includes an admin-set custom date range in its own columns", async () => {
+    // given
+    // - a registration whose dates were overridden by an admin
+    vi.mocked(listRegistrations).mockResolvedValue({
+      items: [
+        {
+          id: "1",
+          name: "Jane",
+          email: "jane@example.com",
+          stay: StayOption.SAT_SUN,
+          stayStartDate: "2026-07-10",
+          stayEndDate: "2026-07-13",
+          accommodation: AccommodationOption.ANYWHERE,
+          adultsCount: 2,
+          childrenCount: 0,
+          notes: null,
+          status: RegistrationStatus.CONFIRMED,
+          createdAt: new Date("2026-01-15T10:00:00.000Z"),
+          updatedAt: new Date("2026-01-15T10:00:00.000Z"),
+        },
+      ],
+      total: 1,
+      page: 1,
+      pageSize: 10000,
+    });
+
+    // when
+    const csv = await exportRegistrationsCsv();
+
+    // then
+    const lines = csv.split("\n");
+    expect(lines[1]).toBe(
+      "Jane,jane@example.com,SAT_SUN,ANYWHERE,2,0,,CONFIRMED,2026-01-15T10:00:00.000Z,2026-07-10,2026-07-13",
+    );
   });
 
   it("escapes commas in field values", async () => {
@@ -69,6 +107,8 @@ describe("exportRegistrationsCsv", () => {
           adultsCount: 1,
           childrenCount: 0,
           notes: "nuts, dairy",
+          stayStartDate: null,
+          stayEndDate: null,
           status: RegistrationStatus.CONFIRMED,
           createdAt: new Date("2026-01-15T10:00:00.000Z"),
           updatedAt: new Date("2026-01-15T10:00:00.000Z"),
@@ -97,6 +137,8 @@ describe("exportRegistrationsCsv", () => {
           adultsCount: 1,
           childrenCount: 0,
           notes: null,
+          stayStartDate: null,
+          stayEndDate: null,
           status: RegistrationStatus.CONFIRMED,
           createdAt: new Date("2026-01-15T10:00:00.000Z"),
           updatedAt: new Date("2026-01-15T10:00:00.000Z"),

@@ -28,7 +28,19 @@ export enum AccommodationOption {
   NONE = "NONE",
 }
 
-/** Input data for creating or updating a registration. */
+/**
+ * Input data for creating or updating a registration.
+ *
+ * `stayStartDate` / `stayEndDate` carry an optional admin-set custom date range
+ * (issue #101) as `YYYY-MM-DD` calendar dates. Three states are meaningful and
+ * distinct:
+ *
+ * - **omitted (`undefined`)** — leave any stored range untouched. Public flows
+ *   (registration and the guest manage form) never send these fields, so a
+ *   guest editing their own registration cannot wipe an admin's range.
+ * - **`null`** — clear the range; the predefined `stay` option governs again.
+ * - **a date pair** — pin the range. Both dates must be present and ordered.
+ */
 export interface RegistrationInput {
   readonly name: string;
   readonly email: string;
@@ -37,6 +49,8 @@ export interface RegistrationInput {
   readonly adultsCount: number;
   readonly childrenCount: number;
   readonly notes?: string;
+  readonly stayStartDate?: string | null;
+  readonly stayEndDate?: string | null;
 }
 
 /** Output data returned when reading a registration. */
@@ -50,6 +64,19 @@ export interface RegistrationOutput {
   readonly childrenCount: number;
   readonly notes: string | null;
   readonly status: RegistrationStatus;
+  /**
+   * Admin-set custom stay range as `YYYY-MM-DD` calendar dates, or `null` when
+   * the predefined `stay` option governs. Calendar dates rather than `Date`
+   * instants: "arrives on 10 July" must not shift with the reader's timezone.
+   *
+   * Required (nullable) rather than optional: the repository always populates
+   * both, and making them optional would push an `undefined` branch onto every
+   * consumer forever for no benefit. `null` is the single representation of
+   * "no custom range" on the way out — the three-state contract with
+   * `undefined` exists only on {@link RegistrationInput}, on the way in.
+   */
+  readonly stayStartDate: string | null;
+  readonly stayEndDate: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }

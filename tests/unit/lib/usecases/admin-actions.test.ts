@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { NotFoundError } from "@/lib/errors/app-errors";
+import { NotFoundError, ValidationError } from "@/lib/errors/app-errors";
 import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
@@ -44,6 +44,8 @@ function makeRegistration(overrides: Partial<RegistrationOutput> = {}): Registra
     adultsCount: 2,
     childrenCount: 0,
     notes: null,
+    stayStartDate: null,
+    stayEndDate: null,
     status: RegistrationStatus.CONFIRMED,
     createdAt: now,
     updatedAt: now,
@@ -232,7 +234,7 @@ describe("exportRegistrationsCsv", () => {
     const csv = await exportRegistrationsCsv();
 
     const lines = csv.split("\n");
-    expect(lines[0]).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt");
+    expect(lines[0]).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt,stayStartDate,stayEndDate");
     expect(lines).toHaveLength(4);
     expect(lines[1]).toContain("Alice Johnson");
     expect(lines[1]).toContain("alice@example.com");
@@ -268,7 +270,7 @@ describe("exportRegistrationsCsv", () => {
 
     const lines = csv.split("\n");
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt");
+    expect(lines[0]).toBe("name,email,stay,accommodation,adultsCount,childrenCount,notes,status,createdAt,stayStartDate,stayEndDate");
   });
 
   it("should handle null notes as empty string", async () => {
@@ -286,5 +288,162 @@ describe("exportRegistrationsCsv", () => {
     // notes is after childrenCount (index 6, accounting for accommodation column)
     const fields = lines[1]?.split(",");
     expect(fields?.[6]).toBe("");
+  });
+});
+
+/**
+ * Admins may set an arbitrary custom date range on a registration. The use
+ * case owns the validation (routes only delegate), so an invalid range never
+ * reaches the repository.
+ */
+describe("adminEditRegistration custom stay date range", () => {
+  const baseEdit = {
+    name: "Alice Johnson",
+    email: "alice@example.com",
+    stay: StayOption.SAT_SUN,
+    accommodation: AccommodationOption.ANYWHERE,
+    adultsCount: 2,
+    childrenCount: 0,
+  };
+
+  it("should forward an arbitrary range to the repository when the range is valid", async () => {
+    // given
+    // - a range that matches none of the predefined stay options
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+    mockUpdateRegistration.mockResolvedValue(
+      makeRegistration({ stayStartDate: "2026-07-10", stayEndDate: "2026-07-13" }),
+    );
+
+    // when
+    const result = await adminEditRegistration(
+      "reg-1",
+      { ...baseEdit, stayStartDate: "2026-07-10", stayEndDate: "2026-07-13" },
+      adminId,
+    );
+
+    // then
+    expect(mockUpdateRegistration).toHaveBeenCalledWith(
+      "reg-1",
+      expect.objectContaining({ stayStartDate: "2026-07-10", stayEndDate: "2026-07-13" }),
+    );
+    expect(result.stayStartDate).toBe("2026-07-10");
+    expect(result.stayEndDate).toBe("2026-07-13");
+  });
+
+  it("should forward a single-day range to the repository when start equals end", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+    mockUpdateRegistration.mockResolvedValue(
+      makeRegistration({ stayStartDate: "2026-07-10", stayEndDate: "2026-07-10" }),
+    );
+
+    // when
+    await adminEditRegistration(
+      "reg-1",
+      { ...baseEdit, stayStartDate: "2026-07-10", stayEndDate: "2026-07-10" },
+      adminId,
+    );
+
+    // then
+    expect(mockUpdateRegistration).toHaveBeenCalledWith(
+      "reg-1",
+      expect.objectContaining({ stayStartDate: "2026-07-10", stayEndDate: "2026-07-10" }),
+    );
+  });
+
+  it("should forward explicit nulls to the repository when the range is cleared", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+    mockUpdateRegistration.mockResolvedValue(makeRegistration());
+
+    // when
+    await adminEditRegistration(
+      "reg-1",
+      { ...baseEdit, stayStartDate: null, stayEndDate: null },
+      adminId,
+    );
+
+    // then
+    expect(mockUpdateRegistration).toHaveBeenCalledWith(
+      "reg-1",
+      expect.objectContaining({ stayStartDate: null, stayEndDate: null }),
+    );
+  });
+
+  it("should omit the range fields when the caller sends none", async () => {
+    // given
+    // - preserves the previous admin-edit contract for callers that do not
+    //   know about custom ranges
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+    mockUpdateRegistration.mockResolvedValue(makeRegistration());
+
+    // when
+    await adminEditRegistration("reg-1", baseEdit, adminId);
+
+    // then
+    const forwarded = mockUpdateRegistration.mock.calls[0]?.[1] as Record<string, unknown>;
+    expect(Object.keys(forwarded)).not.toContain("stayStartDate");
+    expect(Object.keys(forwarded)).not.toContain("stayEndDate");
+  });
+
+  it("should throw ValidationError when the end date precedes the start date", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+
+    // when / then
+    await expect(
+      adminEditRegistration(
+        "reg-1",
+        { ...baseEdit, stayStartDate: "2026-07-13", stayEndDate: "2026-07-10" },
+        adminId,
+      ),
+    ).rejects.toThrow(ValidationError);
+    expect(mockUpdateRegistration).not.toHaveBeenCalled();
+  });
+
+  it("should throw ValidationError when only one of the two dates is provided", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+
+    // when / then
+    await expect(
+      adminEditRegistration(
+        "reg-1",
+        { ...baseEdit, stayStartDate: "2026-07-13", stayEndDate: null },
+        adminId,
+      ),
+    ).rejects.toThrow(ValidationError);
+    expect(mockUpdateRegistration).not.toHaveBeenCalled();
+  });
+
+  it("should throw ValidationError when a date is not a real calendar date", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+
+    // when / then
+    await expect(
+      adminEditRegistration(
+        "reg-1",
+        { ...baseEdit, stayStartDate: "2026-02-30", stayEndDate: "2026-03-02" },
+        adminId,
+      ),
+    ).rejects.toThrow(ValidationError);
+    expect(mockUpdateRegistration).not.toHaveBeenCalled();
+  });
+
+  it("should expose field-level details when the range is invalid", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+
+    // when
+    const error = await adminEditRegistration(
+      "reg-1",
+      { ...baseEdit, stayStartDate: "2026-07-13", stayEndDate: "2026-07-10" },
+      adminId,
+    ).catch((e: unknown) => e);
+
+    // then
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).fields).toHaveProperty("stayEndDate");
   });
 });
