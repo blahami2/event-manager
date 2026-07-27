@@ -237,6 +237,41 @@ export default function AdminRegistrationsPage(): React.ReactElement {
     [refreshAll, t, toast],
   );
 
+  /**
+   * Permanently delete a registration (issue #102).
+   *
+   * Separate from `handleCancel`, which flips status via the collection's
+   * `DELETE`. Confirmation is owned by the edit modal, so by the time this
+   * runs the admin has already made the deliberate choice; all that is left is
+   * to close the surfaces showing a record that no longer exists and reload.
+   */
+  const handleDelete = useCallback(
+    async (registrationId: string) => {
+      try {
+        const res = await fetch("/api/admin/registrations/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ registrationId }),
+        });
+        if (!res.ok) throw new Error("Failed to delete registration");
+        setEditing(null);
+        setDrawer(null);
+        // The row is gone, so any pending selection of it is stale.
+        setSelectedIds((prev) => {
+          if (!prev.has(registrationId)) return prev;
+          const next = new Set(prev);
+          next.delete(registrationId);
+          return next;
+        });
+        toast.success(t("deleteSuccess"));
+        await refreshAll();
+      } catch {
+        toast.error(t("errorDelete"));
+      }
+    },
+    [refreshAll, t, toast],
+  );
+
   const handleResendEmail = useCallback(
     async (registrationId: string) => {
       setResendingId(registrationId);
@@ -469,6 +504,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           registration={editing}
           onSave={handleSave}
           onReconfirm={handleReconfirm}
+          onDelete={handleDelete}
           onClose={() => {
             setEditFieldErrors(null);
             setEditing(null);

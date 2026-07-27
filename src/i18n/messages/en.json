@@ -205,6 +205,8 @@
       "updateSuccess": "Registration updated.",
       "reconfirmSuccess": "Registration reactivated.",
       "reconfirmError": "Failed to reactivate registration.",
+    "deleteSuccess": "Registration deleted permanently.",
+    "errorDelete": "Failed to delete registration",
       "drawer": {
         "eyebrow": "Reservation"
       },
@@ -287,7 +289,12 @@
         "departureDate": "Departure date",
         "errorDateRangeIncomplete": "Enter both an arrival and a departure date.",
         "errorDateRangeOrder": "The departure date cannot be before the arrival date.",
-        "errorDateRangeBounds": "Dates must be between {min} and {max}."
+        "errorDateRangeBounds": "Dates must be between {min} and {max}.",
+      "delete": "Delete permanently",
+      "confirmDeleteTitle": "Delete this registration permanently?",
+      "confirmDeleteMessage": "This permanently removes {name} ({email}) and invalidates their manage link. It cannot be undone — to keep the record, cancel the registration instead.",
+      "confirmDeleteConfirm": "Delete permanently",
+      "confirmDeleteDismiss": "Keep registration"
       },
       "add": {
         "title": "Add reservation",

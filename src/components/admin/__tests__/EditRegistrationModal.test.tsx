@@ -561,6 +561,109 @@ describe("EditRegistrationModal supported date window", () => {
     expect(screen.getByRole("alert").textContent).toBe("errorDateRangeBounds");
   });
 
+  /**
+   * Irreversible admin delete (issue #102).
+   *
+   * The action lives behind the edit modal rather than in the list or the
+   * read-only drawer: reaching it already takes a deliberate step, and it keeps
+   * a one-click destructive control out of the row-level surfaces where the
+   * neighbouring click merely cancels.
+   */
+  describe("delete action", () => {
+    it("should not render the delete control when no handler is supplied", () => {
+      // given
+      // - callers that do not grant delete get exactly the previous modal
+      render(
+        <EditRegistrationModal registration={mockReg} onSave={vi.fn()} onClose={vi.fn()} />,
+      );
+
+      // then
+      expect(screen.queryByText("delete")).toBeNull();
+    });
+
+    it("should require confirmation before deleting", () => {
+      // given
+      const onDelete = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+
+      // when
+      fireEvent.click(screen.getByText("delete"));
+
+      // then
+      // - the confirmation is shown and nothing has been deleted yet
+      expect(screen.getByText("confirmDeleteMessage")).toBeTruthy();
+      expect(onDelete).not.toHaveBeenCalled();
+    });
+
+    it("should delete the registration when the confirmation is accepted", () => {
+      // given
+      const onDelete = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      // when
+      fireEvent.click(screen.getByText("confirmDeleteConfirm"));
+
+      // then
+      expect(onDelete).toHaveBeenCalledWith("reg-1");
+    });
+
+    it("should delete nothing when the confirmation is dismissed", () => {
+      // given
+      const onDelete = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      // when
+      fireEvent.click(screen.getByText("confirmDeleteDismiss"));
+
+      // then
+      expect(onDelete).not.toHaveBeenCalled();
+      expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+    });
+
+    it("should not save the form when the delete control is used", () => {
+      // given
+      // - the control sits in the footer next to Save; it must not submit
+      const onSave = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={onSave}
+          onClose={vi.fn()}
+          onDelete={vi.fn()}
+        />,
+      );
+
+      // when
+      fireEvent.click(screen.getByText("delete"));
+
+      // then
+      expect(onSave).not.toHaveBeenCalled();
+    });
+  });
+
   it("should accept the exact edges of the supported window", () => {
     // given
     const onSave = vi.fn();

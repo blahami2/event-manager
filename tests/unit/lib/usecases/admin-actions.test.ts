@@ -10,6 +10,7 @@ const mockCountRegistrations = vi.hoisted(() => vi.fn());
 const mockFindRegistrationById = vi.hoisted(() => vi.fn());
 const mockCancelRegistration = vi.hoisted(() => vi.fn());
 const mockUpdateRegistration = vi.hoisted(() => vi.fn());
+const mockDeleteRegistrationById = vi.hoisted(() => vi.fn());
 const mockLogger = vi.hoisted(() => ({
   debug: vi.fn(),
   info: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock("@/repositories/registration-repository", () => ({
   findRegistrationById: mockFindRegistrationById,
   cancelRegistration: mockCancelRegistration,
   updateRegistration: mockUpdateRegistration,
+  deleteRegistrationById: mockDeleteRegistrationById,
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -71,6 +73,7 @@ import {
   listRegistrationsPaginated,
   getRegistrationStats,
   adminCancelRegistration,
+  adminDeleteRegistration,
   adminEditRegistration,
   exportRegistrationsCsv,
 } from "@/lib/usecases/admin-actions";
@@ -188,6 +191,112 @@ describe("adminCancelRegistration", () => {
   it("should throw NotFoundError when registration is already cancelled", async () => {
     mockFindRegistrationById.mockResolvedValue(cancelledReg);
     await expect(adminCancelRegistration("reg-3", adminId)).rejects.toThrow(NotFoundError);
+  });
+});
+
+/**
+ * Irreversible admin delete (issue #102).
+ *
+ * Distinct from `adminCancelRegistration`, which only flips status: this
+ * removes the row, and the database cascade removes its tokens with it. The
+ * tests below pin the three things that make that safe — it only runs against a
+ * row that exists, it leaves an audit trail, and a persistence failure is never
+ * reported as a success.
+ */
+describe("adminDeleteRegistration", () => {
+  it("should delete the registration and log the admin action when it exists", async () => {
+    // given
+    // - a confirmed registration the admin is looking at
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+    mockDeleteRegistrationById.mockResolvedValue(true);
+
+    // when
+    const result = await adminDeleteRegistration("reg-1", adminId);
+
+    // then
+    expect(result).toEqual({ id: "reg-1" });
+    expect(mockDeleteRegistrationById).toHaveBeenCalledWith("reg-1");
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      "Admin deleted registration",
+      expect.objectContaining({
+        adminUserId: adminId,
+        action: "delete_registration",
+        targetId: "reg-1",
+      }),
+    );
+  });
+
+  it("should delete a cancelled registration too", async () => {
+    // given
+    // - unlike cancel/reconfirm, delete is not gated on a starting status:
+    //   purging a cancelled record is the main reason to use it
+    mockFindRegistrationById.mockResolvedValue(cancelledReg);
+    mockDeleteRegistrationById.mockResolvedValue(true);
+
+    // when
+    const result = await adminDeleteRegistration("reg-3", adminId);
+
+    // then
+    expect(result).toEqual({ id: "reg-3" });
+    expect(mockDeleteRegistrationById).toHaveBeenCalledWith("reg-3");
+  });
+
+  it("should record only a masked email in the audit log", async () => {
+    // given
+    // - the row is about to be unrecoverable, so the log is the only trace
+    //   left; it still must not carry the full address (LOG3, LOG4)
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+    mockDeleteRegistrationById.mockResolvedValue(true);
+
+    // when
+    await adminDeleteRegistration("reg-1", adminId);
+
+    // then
+    const logged = mockLogger.info.mock.calls[0]?.[1] as Record<string, unknown>;
+    expect(logged["email"]).toBe("a***@example.com");
+    expect(JSON.stringify(logged)).not.toContain("alice@example.com");
+  });
+
+  it("should throw NotFoundError and not touch persistence when it does not exist", async () => {
+    // given
+    mockFindRegistrationById.mockResolvedValue(null);
+
+    // when / then
+    await expect(adminDeleteRegistration("nonexistent", adminId)).rejects.toThrow(
+      NotFoundError,
+    );
+    expect(mockDeleteRegistrationById).not.toHaveBeenCalled();
+  });
+
+  it("should throw NotFoundError when the row disappears between lookup and delete", async () => {
+    // given
+    // - two admins deleting the same row concurrently: the loser must get the
+    //   same 404 as any other missing row, not a false success
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+    mockDeleteRegistrationById.mockResolvedValue(false);
+
+    // when / then
+    await expect(adminDeleteRegistration("reg-1", adminId)).rejects.toThrow(
+      NotFoundError,
+    );
+    expect(mockLogger.info).not.toHaveBeenCalledWith(
+      "Admin deleted registration",
+      expect.anything(),
+    );
+  });
+
+  it("should propagate a persistence failure without logging a success", async () => {
+    // given
+    const failure = new Error("connection lost");
+    mockFindRegistrationById.mockResolvedValue(confirmedReg1);
+    mockDeleteRegistrationById.mockRejectedValue(failure);
+
+    // when / then
+    await expect(adminDeleteRegistration("reg-1", adminId)).rejects.toThrow(failure);
+    expect(mockLogger.info).not.toHaveBeenCalledWith(
+      "Admin deleted registration",
+      expect.anything(),
+    );
   });
 });
 

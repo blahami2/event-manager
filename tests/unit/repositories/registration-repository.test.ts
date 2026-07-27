@@ -5,6 +5,7 @@ import {
   findRegistrationByEmail,
   updateRegistration,
   cancelRegistration,
+  deleteRegistrationById,
   listRegistrations,
   countRegistrations,
 } from "@/repositories/registration-repository";
@@ -17,6 +18,7 @@ const mockRegistration = vi.hoisted(() => ({
   findUnique: vi.fn(),
   findFirst: vi.fn(),
   update: vi.fn(),
+  deleteMany: vi.fn(),
   findMany: vi.fn(),
   count: vi.fn(),
 }));
@@ -465,6 +467,53 @@ describe("listRegistrations", () => {
     );
     expect(result.page).toBe(3);
     expect(result.pageSize).toBe(10);
+  });
+});
+
+/**
+ * Hard delete (issue #102). `deleteMany` rather than `delete` is what makes the
+ * "did it exist?" answer a returned count instead of a thrown Prisma error, so
+ * the caller can map a concurrent delete onto the same 404 as a missing row.
+ */
+describe("deleteRegistrationById", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should delete by id and report true when a row was removed", async () => {
+    // given
+    // - one matching registration exists
+    mockRegistration.deleteMany.mockResolvedValue({ count: 1 });
+
+    // when
+    const result = await deleteRegistrationById("reg-1");
+
+    // then
+    expect(mockRegistration.deleteMany).toHaveBeenCalledWith({
+      where: { id: "reg-1" },
+    });
+    expect(result).toBe(true);
+  });
+
+  it("should report false when no row matched the id", async () => {
+    // given
+    // - the row is already gone (never existed, or a concurrent delete won)
+    mockRegistration.deleteMany.mockResolvedValue({ count: 0 });
+
+    // when
+    const result = await deleteRegistrationById("missing");
+
+    // then
+    expect(result).toBe(false);
+  });
+
+  it("should propagate a persistence failure rather than reporting success", async () => {
+    // given
+    const failure = new Error("connection lost");
+    mockRegistration.deleteMany.mockRejectedValue(failure);
+
+    // when / then
+    await expect(deleteRegistrationById("reg-1")).rejects.toThrow(failure);
   });
 });
 

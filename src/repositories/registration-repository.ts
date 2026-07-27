@@ -158,6 +158,28 @@ export async function reconfirmRegistration(
   return toOutput(row);
 }
 
+/**
+ * Permanently delete a single registration, and with it every row that depends
+ * on it.
+ *
+ * Dependent data is removed by the database, not by this function:
+ * `RegistrationToken.registrationId` carries `ON DELETE CASCADE` (declared in
+ * `schema.prisma` and created by the `20260211_init` migration), so a guest's
+ * manage links die with the registration in the same statement. Deleting them
+ * here as well would duplicate a guarantee the schema already makes, and would
+ * open a window where tokens are gone but the registration is not.
+ *
+ * Uses `deleteMany` rather than `delete` deliberately: `delete` throws an
+ * opaque Prisma error when the row is absent, whereas a count lets the caller
+ * answer "did it exist?" without pattern-matching on driver error codes.
+ *
+ * @returns `true` when a row was removed, `false` when the id matched nothing.
+ */
+export async function deleteRegistrationById(id: string): Promise<boolean> {
+  const result = await prisma.registration.deleteMany({ where: { id } });
+  return result.count > 0;
+}
+
 /** List registrations with optional filtering and pagination. */
 export async function listRegistrations(
   filters: RegistrationFilters,
