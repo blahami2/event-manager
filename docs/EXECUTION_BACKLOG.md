@@ -2835,7 +2835,7 @@ behaviour, and every caller of it is untouched.
 | Unknown id | `404` |
 | Lost race | `404` — a concurrent delete means the caller deleted nothing, and is told so |
 | Persistence failure | Propagates to a generic `500`; never reported as success, never logged as one |
-| Audit | `LOG5` context plus the masked email (`LOG4`), written on success only — after the row is gone, the log is the only trace it existed |
+| Audit | `LOG5` context with the registration ID and no guest email, written on success only |
 
 ### Design Decisions
 
@@ -2900,7 +2900,7 @@ across the four touched files) before any production file was edited.
 
 - Repository (3) — delete by id, `false` for no matching row, failure propagates.
 - Use case (6) — deletes and logs; deletes a cancelled registration; masked
-  email only in the audit entry; `NotFoundError` with no persistence call when
+  no guest email in the audit entry; `NotFoundError` with no persistence call when
   absent; `NotFoundError` when the row vanishes mid-operation; failure
   propagates without a success log.
 - Route (10) — success payload; `401`; `403`; auth precedes body reading;

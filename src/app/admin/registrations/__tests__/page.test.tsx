@@ -114,7 +114,7 @@ function mockListResponse(count: number): void {
 }
 
 // Must import AFTER mocks
-import AdminRegistrationsPage from "../page";
+import AdminRegistrationsPage, { pageAfterDeletion } from "../page";
 import { ToastProvider } from "@/components/ui/admin";
 
 function renderPage(): ReturnType<typeof render> {
@@ -124,6 +124,17 @@ function renderPage(): ReturnType<typeof render> {
     </ToastProvider>,
   );
 }
+
+describe("AdminRegistrationsPage — deletion pagination", () => {
+  it("moves to the prior page after deleting the only row on a later page", () => {
+    expect(pageAfterDeletion(3, 1)).toBe(2);
+  });
+
+  it("keeps the current page when rows remain or it is already the first page", () => {
+    expect(pageAfterDeletion(3, 2)).toBe(3);
+    expect(pageAfterDeletion(1, 1)).toBe(1);
+  });
+});
 
 describe("AdminRegistrationsPage — Add reservation", () => {
   it("should render an 'Add reservation' button when page loads", async () => {

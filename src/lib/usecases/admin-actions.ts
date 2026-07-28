@@ -168,7 +168,6 @@ export async function adminDeleteRegistration(
     adminUserId: adminId,
     action: "delete_registration",
     targetId: registrationId,
-    email: maskEmail(existing.email),
     status: existing.status,
   });
 

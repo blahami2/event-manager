@@ -139,7 +139,7 @@ export interface EditRegistrationModalProps {
    * deletion — a future read-mostly surface, a narrower role — simply do not
    * pass it and get exactly the previous modal.
    */
-  readonly onDelete?: (id: string) => void;
+  readonly onDelete?: (id: string) => void | Promise<void>;
   /**
    * Field-level errors returned by the server (the `fields` map of a `400`
    * response), keyed by field name.
@@ -204,6 +204,7 @@ export function EditRegistrationModal({
    * route from the dialog is the safe one.
    */
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   /** Seed both date inputs from a stay option and mark them machine-generated. */
   const prefillRangeFrom = useCallback((option: StayOption) => {
@@ -333,7 +334,13 @@ export function EditRegistrationModal({
   const serverError = (field: string): string | undefined => serverFieldErrors?.[field];
 
   return (
-    <Modal open onClose={onClose} title={t("title")} size="md">
+    <Modal
+      open
+      onClose={onClose}
+      title={t("title")}
+      size="md"
+      disableEscapeClose={confirmingDelete}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {isCancelled ? (
           <div className="flex items-start gap-3 rounded-md border border-border-subtle bg-surface-sunken/60 px-4 py-3">
@@ -505,9 +512,14 @@ export function EditRegistrationModal({
           confirmLabel={t("confirmDeleteConfirm")}
           dismissLabel={t("confirmDeleteDismiss")}
           variant="danger"
+          loading={deleting}
           onConfirm={() => {
-            setConfirmingDelete(false);
-            onDelete(registration.id);
+            if (deleting) return;
+            setDeleting(true);
+            void Promise.resolve(onDelete(registration.id)).finally(() => {
+              setDeleting(false);
+              setConfirmingDelete(false);
+            });
           }}
           onDismiss={() => setConfirmingDelete(false)}
         />

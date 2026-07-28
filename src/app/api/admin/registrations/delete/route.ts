@@ -5,7 +5,7 @@ import { verifyAdmin } from "@/lib/auth/admin-guard";
 import { adminDeleteRegistration } from "@/lib/usecases/admin-actions";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { readJsonBody } from "@/lib/api-request";
-import { ValidationError } from "@/lib/errors/app-errors";
+import { AuthorizationError, ValidationError } from "@/lib/errors/app-errors";
 import { toFieldErrors } from "@/lib/validation/field-errors";
 
 const deleteSchema = z.object({
@@ -33,6 +33,19 @@ const deleteSchema = z.object({
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const { adminId } = await verifyAdmin(request);
+
+    if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+      throw new ValidationError("Validation failed", {
+        body: "Content-Type must be application/json",
+      });
+    }
+
+    // Cookie-authenticated requests are browser-replayable, so reject an
+    // explicit foreign Origin before performing the destructive action.
+    const origin = request.headers.get("origin");
+    if (origin && origin !== request.nextUrl.origin) {
+      throw new AuthorizationError();
+    }
 
     const parsed = deleteSchema.safeParse(await readJsonBody(request));
 

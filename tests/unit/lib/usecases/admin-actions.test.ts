@@ -241,7 +241,7 @@ describe("adminDeleteRegistration", () => {
     expect(mockDeleteRegistrationById).toHaveBeenCalledWith("reg-3");
   });
 
-  it("should record only a masked email in the audit log", async () => {
+  it("should not record the guest email in the deletion audit log", async () => {
     // given
     // - the row is about to be unrecoverable, so the log is the only trace
     //   left; it still must not carry the full address (LOG3, LOG4)
@@ -253,7 +253,7 @@ describe("adminDeleteRegistration", () => {
 
     // then
     const logged = mockLogger.info.mock.calls[0]?.[1] as Record<string, unknown>;
-    expect(logged["email"]).toBe("a***@example.com");
+    expect(logged).not.toHaveProperty("email");
     expect(JSON.stringify(logged)).not.toContain("alice@example.com");
   });
 

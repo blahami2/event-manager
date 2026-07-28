@@ -420,8 +420,9 @@ Design notes:
 - **A concurrent delete is a 404, not a success.** The use case re-checks the
   affected-row count and reports `NOT_FOUND` if another admin won the race,
   rather than confirming a deletion it did not perform.
-- **The audit log outlives the row.** `LOG5` context plus the masked email
-  (`LOG4`) is the only remaining trace, so it is written on success only.
+- **The audit log outlives the row.** `LOG5` context identifies the deleted
+  registration by ID without retaining the guest's email, and is written on
+  success only.
 - Deletion is distinct from the scheduled retention purge (Section 8.1 /
   `data-retention.ts`), which removes *old cancelled* registrations in bulk on a
   time policy rather than one record on an administrator's instruction.

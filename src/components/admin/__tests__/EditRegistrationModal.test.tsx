@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { EditRegistrationModal } from "../EditRegistrationModal";
 import { SUPPORTED_STAY_DATE_MAX, SUPPORTED_STAY_DATE_MIN } from "@/config/event";
 import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
@@ -620,6 +620,55 @@ describe("EditRegistrationModal supported date window", () => {
 
       // then
       expect(onDelete).toHaveBeenCalledWith("reg-1");
+    });
+
+    it("should disable confirmation while deletion is in flight", async () => {
+      let resolveDelete: (() => void) | undefined;
+      const onDelete = vi.fn(
+        () => new Promise<void>((resolve) => {
+          resolveDelete = resolve;
+        }),
+      );
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      const confirm = screen.getByText("confirmDeleteConfirm");
+      fireEvent.click(confirm);
+      fireEvent.click(confirm);
+
+      expect(onDelete).toHaveBeenCalledOnce();
+      expect((confirm as HTMLButtonElement).disabled).toBe(true);
+
+      resolveDelete?.();
+      await waitFor(() => {
+        expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+      });
+    });
+
+    it("should let Escape dismiss only the nested confirmation", () => {
+      const onClose = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={onClose}
+          onDelete={vi.fn()}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      fireEvent.keyDown(document, { key: "Escape" });
+
+      expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByLabelText("name")).toBeDefined();
     });
 
     it("should delete nothing when the confirmation is dismissed", () => {

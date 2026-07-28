@@ -29,12 +29,16 @@ const REG_ID = "3f1c2d4e-5a6b-4c7d-8e9f-0a1b2c3d4e5f";
 
 const URL = "http://localhost:3000/api/admin/registrations/delete";
 
-function makeRequest(body: unknown): NextRequest {
+function makeRequest(
+  body: unknown,
+  headers: Record<string, string> = {},
+): NextRequest {
   return new NextRequest(URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer valid-token",
+      ...headers,
     },
     body: typeof body === "string" ? body : JSON.stringify(body),
   });
@@ -59,6 +63,28 @@ describe("POST /api/admin/registrations/delete", () => {
     expect(json.data).toEqual({ id: REG_ID });
     expect(json.message).toBe("Registration deleted");
     expect(adminDeleteRegistration).toHaveBeenCalledWith(REG_ID, "admin-1");
+  });
+
+  it("rejects a non-JSON content type before deletion", async () => {
+    const res = await POST(
+      makeRequest(JSON.stringify({ registrationId: REG_ID }), {
+        "Content-Type": "text/plain",
+      }),
+    );
+
+    expect(res.status).toBe(400);
+    expect(adminDeleteRegistration).not.toHaveBeenCalled();
+  });
+
+  it("rejects an explicitly cross-origin request before deletion", async () => {
+    const res = await POST(
+      makeRequest({ registrationId: REG_ID }, {
+        Origin: "https://attacker.example",
+      }),
+    );
+
+    expect(res.status).toBe(403);
+    expect(adminDeleteRegistration).not.toHaveBeenCalled();
   });
 
   it("returns 401 and deletes nothing when the session is not authenticated", async () => {

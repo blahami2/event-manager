@@ -145,8 +145,8 @@ describe("POST /api/admin/registrations/delete (integration)", () => {
       adminUserId: ADMIN_ID,
       action: "delete_registration",
       targetId: REG_ID,
-      email: "a***@example.com",
     });
+    expect(entry?.context).not.toHaveProperty("email");
   });
 
   it("never writes the full email address to the log", async () => {
