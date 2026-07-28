@@ -248,6 +248,7 @@
         "status": "Stav",
         "created": "Vytvorené",
         "actions": "Akcie",
+        "viewDetails": "Zobraziť podrobnosti pre {name}",
         "edit": "Upraviť",
         "cancel": "Zrušiť",
         "confirmCancel": "Zrušiť túto registráciu?",

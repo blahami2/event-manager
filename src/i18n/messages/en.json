@@ -248,6 +248,7 @@
         "status": "Status",
         "created": "Created",
         "actions": "Actions",
+        "viewDetails": "View details for {name}",
         "edit": "Edit",
         "cancel": "Cancel",
         "confirmCancel": "Cancel this registration?",

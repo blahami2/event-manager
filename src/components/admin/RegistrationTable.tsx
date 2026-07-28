@@ -16,7 +16,7 @@ export interface RegistrationTableProps {
   readonly onEdit: (registration: RegistrationOutput) => void;
   readonly onCancel: (registrationId: string) => void;
   readonly onResendEmail?: (registrationId: string) => void;
-  readonly onRowClick?: (registration: RegistrationOutput) => void;
+  readonly onViewDetails?: (registration: RegistrationOutput) => void;
   readonly resendingId?: string | null;
   readonly selectedIds?: ReadonlySet<string>;
   readonly onToggleSelect?: (id: string) => void;
@@ -144,7 +144,7 @@ export function RegistrationTable({
   onEdit,
   onCancel,
   onResendEmail,
-  onRowClick,
+  onViewDetails,
   resendingId,
   selectedIds,
   onToggleSelect,
@@ -268,10 +268,9 @@ export function RegistrationTable({
                   <tr
                     key={reg.id}
                     data-selected={isSelected || undefined}
-                    onClick={onRowClick ? () => onRowClick(reg) : undefined}
                     className={`group transition-colors duration-150 ${
-                      onRowClick ? "cursor-pointer" : ""
-                    } ${isSelected ? "bg-accent-muted/40" : "hover:bg-admin-hover/60"}`}
+                      isSelected ? "bg-accent-muted/40" : "hover:bg-admin-hover/60"
+                    }`}
                   >
                     {hasSelection ? (
                       <td
@@ -328,6 +327,31 @@ export function RegistrationTable({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-end gap-1">
+                        {onViewDetails ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onViewDetails(reg)}
+                            aria-label={t("viewDetails", { name: reg.name })}
+                            title={t("viewDetails", { name: reg.name })}
+                          >
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z"
+                              />
+                              <circle cx="12" cy="12" r="2.25" strokeWidth={1.5} />
+                            </svg>
+                          </Button>
+                        ) : null}
                         <Button
                           variant="ghost"
                           size="sm"

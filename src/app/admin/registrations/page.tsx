@@ -502,7 +502,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
               onEdit={handleEdit}
               onCancel={handleCancel}
               onResendEmail={handleResendEmail}
-              onRowClick={handleRowClick}
+              onViewDetails={handleRowClick}
               resendingId={resendingId}
               selectedIds={selectedIds}
               onToggleSelect={handleToggleSelect}
