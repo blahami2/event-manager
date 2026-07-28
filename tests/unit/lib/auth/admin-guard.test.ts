@@ -178,6 +178,30 @@ describe("verifyAdmin", () => {
     });
   });
 
+  it("should return 403 without provisioning for an authenticated cookie user who is not allowlisted", async () => {
+    const request = createRequestWithCookie();
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "supabase-uid-new", email: "new@example.com" } },
+      error: null,
+    });
+    mockFindAdminBySupabaseId.mockResolvedValue(null);
+
+    const { verifyAdmin } = await import("@/lib/auth/admin-guard");
+    const act = verifyAdmin(request);
+
+    await expect(act).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+      statusCode: 403,
+      message: "Insufficient permissions",
+    });
+    expect(mockGetUser).toHaveBeenCalledWith();
+    expect(mockFindAdminBySupabaseId).toHaveBeenCalledOnce();
+    expect(mockFindAdminBySupabaseId).toHaveBeenCalledWith("supabase-uid-new");
+
+    const clientOptions = mockCreateServerClient.mock.calls[0]?.[2];
+    expect(clientOptions.cookies.getAll()).toEqual(request.cookies.getAll());
+  });
+
   it("should log admin authentication on success", async () => {
     const request = createRequestWithAuth(VALID_TOKEN);
     mockGetUser.mockResolvedValue({
