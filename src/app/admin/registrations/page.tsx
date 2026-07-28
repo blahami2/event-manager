@@ -17,7 +17,8 @@ import { Pagination } from "@/components/admin/Pagination";
 import { StatsStrip, type RegistrationStats } from "@/components/admin/StatsStrip";
 import { RegistrationDrawer } from "@/components/admin/RegistrationDrawer";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
-import { Button, SkeletonRow, useToast } from "@/components/ui/admin";
+import { RegistrationsHeader } from "@/components/admin/RegistrationsHeader";
+import { SkeletonRow, useToast } from "@/components/ui/admin";
 import type { RegistrationOutput, PaginatedResult } from "@/types/registration";
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -458,39 +459,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col items-start justify-between gap-4 border-b border-border-subtle pb-6 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.24em] text-text-tertiary">
-            {t("eyebrow")}
-          </p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">
-            {t("title")}
-          </h1>
-          {stats ? (
-            <p className="mt-1 text-sm text-text-secondary">
-              {t("totalCount", { count: stats.total })}
-            </p>
-          ) : null}
-        </div>
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
-          <a
-            href="/api/admin/registrations/export"
-            download
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-border-default bg-transparent px-3 py-2 text-sm font-medium text-text-secondary transition-colors duration-150 hover:border-border-strong hover:bg-surface-raised hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base sm:flex-none"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a2 2 0 002 2h14a2 2 0 002-2v-3" />
-            </svg>
-            {t("downloadCsv")}
-          </a>
-          <Button variant="primary" onClick={handleOpenAdd}>
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            {t("addReservation")}
-          </Button>
-        </div>
-      </header>
+      <RegistrationsHeader total={stats?.total ?? null} onAdd={handleOpenAdd} />
 
       <StatsStrip stats={stats} />
 
