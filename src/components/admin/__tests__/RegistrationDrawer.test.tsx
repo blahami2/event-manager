@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { RegistrationDrawer } from "../RegistrationDrawer";
 import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
@@ -105,5 +105,24 @@ describe("RegistrationDrawer", () => {
 
     // then
     expect(screen.getByText("enums.stay.SAT_SUN")).toBeDefined();
+  });
+
+  it("should let Escape dismiss only the nested cancellation confirmation", () => {
+    const onClose = vi.fn();
+    render(
+      <RegistrationDrawer
+        registration={mockReg}
+        {...noopHandlers}
+        onClose={onClose}
+      />,
+    );
+    fireEvent.click(screen.getByText("cancel"));
+    expect(screen.getByRole("dialog", { name: "confirmCancel" })).toBeDefined();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(screen.queryByRole("dialog", { name: "confirmCancel" })).toBeNull();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: mockReg.name })).toBeDefined();
   });
 });

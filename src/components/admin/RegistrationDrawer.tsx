@@ -85,7 +85,10 @@ export function RegistrationDrawer({
   useEffect(() => {
     if (!registration) return;
     const handleKey = (e: KeyboardEvent): void => {
-      if (e.key === "Escape") {
+      // The nested confirmation owns Escape while it is open. This mirrors
+      // Modal's disableEscapeClose contract and prevents one key press from
+      // dismissing two dialog layers.
+      if (e.key === "Escape" && !confirmingCancel) {
         e.preventDefault();
         onClose();
       }
@@ -99,7 +102,7 @@ export function RegistrationDrawer({
       document.removeEventListener("keydown", handleKey);
       document.body.style.overflow = original;
     };
-  }, [registration, onClose]);
+  }, [registration, onClose, confirmingCancel]);
 
   if (!registration) return null;
   if (typeof document === "undefined") return null;
