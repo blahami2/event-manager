@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // Mock next-intl so translation keys are returned as-is with their namespace.
@@ -282,7 +282,7 @@ describe("AdminRegistrationsPage — selection visibility", () => {
     },
   );
 
-  it("keeps selection across a same-page data refetch", async () => {
+  it("clears the mutated ID even when a same-page refetch still contains it", async () => {
     fetchMock.mockImplementation((url: string, init?: RequestInit) => {
       if (url === "/api/admin/registrations/stats") {
         return Promise.resolve({ ok: false });
@@ -306,11 +306,15 @@ describe("AdminRegistrationsPage — selection visibility", () => {
     await waitFor(() =>
       expect(screen.queryByTestId("edit-modal-stub")).toBeNull(),
     );
-    expect(screen.getByTestId("selected-count").textContent).toBe("1");
     expect(
-      screen.getByRole("link", { name: "admin.registrations.bulk.export" })
+      screen.queryByRole("region", {
+        name: "admin.registrations.bulk.region",
+      }),
+    ).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "admin.registrations.downloadCsv" })
         .getAttribute("href"),
-    ).toBe("/api/admin/registrations/export?id=visible-registration");
+    ).toBe("/api/admin/registrations/export");
   });
 
   it("drops a selected ID removed by a same-page data refetch", async () => {
@@ -341,12 +345,60 @@ describe("AdminRegistrationsPage — selection visibility", () => {
         screen.getByRole("button", { name: "edit-replacement-registration" }),
       ).toBeDefined(),
     );
-    expect(screen.getByTestId("selected-count").textContent).toBe("0");
     expect(
       screen.queryByRole("region", {
         name: "admin.registrations.bulk.region",
       }),
     ).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "admin.registrations.downloadCsv" })
+        .getAttribute("href"),
+    ).toBe("/api/admin/registrations/export");
+  });
+
+  it("removes a mutated ID from bulk actions before its refresh resolves", async () => {
+    const pendingRefresh = deferred<ReturnType<typeof listResponse>>();
+    let mutationSucceeded = false;
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      if (init?.method === "PUT") {
+        mutationSucceeded = true;
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ data: { id: "visible-registration" } }),
+        });
+      }
+      return mutationSucceeded
+        ? pendingRefresh.promise
+        : Promise.resolve(listResponse("visible-registration"));
+    });
+    renderPage();
+    await selectVisibleRegistration();
+    fireEvent.click(
+      screen.getByRole("button", { name: "edit-visible-registration" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+
+    await waitFor(() =>
+      expect(screen.queryByTestId("edit-modal-stub")).toBeNull(),
+    );
+    expect(
+      screen.queryByRole("region", {
+        name: "admin.registrations.bulk.region",
+      }),
+    ).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "admin.registrations.downloadCsv" })
+        .getAttribute("href"),
+    ).toBe("/api/admin/registrations/export");
+
+    await act(async () => {
+      pendingRefresh.resolve(listResponse("visible-registration"));
+      await pendingRefresh.promise;
+    });
   });
 });
 
