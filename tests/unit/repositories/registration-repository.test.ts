@@ -450,6 +450,32 @@ describe("listRegistrations", () => {
     );
   });
 
+  it("should apply stay and accommodation filters before count and pagination", async () => {
+    // A matching row may sit beyond the first page of the unfiltered dataset.
+    // Both queries must therefore share the filters so Prisma counts and
+    // paginates the matching dataset rather than filtering returned rows.
+    mockRegistration.findMany.mockResolvedValue([dbRegistration]);
+    mockRegistration.count.mockResolvedValue(1);
+
+    const result = await listRegistrations({
+      stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
+      page: 1,
+      pageSize: 20,
+    });
+
+    const where = {
+      stay: StayOption.FRI_SUN,
+      accommodation: AccommodationOption.ANYWHERE,
+    };
+    expect(mockRegistration.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where, skip: 0, take: 20 }),
+    );
+    expect(mockRegistration.count).toHaveBeenCalledWith({ where });
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
+  });
+
   it("should support custom pagination", async () => {
     // given
     mockRegistration.findMany.mockResolvedValue([]);

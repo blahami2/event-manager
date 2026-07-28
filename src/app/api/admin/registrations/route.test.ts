@@ -92,6 +92,8 @@ describe("GET /api/admin/registrations", () => {
 
     const res = await GET(makeGetRequest({
       status: "CONFIRMED",
+      stay: "FRI_SAT",
+      accommodation: "ANYWHERE",
       search: "jane",
       page: "2",
       pageSize: "10",
@@ -100,6 +102,8 @@ describe("GET /api/admin/registrations", () => {
     expect(res.status).toBe(200);
     expect(listRegistrationsPaginated).toHaveBeenCalledWith({
       status: RegistrationStatus.CONFIRMED,
+      stay: StayOption.FRI_SAT,
+      accommodation: AccommodationOption.ANYWHERE,
       search: "jane",
       page: 2,
       pageSize: 10,

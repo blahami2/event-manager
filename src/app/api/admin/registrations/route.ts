@@ -14,7 +14,11 @@ import { ValidationError } from "@/lib/errors/app-errors";
 import { toFieldErrors } from "@/lib/validation/field-errors";
 import { adminEditRegistrationSchema } from "@/lib/validation/registration";
 import type { RegistrationFilters, RegistrationInput } from "@/types/registration";
-import { RegistrationStatus } from "@/types/registration";
+import {
+  AccommodationOption,
+  RegistrationStatus,
+  StayOption,
+} from "@/types/registration";
 
 /** Zod schema for the POST (resend email) request body. */
 const resendEmailSchema = z.object({
@@ -25,7 +29,7 @@ const resendEmailSchema = z.object({
  * GET /api/admin/registrations
  *
  * Returns a paginated list of registrations with optional filters.
- * Query params: status, search, page, pageSize.
+ * Query params: status, stay, accommodation, search, page, pageSize.
  */
 export async function GET(request: NextRequest): Promise<Response> {
   try {
@@ -34,6 +38,10 @@ export async function GET(request: NextRequest): Promise<Response> {
     const params = request.nextUrl.searchParams;
     const filters: RegistrationFilters = {
       ...(params.get("status") ? { status: params.get("status") as RegistrationStatus } : {}),
+      ...(params.get("stay") ? { stay: params.get("stay") as StayOption } : {}),
+      ...(params.get("accommodation")
+        ? { accommodation: params.get("accommodation") as AccommodationOption }
+        : {}),
       ...(params.get("search") ? { search: params.get("search") as string } : {}),
       page: params.get("page") ? Number(params.get("page")) : 1,
       pageSize: params.get("pageSize") ? Number(params.get("pageSize")) : 20,
