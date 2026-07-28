@@ -214,15 +214,18 @@ describe("AdminRegistrationsPage — request sequencing", () => {
       )).toBe(true),
     );
 
-    older.resolve(listResponse("stale"));
-    await older.promise;
-    expect(screen.queryByRole("button", { name: "edit-stale" })).toBeNull();
-    expect(screen.getByRole("status")).toBeDefined();
-
     newer.resolve(listResponse("newest"));
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "edit-newest" })).toBeDefined(),
     );
+    expect(screen.queryByRole("status")).toBeNull();
+
+    older.resolve(listResponse("stale"));
+    await older.promise;
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "edit-newest" })).toBeDefined(),
+    );
+    expect(screen.queryByRole("button", { name: "edit-stale" })).toBeNull();
     expect(screen.queryByRole("status")).toBeNull();
   });
 
@@ -285,6 +288,30 @@ describe("AdminRegistrationsPage — request sequencing", () => {
     );
     expect(screen.queryByRole("status")).toBeNull();
     expect(screen.queryByRole("button", { name: "edit-stale" })).toBeNull();
+  });
+
+  it("does not commit state or show an error after unmount", async () => {
+    const pending = deferred<ReturnType<typeof listResponse>>();
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      return pending.promise;
+    });
+
+    const view = render(
+      <ToastProvider>
+        <AdminRegistrationsPage />
+      </ToastProvider>,
+    );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    view.rerender(<ToastProvider>{null}</ToastProvider>);
+
+    pending.reject(new Error("finished after unmount"));
+    await expect(pending.promise).rejects.toThrow("finished after unmount");
+    await Promise.resolve();
+
+    expect(screen.queryByText("admin.registrations.errorLoad")).toBeNull();
   });
 });
 

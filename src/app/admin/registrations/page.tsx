@@ -179,6 +179,11 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   useEffect(() => {
     void loadData();
+    return () => {
+      // Dependency changes and unmounts both retire the in-flight request.
+      // Its eventual success or failure must not mutate this page instance.
+      latestListRequest.current += 1;
+    };
   }, [loadData]);
 
   useEffect(() => {
