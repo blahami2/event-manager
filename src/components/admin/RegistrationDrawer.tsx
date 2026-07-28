@@ -12,6 +12,10 @@ import { parseIsoDate } from "@/lib/date/iso-date";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 import { Badge, Button, ConfirmDialog } from "@/components/ui/admin";
+import {
+  containTabFocus,
+  getFocusableElements,
+} from "@/components/ui/admin/focus-scope";
 
 export interface RegistrationDrawerProps {
   readonly registration: RegistrationOutput | null;
@@ -79,8 +83,45 @@ export function RegistrationDrawer({
   const tTable = useTranslations("admin.registrations.table");
   const tEdit = useTranslations("admin.registrations.edit");
   const tEnums = useTranslations();
+  const layerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
+
+  useEffect(() => {
+    if (!registration) return;
+    openerRef.current = document.activeElement as HTMLElement | null;
+    const layer = layerRef.current;
+    const background = Array.from(document.body.children).filter(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement && element !== layer,
+    );
+    const previousBackgroundState = background.map((element) => ({
+      element,
+      inert: element.hasAttribute("inert"),
+      ariaHidden: element.getAttribute("aria-hidden"),
+    }));
+    for (const element of background) {
+      element.setAttribute("inert", "");
+      element.setAttribute("aria-hidden", "true");
+    }
+
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const panel = panelRef.current;
+    const first = panel ? getFocusableElements(panel)[0] : undefined;
+    (first ?? panel)?.focus();
+
+    return () => {
+      document.body.style.overflow = original;
+      for (const { element, inert, ariaHidden } of previousBackgroundState) {
+        if (!inert) element.removeAttribute("inert");
+        if (ariaHidden === null) element.removeAttribute("aria-hidden");
+        else element.setAttribute("aria-hidden", ariaHidden);
+      }
+      openerRef.current?.focus();
+    };
+  }, [registration]);
 
   useEffect(() => {
     if (!registration) return;
@@ -91,16 +132,13 @@ export function RegistrationDrawer({
       if (e.key === "Escape" && !confirmingCancel) {
         e.preventDefault();
         onClose();
+      } else if (e.key === "Tab" && !confirmingCancel && panelRef.current) {
+        containTabFocus(e, panelRef.current);
       }
     };
     document.addEventListener("keydown", handleKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    // focus the drawer so it's reachable by keyboard users
-    panelRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", handleKey);
-      document.body.style.overflow = original;
     };
   }, [registration, onClose, confirmingCancel]);
 
@@ -110,7 +148,7 @@ export function RegistrationDrawer({
   const isCancelled = registration.status === RegistrationStatus.CANCELLED;
 
   const tree = (
-    <div className="fixed inset-0 z-50 flex admin-fade-in">
+    <div ref={layerRef} className="fixed inset-0 z-50 flex admin-fade-in">
       <button
         type="button"
         aria-label="Close"

@@ -125,4 +125,44 @@ describe("RegistrationDrawer", () => {
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole("dialog", { name: mockReg.name })).toBeDefined();
   });
+
+  it("should contain Tab focus within the drawer", () => {
+    render(<RegistrationDrawer registration={mockReg} {...noopHandlers} />);
+    const dialog = screen.getByRole("dialog", { name: mockReg.name });
+    const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button"));
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    expect(first).toBeDefined();
+    expect(last).toBeDefined();
+
+    last?.focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+
+    first?.focus();
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
+  });
+
+  it("should make the background inert and restore focus to the exact opener", () => {
+    const opener = document.createElement("button");
+    opener.textContent = "Open drawer";
+    document.body.appendChild(opener);
+    opener.focus();
+
+    const { container, rerender } = render(
+      <RegistrationDrawer registration={mockReg} {...noopHandlers} />,
+    );
+    expect(container.hasAttribute("inert")).toBe(true);
+    expect(container.getAttribute("aria-hidden")).toBe("true");
+    expect(screen.getByRole("dialog", { name: mockReg.name }).contains(document.activeElement))
+      .toBe(true);
+
+    rerender(<RegistrationDrawer registration={null} {...noopHandlers} />);
+
+    expect(container.hasAttribute("inert")).toBe(false);
+    expect(container.hasAttribute("aria-hidden")).toBe(false);
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
 });
