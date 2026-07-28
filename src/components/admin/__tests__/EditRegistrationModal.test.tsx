@@ -602,7 +602,7 @@ describe("EditRegistrationModal supported date window", () => {
       expect(onDelete).not.toHaveBeenCalled();
     });
 
-    it("should delete the registration when the confirmation is accepted", () => {
+    it("should delete the registration when the confirmation is accepted", async () => {
       // given
       const onDelete = vi.fn();
       render(
@@ -619,7 +619,9 @@ describe("EditRegistrationModal supported date window", () => {
       fireEvent.click(screen.getByText("confirmDeleteConfirm"));
 
       // then
-      expect(onDelete).toHaveBeenCalledWith("reg-1");
+      await waitFor(() => {
+        expect(onDelete).toHaveBeenCalledWith("reg-1");
+      });
     });
 
     it("should disable confirmation while deletion is in flight", async () => {
@@ -643,13 +645,74 @@ describe("EditRegistrationModal supported date window", () => {
       fireEvent.click(confirm);
       fireEvent.click(confirm);
 
-      expect(onDelete).toHaveBeenCalledOnce();
+      await waitFor(() => {
+        expect(onDelete).toHaveBeenCalledOnce();
+      });
       expect((confirm as HTMLButtonElement).disabled).toBe(true);
 
       resolveDelete?.();
       await waitFor(() => {
         expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
       });
+    });
+
+    it("should keep both dialogs locked while deletion is in flight", async () => {
+      let resolveDelete: (() => void) | undefined;
+      const onClose = vi.fn();
+      const onDelete = vi.fn(
+        () => new Promise<void>((resolve) => {
+          resolveDelete = resolve;
+        }),
+      );
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={onClose}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+      fireEvent.click(screen.getByText("confirmDeleteConfirm"));
+      await waitFor(() => expect(onDelete).toHaveBeenCalledOnce());
+
+      const backdrops = screen.getAllByTestId("modal-backdrop");
+      const closeButtons = screen.getAllByRole("button", { name: "Close" });
+      fireEvent.keyDown(document, { key: "Escape" });
+      backdrops.forEach((backdrop) => fireEvent.click(backdrop));
+      closeButtons.forEach((button) => fireEvent.click(button));
+
+      expect(screen.getAllByRole("dialog")).toHaveLength(2);
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onDelete).toHaveBeenCalledOnce();
+
+      resolveDelete?.();
+      await waitFor(() => {
+        expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+      });
+    });
+
+    it("should release the guard when the delete callback throws synchronously", async () => {
+      const onDelete = vi.fn(() => {
+        throw new Error("callback failed");
+      });
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      expect(() => {
+        fireEvent.click(screen.getByText("confirmDeleteConfirm"));
+      }).not.toThrow();
+      await waitFor(() => {
+        expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+      });
+      expect(onDelete).toHaveBeenCalledOnce();
     });
 
     it("should let Escape dismiss only the nested confirmation", () => {

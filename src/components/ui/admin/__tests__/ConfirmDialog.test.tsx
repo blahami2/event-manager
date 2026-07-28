@@ -93,4 +93,27 @@ describe("admin ConfirmDialog", () => {
         .getAttribute("data-variant"),
     ).toBe("danger");
   });
+
+  test("should block every dismissal path while loading", () => {
+    const onDismiss = vi.fn();
+    render(
+      <ConfirmDialog
+        open
+        loading
+        title="T"
+        message="m"
+        confirmLabel="Delete"
+        dismissLabel="Keep"
+        onConfirm={vi.fn()}
+        onDismiss={onDismiss}
+      />,
+    );
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.click(screen.getByTestId("modal-backdrop"));
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    fireEvent.click(screen.getByRole("button", { name: "Keep" }));
+
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
 });

@@ -336,10 +336,13 @@ export function EditRegistrationModal({
   return (
     <Modal
       open
-      onClose={onClose}
+      onClose={() => {
+        if (!confirmingDelete) onClose();
+      }}
       title={t("title")}
       size="md"
       disableEscapeClose={confirmingDelete}
+      disableBackdropClose={confirmingDelete}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {isCancelled ? (
@@ -516,10 +519,16 @@ export function EditRegistrationModal({
           onConfirm={() => {
             if (deleting) return;
             setDeleting(true);
-            void Promise.resolve(onDelete(registration.id)).finally(() => {
-              setDeleting(false);
-              setConfirmingDelete(false);
-            });
+            void Promise.resolve()
+              .then(() => onDelete(registration.id))
+              // The owner surfaces operational failures (for example, a
+              // toast). Keep a thrown callback from escaping as an unhandled
+              // rejection while still releasing the single-flight guard.
+              .catch(() => undefined)
+              .finally(() => {
+                setDeleting(false);
+                setConfirmingDelete(false);
+              });
           }}
           onDismiss={() => setConfirmingDelete(false)}
         />
