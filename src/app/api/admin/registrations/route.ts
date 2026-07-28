@@ -25,6 +25,12 @@ const resendEmailSchema = z.object({
   registrationId: z.string().uuid("registrationId must be a valid UUID"),
 });
 
+/** Runtime validation for optional enum-valued list query parameters. */
+const registrationListFilterSchema = z.object({
+  stay: z.enum(StayOption).optional(),
+  accommodation: z.enum(AccommodationOption).optional(),
+});
+
 /**
  * GET /api/admin/registrations
  *
@@ -36,12 +42,17 @@ export async function GET(request: NextRequest): Promise<Response> {
     await verifyAdmin(request);
 
     const params = request.nextUrl.searchParams;
+    const parsedFilters = registrationListFilterSchema.safeParse({
+      stay: params.get("stay") ?? undefined,
+      accommodation: params.get("accommodation") ?? undefined,
+    });
+    if (!parsedFilters.success) {
+      throw new ValidationError("Validation failed", toFieldErrors(parsedFilters.error));
+    }
+
     const filters: RegistrationFilters = {
       ...(params.get("status") ? { status: params.get("status") as RegistrationStatus } : {}),
-      ...(params.get("stay") ? { stay: params.get("stay") as StayOption } : {}),
-      ...(params.get("accommodation")
-        ? { accommodation: params.get("accommodation") as AccommodationOption }
-        : {}),
+      ...parsedFilters.data,
       ...(params.get("search") ? { search: params.get("search") as string } : {}),
       page: params.get("page") ? Number(params.get("page")) : 1,
       pageSize: params.get("pageSize") ? Number(params.get("pageSize")) : 20,

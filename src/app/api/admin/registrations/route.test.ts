@@ -110,6 +110,19 @@ describe("GET /api/admin/registrations", () => {
     });
   });
 
+  it.each([
+    ["stay", "NOT_A_STAY"],
+    ["accommodation", "NOT_AN_ACCOMMODATION"],
+  ])("returns 400 for an invalid %s filter without querying registrations", async (field, value) => {
+    const res = await GET(makeGetRequest({ [field]: value }));
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json.error.code).toBe("VALIDATION_ERROR");
+    expect(json.error.fields[field]).toBeDefined();
+    expect(listRegistrationsPaginated).not.toHaveBeenCalled();
+  });
+
   it("returns 401 for unauthenticated requests", async () => {
     vi.mocked(verifyAdmin).mockRejectedValue(new AuthenticationError());
     const res = await GET(makeGetRequest());
