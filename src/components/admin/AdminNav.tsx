@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { createBrowserClient } from "@/lib/auth/supabase-client";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { useState } from "react";
 
 const navItems = [
   { href: "/admin/registrations", labelKey: "registrations" },
@@ -21,6 +22,7 @@ export function AdminNav(): React.ReactElement | null {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations("admin.nav");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Login is the only /admin/* page that renders without the authenticated
   // chrome — the nav relies on a session and would otherwise appear as a
@@ -41,23 +43,23 @@ export function AdminNav(): React.ReactElement | null {
       aria-label="Admin navigation"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-14 items-center justify-between gap-6">
-          <div className="flex items-center gap-8">
+        <div className="flex h-14 items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-8">
             <Link
               href="/admin"
-              className="group flex items-center gap-2"
+              className="group flex min-w-0 items-center gap-2"
               aria-label={t("title")}
             >
               <span
                 aria-hidden="true"
                 className="inline-block h-5 w-5 rounded-sm bg-accent transition-transform duration-200 group-hover:rotate-[8deg]"
               />
-              <span className="font-heading text-base tracking-[0.22em] text-text-primary">
+              <span className="truncate font-heading text-base tracking-[0.22em] text-text-primary">
                 {t("title")}
               </span>
             </Link>
 
-            <ul className="flex items-center gap-1">
+            <ul className="hidden items-center gap-1 md:flex">
               {navItems.map((item) => {
                 const active = isActive(pathname, item.href);
                 return (
@@ -85,7 +87,7 @@ export function AdminNav(): React.ReactElement | null {
             </ul>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 md:flex">
             <LanguageSwitcher />
             <div
               className="h-6 w-px bg-border-default"
@@ -113,7 +115,46 @@ export function AdminNav(): React.ReactElement | null {
               {t("logout")}
             </button>
           </div>
+          <button
+            type="button"
+            className="inline-flex rounded-md border border-border-default p-2 text-text-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring md:hidden"
+            aria-label={t(mobileOpen ? "closeMenu" : "openMenu")}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((open) => !open)}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+            </svg>
+          </button>
         </div>
+        {mobileOpen ? (
+          <div className="space-y-3 border-t border-border-subtle py-3 md:hidden">
+            <ul className="grid gap-1">
+              {navItems.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={isActive(pathname, item.href) ? "page" : undefined}
+                    className="block rounded-md px-3 py-2 text-sm font-medium text-text-secondary hover:bg-surface-raised hover:text-text-primary"
+                  >
+                    {t(item.labelKey)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-3">
+              <LanguageSwitcher />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-md border border-border-default px-3 py-2 text-sm font-medium text-text-secondary"
+              >
+                {t("logout")}
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </nav>
   );

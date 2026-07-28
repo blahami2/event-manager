@@ -86,4 +86,22 @@ describe("AdminNav", () => {
     render(<AdminNav />);
     expect(screen.getByText("title")).toBeDefined();
   });
+
+  it("should toggle the mobile navigation and collapse after choosing a link", () => {
+    render(<AdminNav />);
+    const toggle = screen.getByRole("button", { name: "openMenu" });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+
+    fireEvent.click(toggle);
+    expect(screen.getByRole("button", { name: "closeMenu" }).getAttribute("aria-expanded"))
+      .toBe("true");
+    const registrationLinks = screen.getAllByRole("link", { name: "registrations" });
+    const mobileRegistrationLink = registrationLinks[registrationLinks.length - 1];
+    expect(mobileRegistrationLink).toBeDefined();
+    mobileRegistrationLink?.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(mobileRegistrationLink as HTMLElement);
+
+    expect(screen.getByRole("button", { name: "openMenu" }).getAttribute("aria-expanded"))
+      .toBe("false");
+  });
 });

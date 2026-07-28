@@ -31,16 +31,16 @@ export function BulkActionBar({
     <div
       role="region"
       aria-label={t("region")}
-      className="admin-pop-in sticky bottom-4 z-20 mx-auto flex max-w-xl items-center gap-3 rounded-full border border-border-default bg-surface-overlay/95 px-5 py-2.5 shadow-pop backdrop-blur"
+      className="admin-pop-in sticky bottom-2 z-20 mx-auto flex w-full max-w-xl flex-wrap items-center gap-2 rounded-xl border border-border-default bg-surface-overlay/95 px-3 py-2.5 shadow-pop backdrop-blur sm:bottom-4 sm:flex-nowrap sm:gap-3 sm:rounded-full sm:px-5"
     >
-      <span className="flex items-center gap-2 pr-2">
+      <span className="flex min-w-0 items-center gap-2 pr-1 sm:pr-2">
         <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-accent px-2 font-mono text-xs font-semibold tabular-nums text-white">
           {count}
         </span>
-        <span className="text-sm text-text-secondary">{t("selected")}</span>
+        <span className="truncate text-sm text-text-secondary">{t("selected")}</span>
       </span>
 
-      <div className="mx-0 h-5 w-px bg-border-default" aria-hidden="true" />
+      <div className="mx-0 hidden h-5 w-px bg-border-default sm:block" aria-hidden="true" />
 
       <Button
         variant="secondary"
