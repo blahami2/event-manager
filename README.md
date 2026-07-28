@@ -63,6 +63,14 @@ See [docs/ARCHITECTURE.md, Section 11](docs/ARCHITECTURE.md) for the full migrat
 
 Admin access requires both a **Supabase Auth account** and a matching row in the **AdminUser** database table. This two-step process ensures that only explicitly allowlisted users can access admin features.
 
+Public Supabase sign-up must be disabled (`auth.enable_signup = false` and
+`auth.email.enable_signup = false`; both are disabled in the local
+`supabase/config.toml`). Apply the equivalent setting in the hosted Supabase
+dashboard for production. This reduces unwanted Auth accounts, but it is not an
+authorization control: every admin request is independently denied unless the
+authenticated Supabase user ID has a matching `AdminUser` row, as required by
+[architecture rule S6](docs/ARCHITECTURE_RULES.md#security-constraints).
+
 ### 1. Create a Supabase Auth user
 
 - **Local development:** Open Supabase Studio at [http://127.0.0.1:54323](http://127.0.0.1:54323) (started automatically by `npm run dev`), navigate to **Authentication > Users**, and create a new user with email and password.
