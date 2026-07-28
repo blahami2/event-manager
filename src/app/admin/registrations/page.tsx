@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   RegistrationFilters,
@@ -134,8 +134,11 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
+  const latestListRequest = useRef(0);
 
   const loadData = useCallback(async () => {
+    const requestId = latestListRequest.current + 1;
+    latestListRequest.current = requestId;
     setState((prev) => ({ ...prev, loading: true }));
     try {
       const data = await fetchRegistrations(
@@ -146,8 +149,10 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         page,
         pageSize,
       );
+      if (requestId !== latestListRequest.current) return;
       setState({ data, loading: false });
     } catch {
+      if (requestId !== latestListRequest.current) return;
       setState((prev) => ({ ...prev, loading: false }));
       toast.error(t("errorLoad"));
     }
