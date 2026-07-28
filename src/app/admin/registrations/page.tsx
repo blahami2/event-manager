@@ -136,6 +136,20 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   );
   const latestListRequest = useRef(0);
 
+  useEffect(() => {
+    // Selection is page-local by design. Once visibility criteria change,
+    // retaining IDs would let bulk actions affect registrations the admin can
+    // no longer see.
+    setSelectedIds(new Set());
+  }, [
+    filters.status,
+    filters.stay,
+    filters.accommodation,
+    filters.search,
+    page,
+    pageSize,
+  ]);
+
   const loadData = useCallback(async () => {
     const requestId = latestListRequest.current + 1;
     latestListRequest.current = requestId;

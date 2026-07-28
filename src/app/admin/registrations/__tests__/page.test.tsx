@@ -53,22 +53,43 @@ vi.mock("@/components/admin/RegistrationTable", () => ({
   RegistrationTable: ({
     registrations,
     onEdit,
+    selectedIds,
+    onToggleSelect,
   }: {
     readonly registrations: ReadonlyArray<{ id: string }>;
     readonly onEdit: (registration: { id: string }) => void;
+    readonly selectedIds: ReadonlySet<string>;
+    readonly onToggleSelect: (id: string) => void;
   }) => (
     <div data-testid="table-stub">
       {registrations.length} rows
       {registrations.map((r) => (
-        <button key={r.id} type="button" onClick={() => onEdit(r)}>
-          {`edit-${r.id}`}
-        </button>
+        <span key={r.id}>
+          <button type="button" onClick={() => onEdit(r)}>
+            {`edit-${r.id}`}
+          </button>
+          <button type="button" onClick={() => onToggleSelect(r.id)}>
+            {`select-${r.id}`}
+          </button>
+        </span>
       ))}
+      <span data-testid="selected-count">{selectedIds.size}</span>
     </div>
   ),
 }));
 vi.mock("@/components/admin/Pagination", () => ({
-  Pagination: () => <div data-testid="pagination-stub" />,
+  Pagination: ({
+    onPageChange,
+    onPageSizeChange,
+  }: {
+    readonly onPageChange: (page: number) => void;
+    readonly onPageSizeChange: (pageSize: number) => void;
+  }) => (
+    <div data-testid="pagination-stub">
+      <button type="button" onClick={() => onPageChange(2)}>page-2</button>
+      <button type="button" onClick={() => onPageSizeChange(100)}>page-size-100</button>
+    </div>
+  ),
 }));
 // The edit modal is stubbed down to the two things the page owns: it triggers
 // a save, and it renders whatever server-side field errors the page hands back.
@@ -191,6 +212,105 @@ describe("AdminRegistrationsPage — deletion pagination", () => {
   it("keeps the current page when rows remain or it is already the first page", () => {
     expect(pageAfterDeletion(3, 2)).toBe(3);
     expect(pageAfterDeletion(1, 1)).toBe(1);
+  });
+});
+
+describe("AdminRegistrationsPage — selection visibility", () => {
+  function mockStableList(): void {
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      return Promise.resolve(listResponse("visible-registration"));
+    });
+  }
+
+  async function selectVisibleRegistration(): Promise<void> {
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "select-visible-registration" }))
+        .toBeDefined(),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "select-visible-registration" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("selected-count").textContent).toBe("1"),
+    );
+    expect(
+      screen.getByRole("link", { name: "admin.registrations.bulk.export" })
+        .getAttribute("href"),
+    ).toBe("/api/admin/registrations/export?id=visible-registration");
+  }
+
+  it("clears selection and hidden bulk payloads when filters change", async () => {
+    mockStableList();
+    renderPage();
+    await selectVisibleRegistration();
+
+    fireEvent.click(screen.getByRole("button", { name: "search-newest" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("selected-count").textContent).toBe("0"),
+    );
+    expect(
+      screen.queryByRole("region", {
+        name: "admin.registrations.bulk.region",
+      }),
+    ).toBeNull();
+    expect(fetchMock.mock.calls.some(([, init]) =>
+      (init as RequestInit | undefined)?.method === "POST",
+    )).toBe(false);
+  });
+
+  it.each(["page-2", "page-size-100"])(
+    "clears selection when pagination changes via %s",
+    async (control) => {
+      mockStableList();
+      renderPage();
+      await selectVisibleRegistration();
+
+      fireEvent.click(screen.getByRole("button", { name: control }));
+
+      await waitFor(() =>
+        expect(screen.getByTestId("selected-count").textContent).toBe("0"),
+      );
+      expect(
+        screen.queryByRole("region", {
+          name: "admin.registrations.bulk.region",
+        }),
+      ).toBeNull();
+    },
+  );
+
+  it("keeps selection across a same-page data refetch", async () => {
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      if (init?.method === "PUT") {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ data: { id: "visible-registration" } }),
+        });
+      }
+      return Promise.resolve(listResponse("visible-registration"));
+    });
+    renderPage();
+    await selectVisibleRegistration();
+    fireEvent.click(
+      screen.getByRole("button", { name: "edit-visible-registration" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+
+    await waitFor(() =>
+      expect(screen.queryByTestId("edit-modal-stub")).toBeNull(),
+    );
+    expect(screen.getByTestId("selected-count").textContent).toBe("1");
+    expect(
+      screen.getByRole("link", { name: "admin.registrations.bulk.export" })
+        .getAttribute("href"),
+    ).toBe("/api/admin/registrations/export?id=visible-registration");
   });
 });
 
