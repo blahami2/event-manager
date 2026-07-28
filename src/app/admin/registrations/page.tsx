@@ -136,20 +136,6 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   );
   const latestListRequest = useRef(0);
 
-  useEffect(() => {
-    // Selection is page-local by design. Once visibility criteria change,
-    // retaining IDs would let bulk actions affect registrations the admin can
-    // no longer see.
-    setSelectedIds(new Set());
-  }, [
-    filters.status,
-    filters.stay,
-    filters.accommodation,
-    filters.search,
-    page,
-    pageSize,
-  ]);
-
   const loadData = useCallback(async () => {
     const requestId = latestListRequest.current + 1;
     latestListRequest.current = requestId;
@@ -165,6 +151,13 @@ export default function AdminRegistrationsPage(): React.ReactElement {
       );
       if (requestId !== latestListRequest.current) return;
       setState({ data, loading: false });
+      const visibleIds = new Set(data.items.map((registration) => registration.id));
+      setSelectedIds((previous) => {
+        const retained = new Set(
+          Array.from(previous).filter((id) => visibleIds.has(id)),
+        );
+        return retained.size === previous.size ? previous : retained;
+      });
     } catch {
       if (requestId !== latestListRequest.current) return;
       setState((prev) => ({ ...prev, loading: false }));
@@ -206,6 +199,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   const handleFiltersChange = useCallback(
     (next: RegistrationFiltersValue) => {
+      setSelectedIds(new Set());
       setFilters(next);
       setPage(1);
     },
@@ -213,13 +207,20 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   );
 
   const handleFiltersReset = useCallback(() => {
+    setSelectedIds(new Set());
     setFilters(EMPTY_FILTERS);
     setPage(1);
   }, []);
 
   const handlePageSizeChange = useCallback((newPageSize: number) => {
+    setSelectedIds(new Set());
     setPageSize(newPageSize);
     setPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setSelectedIds(new Set());
+    setPage(newPage);
   }, []);
 
   const refreshAll = useCallback(async () => {
@@ -295,6 +296,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         // exist. Move back first; the page effect will fetch the valid page.
         const nextPage = pageAfterDeletion(page, state.data?.items.length ?? 0);
         if (nextPage !== page) {
+          setSelectedIds(new Set());
           setPage(nextPage);
           await loadStats();
         } else {
@@ -527,7 +529,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
               page={state.data.page}
               pageSize={state.data.pageSize}
               total={state.data.total}
-              onPageChange={setPage}
+              onPageChange={handlePageChange}
               onPageSizeChange={handlePageSizeChange}
             />
           </>

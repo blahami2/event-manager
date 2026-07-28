@@ -312,6 +312,42 @@ describe("AdminRegistrationsPage — selection visibility", () => {
         .getAttribute("href"),
     ).toBe("/api/admin/registrations/export?id=visible-registration");
   });
+
+  it("drops a selected ID removed by a same-page data refetch", async () => {
+    let visibleId = "visible-registration";
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      if (init?.method === "PUT") {
+        visibleId = "replacement-registration";
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ data: { id: "visible-registration" } }),
+        });
+      }
+      return Promise.resolve(listResponse(visibleId));
+    });
+    renderPage();
+    await selectVisibleRegistration();
+    fireEvent.click(
+      screen.getByRole("button", { name: "edit-visible-registration" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "save-stub" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "edit-replacement-registration" }),
+      ).toBeDefined(),
+    );
+    expect(screen.getByTestId("selected-count").textContent).toBe("0");
+    expect(
+      screen.queryByRole("region", {
+        name: "admin.registrations.bulk.region",
+      }),
+    ).toBeNull();
+  });
 });
 
 describe("AdminRegistrationsPage — request sequencing", () => {
