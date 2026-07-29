@@ -164,6 +164,8 @@
       "dashboard": "Dashboard",
       "registrations": "Registrations",
       "logout": "Logout",
+      "openMenu": "Open admin menu",
+      "closeMenu": "Close admin menu",
       "settings": "Settings"
     },
     "login": {

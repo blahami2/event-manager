@@ -26,7 +26,7 @@ export function StatsStrip({ stats }: StatsStripProps): React.ReactElement {
 
   if (!stats) {
     return (
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <SkeletonStat />
         <SkeletonStat />
         <SkeletonStat />
@@ -35,7 +35,7 @@ export function StatsStrip({ stats }: StatsStripProps): React.ReactElement {
   }
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <StatsCard label={t("totalRegistrations")} value={stats.total} accent />
       <StatsCard label={t("totalAdults")} value={stats.totalAdults} />
       <StatsCard label={t("totalChildren")} value={stats.totalChildren} />

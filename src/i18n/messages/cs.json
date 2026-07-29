@@ -164,6 +164,8 @@
       "dashboard": "Přehled",
       "registrations": "Registrace",
       "logout": "Odhlásit se",
+      "openMenu": "Otevřít nabídku administrace",
+      "closeMenu": "Zavřít nabídku administrace",
       "settings": "Nastavení"
     },
     "login": {
