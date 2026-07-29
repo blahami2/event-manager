@@ -84,6 +84,8 @@ export interface RegistrationOutput {
 /** Filters for listing registrations (admin). */
 export interface RegistrationFilters {
   readonly status?: RegistrationStatus;
+  readonly stay?: StayOption;
+  readonly accommodation?: AccommodationOption;
   readonly search?: string;
   readonly page?: number;
   readonly pageSize?: number;

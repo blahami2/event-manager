@@ -194,6 +194,14 @@ export async function listRegistrations(
     where.status = filters.status;
   }
 
+  if (filters.stay) {
+    where.stay = filters.stay;
+  }
+
+  if (filters.accommodation) {
+    where.accommodation = filters.accommodation;
+  }
+
   if (filters.search) {
     where.OR = [
       { name: { contains: filters.search, mode: "insensitive" } },

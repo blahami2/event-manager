@@ -92,6 +92,8 @@ describe("GET /api/admin/registrations", () => {
 
     const res = await GET(makeGetRequest({
       status: "CONFIRMED",
+      stay: "FRI_SAT",
+      accommodation: "ANYWHERE",
       search: "jane",
       page: "2",
       pageSize: "10",
@@ -100,10 +102,25 @@ describe("GET /api/admin/registrations", () => {
     expect(res.status).toBe(200);
     expect(listRegistrationsPaginated).toHaveBeenCalledWith({
       status: RegistrationStatus.CONFIRMED,
+      stay: StayOption.FRI_SAT,
+      accommodation: AccommodationOption.ANYWHERE,
       search: "jane",
       page: 2,
       pageSize: 10,
     });
+  });
+
+  it.each([
+    ["stay", "NOT_A_STAY"],
+    ["accommodation", "NOT_AN_ACCOMMODATION"],
+  ])("returns 400 for an invalid %s filter without querying registrations", async (field, value) => {
+    const res = await GET(makeGetRequest({ [field]: value }));
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json.error.code).toBe("VALIDATION_ERROR");
+    expect(json.error.fields[field]).toBeDefined();
+    expect(listRegistrationsPaginated).not.toHaveBeenCalled();
   });
 
   it("returns 401 for unauthenticated requests", async () => {

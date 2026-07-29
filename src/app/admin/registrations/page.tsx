@@ -41,12 +41,16 @@ interface FetchState {
 
 async function fetchRegistrations(
   status: string,
+  stay: string,
+  accommodation: string,
   search: string,
   page: number,
   pageSize: number,
 ): Promise<PaginatedResult<RegistrationOutput>> {
   const params = new URLSearchParams();
   if (status) params.set("status", status);
+  if (stay) params.set("stay", stay);
+  if (accommodation) params.set("accommodation", accommodation);
   if (search) params.set("search", search);
   params.set("page", String(page));
   params.set("pageSize", String(pageSize));
@@ -109,23 +113,6 @@ async function fetchStats(): Promise<RegistrationStats> {
   return json.data;
 }
 
-/**
- * Stay + accommodation filters are applied client-side because the list
- * endpoint only accepts `status` + `search` today. Stats reflect the full
- * dataset so totals stay honest; the table is filtered to the current page.
- */
-function applyClientFilters(
-  items: ReadonlyArray<RegistrationOutput>,
-  filters: RegistrationFiltersValue,
-): ReadonlyArray<RegistrationOutput> {
-  if (!filters.stay && !filters.accommodation) return items;
-  return items.filter((r) => {
-    if (filters.stay && r.stay !== filters.stay) return false;
-    if (filters.accommodation && r.accommodation !== filters.accommodation) return false;
-    return true;
-  });
-}
-
 export default function AdminRegistrationsPage(): React.ReactElement {
   const t = useTranslations("admin.registrations");
   const tBulk = useTranslations("admin.registrations.bulk");
@@ -153,6 +140,8 @@ export default function AdminRegistrationsPage(): React.ReactElement {
     try {
       const data = await fetchRegistrations(
         filters.status,
+        filters.stay,
+        filters.accommodation,
         filters.search,
         page,
         pageSize,
@@ -162,7 +151,16 @@ export default function AdminRegistrationsPage(): React.ReactElement {
       setState((prev) => ({ ...prev, loading: false }));
       toast.error(t("errorLoad"));
     }
-  }, [filters.status, filters.search, page, pageSize, t, toast]);
+  }, [
+    filters.status,
+    filters.stay,
+    filters.accommodation,
+    filters.search,
+    page,
+    pageSize,
+    t,
+    toast,
+  ]);
 
   const loadStats = useCallback(async () => {
     try {
@@ -359,8 +357,8 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   }, []);
 
   const visibleItems = useMemo(
-    () => applyClientFilters(state.data?.items ?? [], filters),
-    [state.data?.items, filters],
+    () => state.data?.items ?? [],
+    [state.data?.items],
   );
 
   const handleToggleSelect = useCallback((id: string) => {

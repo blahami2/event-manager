@@ -14,26 +14,45 @@ import { ValidationError } from "@/lib/errors/app-errors";
 import { toFieldErrors } from "@/lib/validation/field-errors";
 import { adminEditRegistrationSchema } from "@/lib/validation/registration";
 import type { RegistrationFilters, RegistrationInput } from "@/types/registration";
-import { RegistrationStatus } from "@/types/registration";
+import {
+  AccommodationOption,
+  RegistrationStatus,
+  StayOption,
+} from "@/types/registration";
 
 /** Zod schema for the POST (resend email) request body. */
 const resendEmailSchema = z.object({
   registrationId: z.string().uuid("registrationId must be a valid UUID"),
 });
 
+/** Runtime validation for optional enum-valued list query parameters. */
+const registrationListFilterSchema = z.object({
+  stay: z.enum(StayOption).optional(),
+  accommodation: z.enum(AccommodationOption).optional(),
+});
+
 /**
  * GET /api/admin/registrations
  *
  * Returns a paginated list of registrations with optional filters.
- * Query params: status, search, page, pageSize.
+ * Query params: status, stay, accommodation, search, page, pageSize.
  */
 export async function GET(request: NextRequest): Promise<Response> {
   try {
     await verifyAdmin(request);
 
     const params = request.nextUrl.searchParams;
+    const parsedFilters = registrationListFilterSchema.safeParse({
+      stay: params.get("stay") ?? undefined,
+      accommodation: params.get("accommodation") ?? undefined,
+    });
+    if (!parsedFilters.success) {
+      throw new ValidationError("Validation failed", toFieldErrors(parsedFilters.error));
+    }
+
     const filters: RegistrationFilters = {
       ...(params.get("status") ? { status: params.get("status") as RegistrationStatus } : {}),
+      ...parsedFilters.data,
       ...(params.get("search") ? { search: params.get("search") as string } : {}),
       page: params.get("page") ? Number(params.get("page")) : 1,
       pageSize: params.get("pageSize") ? Number(params.get("pageSize")) : 20,
