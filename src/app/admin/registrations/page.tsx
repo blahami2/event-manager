@@ -151,6 +151,13 @@ export default function AdminRegistrationsPage(): React.ReactElement {
       );
       if (requestId !== latestListRequest.current) return;
       setState({ data, loading: false });
+      const visibleIds = new Set(data.items.map((registration) => registration.id));
+      setSelectedIds((previous) => {
+        const retained = new Set(
+          Array.from(previous).filter((id) => visibleIds.has(id)),
+        );
+        return retained.size === previous.size ? previous : retained;
+      });
     } catch {
       if (requestId !== latestListRequest.current) return;
       setState((prev) => ({ ...prev, loading: false }));
@@ -192,6 +199,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   const handleFiltersChange = useCallback(
     (next: RegistrationFiltersValue) => {
+      setSelectedIds(new Set());
       setFilters(next);
       setPage(1);
     },
@@ -199,18 +207,34 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   );
 
   const handleFiltersReset = useCallback(() => {
+    setSelectedIds(new Set());
     setFilters(EMPTY_FILTERS);
     setPage(1);
   }, []);
 
   const handlePageSizeChange = useCallback((newPageSize: number) => {
+    setSelectedIds(new Set());
     setPageSize(newPageSize);
     setPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setSelectedIds(new Set());
+    setPage(newPage);
   }, []);
 
   const refreshAll = useCallback(async () => {
     await Promise.all([loadData(), loadStats()]);
   }, [loadData, loadStats]);
+
+  const removeSelectedId = useCallback((registrationId: string) => {
+    setSelectedIds((previous) => {
+      if (!previous.has(registrationId)) return previous;
+      const next = new Set(previous);
+      next.delete(registrationId);
+      return next;
+    });
+  }, []);
 
   const handleCancel = useCallback(
     async (registrationId: string) => {
@@ -221,13 +245,14 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           body: JSON.stringify({ registrationId }),
         });
         if (!res.ok) throw new Error("Failed to cancel registration");
+        removeSelectedId(registrationId);
         setDrawer(null);
         await refreshAll();
       } catch {
         toast.error(t("errorCancel"));
       }
     },
-    [refreshAll, t, toast],
+    [refreshAll, removeSelectedId, t, toast],
   );
 
   const handleReconfirm = useCallback(
@@ -239,6 +264,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           body: JSON.stringify({ registrationId }),
         });
         if (!res.ok) throw new Error("Failed to reconfirm registration");
+        removeSelectedId(registrationId);
         setEditing(null);
         setDrawer(null);
         toast.success(t("reconfirmSuccess"));
@@ -247,7 +273,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         toast.error(t("reconfirmError"));
       }
     },
-    [refreshAll, t, toast],
+    [refreshAll, removeSelectedId, t, toast],
   );
 
   /**
@@ -270,17 +296,13 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         setEditing(null);
         setDrawer(null);
         // The row is gone, so any pending selection of it is stale.
-        setSelectedIds((prev) => {
-          if (!prev.has(registrationId)) return prev;
-          const next = new Set(prev);
-          next.delete(registrationId);
-          return next;
-        });
+        removeSelectedId(registrationId);
         toast.success(t("deleteSuccess"));
         // Deleting the sole row on a later page makes that page cease to
         // exist. Move back first; the page effect will fetch the valid page.
         const nextPage = pageAfterDeletion(page, state.data?.items.length ?? 0);
         if (nextPage !== page) {
+          setSelectedIds(new Set());
           setPage(nextPage);
           await loadStats();
         } else {
@@ -290,7 +312,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         toast.error(t("errorDelete"));
       }
     },
-    [loadStats, page, refreshAll, state.data?.items.length, t, toast],
+    [loadStats, page, refreshAll, removeSelectedId, state.data?.items.length, t, toast],
   );
 
   const handleResendEmail = useCallback(
@@ -352,6 +374,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           throw new Error("Failed to update registration");
         }
 
+        removeSelectedId(id);
         setEditing(null);
         toast.success(t("updateSuccess"));
         await refreshAll();
@@ -359,7 +382,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
         toast.error(t("errorUpdate"));
       }
     },
-    [refreshAll, t, toast],
+    [refreshAll, removeSelectedId, t, toast],
   );
 
   const handleRowClick = useCallback((registration: RegistrationOutput) => {
@@ -513,7 +536,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
               page={state.data.page}
               pageSize={state.data.pageSize}
               total={state.data.total}
-              onPageChange={setPage}
+              onPageChange={handlePageChange}
               onPageSizeChange={handlePageSizeChange}
             />
           </>
