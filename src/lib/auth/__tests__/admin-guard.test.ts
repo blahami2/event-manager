@@ -10,11 +10,10 @@ vi.mock("@supabase/ssr", () => ({
 
 vi.mock("@/repositories/admin-repository", () => ({
   findAdminBySupabaseId: vi.fn(),
-  ensureAdminUser: vi.fn(),
 }));
 
 import { createServerClient } from "@supabase/ssr";
-import { findAdminBySupabaseId, ensureAdminUser } from "@/repositories/admin-repository";
+import { findAdminBySupabaseId } from "@/repositories/admin-repository";
 
 // Set required environment variables
 process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
@@ -118,7 +117,7 @@ describe("verifyAdmin", () => {
     await expect(verifyAdmin(request)).rejects.toThrow("Authentication required");
   });
 
-  it("auto-provisions admin when user is authenticated but not in AdminUser table", async () => {
+  it("denies an authenticated user who is not in the AdminUser allowlist", async () => {
     const mockSupabase = {
       auth: {
         getUser: vi.fn().mockResolvedValue({
@@ -130,12 +129,6 @@ describe("verifyAdmin", () => {
 
     vi.mocked(createServerClient).mockReturnValue(mockSupabase);
     vi.mocked(findAdminBySupabaseId).mockResolvedValue(null);
-    vi.mocked(ensureAdminUser).mockResolvedValue({
-      id: "new-admin-id",
-      supabaseUserId: "user123",
-      email: "user@example.com",
-      createdAt: new Date(),
-    });
 
     const request = new NextRequest("https://example.com/api/admin/test", {
       headers: {
@@ -143,12 +136,10 @@ describe("verifyAdmin", () => {
       },
     });
 
-    const result = await verifyAdmin(request);
-
-    expect(result).toEqual({
-      authenticated: true,
-      adminId: "new-admin-id",
+    await expect(verifyAdmin(request)).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+      statusCode: 403,
+      message: "Insufficient permissions",
     });
-    expect(ensureAdminUser).toHaveBeenCalledWith("user123", "user@example.com");
   });
 });

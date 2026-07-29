@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { findAdminBySupabaseId, ensureAdminUser } from "@/repositories/admin-repository";
-import { AuthenticationError } from "@/lib/errors/app-errors";
+import { findAdminBySupabaseId } from "@/repositories/admin-repository";
+import { AuthenticationError, AuthorizationError } from "@/lib/errors/app-errors";
 import { logger } from "@/lib/logger";
 
 /**
@@ -36,10 +36,10 @@ function getSupabaseConfig(): { url: string; anonKey: string } {
  * 1. Extract the Bearer token from the Authorization header, OR
  *    extract the session from Supabase SSR cookies
  * 2. Verify the token/session with Supabase (`auth.getUser`)
- * 3. Check if the Supabase user ID exists in the AdminUser table;
- *    if not, auto-provision (only Supabase Auth users can reach this point)
+ * 3. Check if the Supabase user ID exists in the AdminUser allowlist
  *
  * @throws {AuthenticationError} if no valid session (401)
+ * @throws {AuthorizationError} if the authenticated user is not allowlisted (403)
  */
 export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResult> {
   const authHeader = request.headers.get("authorization");
@@ -62,7 +62,7 @@ export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResu
       throw new AuthenticationError();
     }
 
-    const admin = await resolveAdmin(data.user.id, data.user.email ?? "");
+    const admin = await resolveAdmin(data.user.id);
     logger.info("Admin authenticated via Bearer token", { adminUserId: admin.adminId });
     return admin;
   }
@@ -98,24 +98,21 @@ export async function verifyAdmin(request: NextRequest): Promise<VerifyAdminResu
     throw new AuthenticationError();
   }
 
-  const admin = await resolveAdmin(data.user.id, data.user.email ?? "");
+  const admin = await resolveAdmin(data.user.id);
   logger.info("Admin authenticated via cookie session", { adminUserId: admin.adminId });
   return admin;
 }
 
 /**
- * Resolve or auto-provision an admin user by Supabase ID.
- *
- * Looks up the AdminUser record; if not found, creates one.
- * This handles the case where the database was seeded with a placeholder
- * Supabase user ID that doesn't match the real one (fixes B-005/B-006).
+ * Resolve an explicitly allowlisted admin user by Supabase ID.
+ * Authentication alone never grants admin authorization (architecture rule S6).
  */
-async function resolveAdmin(supabaseUserId: string, email: string): Promise<VerifyAdminResult> {
-  let admin = await findAdminBySupabaseId(supabaseUserId);
+async function resolveAdmin(supabaseUserId: string): Promise<VerifyAdminResult> {
+  const admin = await findAdminBySupabaseId(supabaseUserId);
 
   if (!admin) {
-    logger.info("Auto-provisioning admin user", { supabaseUserId, email });
-    admin = await ensureAdminUser(supabaseUserId, email);
+    logger.warn("Authenticated user denied admin access");
+    throw new AuthorizationError();
   }
 
   return {

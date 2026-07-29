@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import { AuthenticationError } from "@/lib/errors/app-errors";
+import { AuthenticationError, AuthorizationError } from "@/lib/errors/app-errors";
 
 // ── Mock Setup (vi.hoisted) ──
 
 const mockCreateServerClient = vi.hoisted(() => vi.fn());
 const mockFindAdminBySupabaseId = vi.hoisted(() => vi.fn());
-const mockEnsureAdminUser = vi.hoisted(() => vi.fn());
 const mockGetUser = vi.hoisted(() => vi.fn());
 const mockLogger = vi.hoisted(() => ({
   debug: vi.fn(),
@@ -27,7 +26,6 @@ vi.mock("@supabase/ssr", () => ({
 
 vi.mock("@/repositories/admin-repository", () => ({
   findAdminBySupabaseId: mockFindAdminBySupabaseId,
-  ensureAdminUser: mockEnsureAdminUser,
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -140,28 +138,27 @@ describe("verifyAdmin", () => {
     await expect(act).rejects.toThrow(AuthenticationError);
   });
 
-  it("should auto-provision admin when user is not in AdminUser table", async () => {
+  it("should return 403 without writing when authenticated user is not allowlisted", async () => {
     const request = createRequestWithAuth(VALID_TOKEN);
     mockGetUser.mockResolvedValue({
       data: { user: { id: "supabase-uid-new", email: "new@example.com" } },
       error: null,
     });
     mockFindAdminBySupabaseId.mockResolvedValue(null);
-    mockEnsureAdminUser.mockResolvedValue({
-      id: "new-admin-id",
-      supabaseUserId: "supabase-uid-new",
-      email: "new@example.com",
-      createdAt: new Date(),
-    });
 
     const { verifyAdmin } = await import("@/lib/auth/admin-guard");
-    const result = await verifyAdmin(request);
+    const act = verifyAdmin(request);
 
-    expect(result).toEqual({
-      authenticated: true,
-      adminId: "new-admin-id",
+    await expect(act).rejects.toBeInstanceOf(AuthorizationError);
+    await expect(act).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+      statusCode: 403,
+      message: "Insufficient permissions",
     });
-    expect(mockEnsureAdminUser).toHaveBeenCalledWith("supabase-uid-new", "new@example.com");
+    expect(mockFindAdminBySupabaseId).toHaveBeenCalledWith("supabase-uid-new");
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      "Authenticated user denied admin access",
+    );
   });
 
   it("should authenticate via cookies when no Bearer header", async () => {
@@ -179,6 +176,30 @@ describe("verifyAdmin", () => {
       authenticated: true,
       adminId: "admin-1",
     });
+  });
+
+  it("should return 403 without provisioning for an authenticated cookie user who is not allowlisted", async () => {
+    const request = createRequestWithCookie();
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "supabase-uid-new", email: "new@example.com" } },
+      error: null,
+    });
+    mockFindAdminBySupabaseId.mockResolvedValue(null);
+
+    const { verifyAdmin } = await import("@/lib/auth/admin-guard");
+    const act = verifyAdmin(request);
+
+    await expect(act).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+      statusCode: 403,
+      message: "Insufficient permissions",
+    });
+    expect(mockGetUser).toHaveBeenCalledWith();
+    expect(mockFindAdminBySupabaseId).toHaveBeenCalledOnce();
+    expect(mockFindAdminBySupabaseId).toHaveBeenCalledWith("supabase-uid-new");
+
+    const clientOptions = mockCreateServerClient.mock.calls[0]?.[2];
+    expect(clientOptions.cookies.getAll()).toEqual(request.cookies.getAll());
   });
 
   it("should log admin authentication on success", async () => {
