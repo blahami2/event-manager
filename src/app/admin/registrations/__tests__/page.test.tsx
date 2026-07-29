@@ -22,7 +22,32 @@ vi.mock("next-intl", () => ({
 
 // Mock child components so the test focuses on page wiring
 vi.mock("@/components/admin/RegistrationFilters", () => ({
-  RegistrationFilters: () => <div data-testid="filters-stub" />,
+  RegistrationFilters: ({
+    value,
+    onChange,
+  }: {
+    readonly value: {
+      readonly status: string;
+      readonly stay: string;
+      readonly accommodation: string;
+      readonly search: string;
+    };
+    readonly onChange: (value: {
+      readonly status: string;
+      readonly stay: string;
+      readonly accommodation: string;
+      readonly search: string;
+    }) => void;
+  }) => (
+    <div data-testid="filters-stub">
+      <button
+        type="button"
+        onClick={() => onChange({ ...value, search: "newest" })}
+      >
+        search-newest
+      </button>
+    </div>
+  ),
 }));
 vi.mock("@/components/admin/RegistrationTable", () => ({
   RegistrationTable: ({
@@ -113,6 +138,39 @@ function mockListResponse(count: number): void {
   });
 }
 
+function deferred<T>(): {
+  readonly promise: Promise<T>;
+  readonly resolve: (value: T) => void;
+  readonly reject: (reason?: unknown) => void;
+} {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, resolve, reject };
+}
+
+function listResponse(id: string): {
+  readonly ok: true;
+  readonly status: 200;
+  readonly json: () => Promise<Record<string, unknown>>;
+} {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      data: {
+        items: [{ id }],
+        total: 1,
+        page: 1,
+        pageSize: 50,
+      },
+    }),
+  };
+}
+
 // Must import AFTER mocks
 import AdminRegistrationsPage, { pageAfterDeletion } from "../page";
 import { ToastProvider } from "@/components/ui/admin";
@@ -133,6 +191,127 @@ describe("AdminRegistrationsPage — deletion pagination", () => {
   it("keeps the current page when rows remain or it is already the first page", () => {
     expect(pageAfterDeletion(3, 2)).toBe(3);
     expect(pageAfterDeletion(1, 1)).toBe(1);
+  });
+});
+
+describe("AdminRegistrationsPage — request sequencing", () => {
+  it("keeps loading and data controlled by the newest request when responses arrive out of order", async () => {
+    const older = deferred<ReturnType<typeof listResponse>>();
+    const newer = deferred<ReturnType<typeof listResponse>>();
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      return url.includes("search=newest") ? newer.promise : older.promise;
+    });
+
+    renderPage();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole("button", { name: "search-newest" }));
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) =>
+        typeof url === "string" && url.includes("search=newest"),
+      )).toBe(true),
+    );
+
+    newer.resolve(listResponse("newest"));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "edit-newest" })).toBeDefined(),
+    );
+    expect(screen.queryByRole("status")).toBeNull();
+
+    older.resolve(listResponse("stale"));
+    await older.promise;
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "edit-newest" })).toBeDefined(),
+    );
+    expect(screen.queryByRole("button", { name: "edit-stale" })).toBeNull();
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("ignores an older request error after a newer request has started", async () => {
+    const older = deferred<ReturnType<typeof listResponse>>();
+    const newer = deferred<ReturnType<typeof listResponse>>();
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      return url.includes("search=newest") ? newer.promise : older.promise;
+    });
+
+    renderPage();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole("button", { name: "search-newest" }));
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) =>
+        typeof url === "string" && url.includes("search=newest"),
+      )).toBe(true),
+    );
+
+    older.reject(new Error("stale failure"));
+    await expect(older.promise).rejects.toThrow("stale failure");
+    expect(screen.queryByText("admin.registrations.errorLoad")).toBeNull();
+    expect(screen.getByRole("status")).toBeDefined();
+
+    newer.resolve(listResponse("newest"));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "edit-newest" })).toBeDefined(),
+    );
+    expect(screen.queryByText("admin.registrations.errorLoad")).toBeNull();
+  });
+
+  it("lets the newest request control the error and loading state", async () => {
+    const older = deferred<ReturnType<typeof listResponse>>();
+    const newer = deferred<ReturnType<typeof listResponse>>();
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      return url.includes("search=newest") ? newer.promise : older.promise;
+    });
+
+    renderPage();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole("button", { name: "search-newest" }));
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) =>
+        typeof url === "string" && url.includes("search=newest"),
+      )).toBe(true),
+    );
+
+    older.resolve(listResponse("stale"));
+    await older.promise;
+    newer.reject(new Error("newest failure"));
+
+    await waitFor(() =>
+      expect(screen.getByText("admin.registrations.errorLoad")).toBeDefined(),
+    );
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.queryByRole("button", { name: "edit-stale" })).toBeNull();
+  });
+
+  it("does not commit state or show an error after unmount", async () => {
+    const pending = deferred<ReturnType<typeof listResponse>>();
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/api/admin/registrations/stats") {
+        return Promise.resolve({ ok: false });
+      }
+      return pending.promise;
+    });
+
+    const view = render(
+      <ToastProvider>
+        <AdminRegistrationsPage />
+      </ToastProvider>,
+    );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    view.rerender(<ToastProvider>{null}</ToastProvider>);
+
+    pending.reject(new Error("finished after unmount"));
+    await expect(pending.promise).rejects.toThrow("finished after unmount");
+    await Promise.resolve();
+
+    expect(screen.queryByText("admin.registrations.errorLoad")).toBeNull();
   });
 });
 
