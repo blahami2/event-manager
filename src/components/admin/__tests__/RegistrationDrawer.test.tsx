@@ -122,9 +122,10 @@ describe("RegistrationDrawer", () => {
     }))).toBeDefined();
   });
 
-  it("should keep showing the stay option alongside a custom range", () => {
+  it("should label the stay as custom alongside a custom range", () => {
     // given
-    // - the stay option still drives tables, filters and exports
+    // - the persisted stay option still drives editing, filters and exports,
+    //   but no longer describes the overridden dates shown in this summary
     const customReg: RegistrationOutput = {
       ...mockReg,
       stayStartDate: "2026-07-10",
@@ -135,7 +136,8 @@ describe("RegistrationDrawer", () => {
     render(<RegistrationDrawer registration={customReg} {...noopHandlers} />);
 
     // then
-    expect(screen.getByText("enums.stay.SAT_SUN")).toBeDefined();
+    expect(screen.getByText("enums.stay.CUSTOM")).toBeDefined();
+    expect(screen.queryByText("enums.stay.SAT_SUN")).toBeNull();
   });
 
   it("should let Escape dismiss only the nested cancellation confirmation", () => {

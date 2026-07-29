@@ -2,6 +2,7 @@ import { describe, test, expect } from "vitest";
 import {
   accommodationLabel,
   stayLabel,
+  staySummaryLabel,
   statusLabel,
   accommodationEnumKey,
   stayEnumKey,
@@ -13,6 +14,9 @@ import {
   RegistrationStatus,
   StayOption,
 } from "@/types/registration";
+import csMessages from "@/i18n/messages/cs.json";
+import enMessages from "@/i18n/messages/en.json";
+import skMessages from "@/i18n/messages/sk.json";
 
 describe("i18n canonical labels", () => {
   /**
@@ -90,6 +94,51 @@ describe("i18n canonical labels", () => {
         "enums.stay.SAT_ONLY",
       ]);
     });
+  });
+
+  describe("staySummaryLabel", () => {
+    test("should retain the selected stay label when no custom range is set", () => {
+      expect(
+        staySummaryLabel(StayOption.SAT_SUN, null, null, passthrough),
+      ).toBe("enums.stay.SAT_SUN");
+    });
+
+    test("should use the custom label when a complete custom range is set", () => {
+      expect(
+        staySummaryLabel(
+          StayOption.SAT_SUN,
+          "2026-07-10",
+          "2026-07-13",
+          passthrough,
+        ),
+      ).toBe("enums.stay.CUSTOM");
+    });
+
+    test.each([
+      ["en", enMessages, "Custom", "Saturday – Sunday"],
+      ["cs", csMessages, "Vlastní", "Sobota – Neděle"],
+      ["sk", skMessages, "Vlastné", "Sobota – Nedeľa"],
+    ])(
+      "should resolve custom and standard summaries in %s",
+      (_locale, messages, customLabel, standardLabel) => {
+        const translateStay = (key: string): string => {
+          const stayKey = key.replace("enums.stay.", "") as keyof typeof messages.enums.stay;
+          return messages.enums.stay[stayKey];
+        };
+
+        expect(
+          staySummaryLabel(
+            StayOption.SAT_SUN,
+            "2026-07-10",
+            "2026-07-13",
+            translateStay,
+          ),
+        ).toBe(customLabel);
+        expect(
+          staySummaryLabel(StayOption.SAT_SUN, null, null, translateStay),
+        ).toBe(standardLabel);
+      },
+    );
   });
 
   describe("ALL_STAY_OPTIONS", () => {

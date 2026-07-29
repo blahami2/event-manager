@@ -73,6 +73,19 @@ describe("RegistrationTable", () => {
     expect(screen.getByText("2")).toBeDefined();
   });
 
+  it("should label a registration with custom stay dates as custom", () => {
+    const registration = makeRegistration({
+      stay: StayOption.SAT_SUN,
+      stayStartDate: "2026-07-10",
+      stayEndDate: "2026-07-13",
+    });
+
+    render(<RegistrationTable {...defaultProps} registrations={[registration]} />);
+
+    expect(screen.getByText("enums.stay.CUSTOM")).toBeDefined();
+    expect(screen.queryByText("enums.stay.SAT_SUN")).toBeNull();
+  });
+
   it("should format created dates in the active locale", () => {
     const createdAt = new Date("2026-07-10T12:00:00.000Z");
     render(<RegistrationTable {...defaultProps} registrations={[makeRegistration({ createdAt })]} />);
