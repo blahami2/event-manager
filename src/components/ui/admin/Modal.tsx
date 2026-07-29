@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import { containTabFocus, getFocusableElements } from "./focus-scope";
 
 export interface ModalProps {
@@ -61,6 +62,7 @@ export function Modal({
   disableBackdropClose = false,
   children,
 }: ModalProps): React.ReactElement | null {
+  const t = useTranslations("common");
   const reactId = useId();
   const titleId = `${reactId}-title`;
   const descId = description ? `${reactId}-desc` : undefined;
@@ -177,7 +179,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("close")}
             className="rounded-md p-1.5 text-text-tertiary transition-colors duration-150 hover:bg-admin-hover hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
           >
             <svg

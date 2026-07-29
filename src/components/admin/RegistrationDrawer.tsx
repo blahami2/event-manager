@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   accommodationLabel,
   stayLabel,
@@ -36,10 +36,10 @@ export interface RegistrationDrawerProps {
  * day for anyone west of Greenwich. Falls back to the raw value if it is not
  * parseable, so bad data is visible rather than silently blank.
  */
-function formatCalendarDate(isoDate: string): string {
+function formatCalendarDate(isoDate: string, locale: string): string {
   const parsed = parseIsoDate(isoDate);
   if (!parsed) return isoDate;
-  return parsed.toLocaleDateString("en-US", {
+  return parsed.toLocaleDateString(locale, {
     timeZone: "UTC",
     year: "numeric",
     month: "short",
@@ -48,14 +48,14 @@ function formatCalendarDate(isoDate: string): string {
 }
 
 /** Render an admin-set custom stay range; a single-day range collapses to one date. */
-function formatDateRange(start: string, end: string): string {
+function formatDateRange(start: string, end: string, locale: string): string {
   return start === end
-    ? formatCalendarDate(start)
-    : `${formatCalendarDate(start)} – ${formatCalendarDate(end)}`;
+    ? formatCalendarDate(start, locale)
+    : `${formatCalendarDate(start, locale)} – ${formatCalendarDate(end, locale)}`;
 }
 
-function formatDate(date: Date): string {
-  return new Date(date).toLocaleString("en-US", {
+function formatDate(date: Date, locale: string): string {
+  return new Date(date).toLocaleString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -79,10 +79,12 @@ export function RegistrationDrawer({
   onReconfirm,
   resendingId,
 }: RegistrationDrawerProps): React.ReactElement | null {
+  const locale = useLocale();
   const t = useTranslations("admin.registrations");
   const tTable = useTranslations("admin.registrations.table");
   const tEdit = useTranslations("admin.registrations.edit");
   const tEnums = useTranslations();
+  const tCommon = useTranslations("common");
   const layerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -151,7 +153,7 @@ export function RegistrationDrawer({
     <div ref={layerRef} className="fixed inset-0 z-50 flex admin-fade-in">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={tCommon("close")}
         onClick={onClose}
         className="flex-1 bg-black/60 backdrop-blur-sm focus:outline-none"
       />
@@ -175,7 +177,7 @@ export function RegistrationDrawer({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tCommon("close")}
             className="rounded-md p-1.5 text-text-tertiary transition-colors duration-150 hover:bg-admin-hover hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -224,7 +226,7 @@ export function RegistrationDrawer({
             <Field label={tTable("dateRange")}>
               {registration.stayStartDate && registration.stayEndDate ? (
                 <span className="text-sm text-text-primary">
-                  {formatDateRange(registration.stayStartDate, registration.stayEndDate)}
+                  {formatDateRange(registration.stayStartDate, registration.stayEndDate, locale)}
                 </span>
               ) : (
                 <span className="text-sm text-text-tertiary">
@@ -250,7 +252,7 @@ export function RegistrationDrawer({
 
             <Field label={tTable("created")}>
               <span className="font-mono text-sm tabular-nums text-text-secondary">
-                {formatDate(registration.createdAt)}
+                {formatDate(registration.createdAt, locale)}
               </span>
             </Field>
           </dl>

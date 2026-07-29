@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 import {
@@ -24,11 +24,8 @@ export interface RegistrationTableProps {
   readonly searchQuery?: string;
 }
 
-function formatDate(date: Date): string {
-  // Use a fixed locale so the SSR-rendered string matches the client-side
-  // hydration; the admin UI is organizer-facing so a single locale for
-  // dates is acceptable.
-  return new Date(date).toLocaleDateString("en-US", {
+function formatDate(date: Date, locale: string): string {
+  return new Date(date).toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -151,6 +148,7 @@ export function RegistrationTable({
   onToggleSelectAll,
   searchQuery = "",
 }: RegistrationTableProps): React.ReactElement {
+  const locale = useLocale();
   const t = useTranslations("admin.registrations.table");
   const tReg = useTranslations("admin.registrations");
   const tEnums = useTranslations();
@@ -320,7 +318,7 @@ export function RegistrationTable({
                       />
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 align-top font-mono text-xs tabular-nums text-text-tertiary">
-                      {formatDate(reg.createdAt)}
+                      {formatDate(reg.createdAt, locale)}
                     </td>
                     <td
                       className="whitespace-nowrap px-4 py-3 text-right align-top"

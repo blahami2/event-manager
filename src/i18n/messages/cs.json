@@ -10,7 +10,10 @@
     "confirm": "Potvrdit",
     "close": "Zavřít",
     "yes": "Ano",
-    "no": "Ne"
+    "no": "Ne",
+    "dismiss": "Zavřít oznámení",
+    "selectLanguage": "Vybrat jazyk",
+    "availableLanguages": "Dostupné jazyky"
   },
   "nav": {
     "home": "Domů",
@@ -166,7 +169,8 @@
       "logout": "Odhlásit se",
       "openMenu": "Otevřít nabídku administrace",
       "closeMenu": "Zavřít nabídku administrace",
-      "settings": "Nastavení"
+      "settings": "Nastavení",
+      "navigationLabel": "Navigace administrace"
     },
     "login": {
       "title": "Přihlášení administrátora",

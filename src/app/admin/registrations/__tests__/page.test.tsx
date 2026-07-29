@@ -10,6 +10,7 @@ import userEvent from "@testing-library/user-event";
 // across re-renders (avoids triggering effects that depend on `t`).
 const translatorCache = new Map<string, (key: string) => string>();
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: (namespace?: string) => {
     const key = namespace ?? "";
     const cached = translatorCache.get(key);

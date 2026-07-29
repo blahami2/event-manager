@@ -40,7 +40,7 @@ export function AdminNav(): React.ReactElement | null {
   return (
     <nav
       className="sticky top-0 z-40 border-b border-border-default bg-surface-base/90 backdrop-blur-md"
-      aria-label="Admin navigation"
+      aria-label={t("navigationLabel")}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between gap-3">

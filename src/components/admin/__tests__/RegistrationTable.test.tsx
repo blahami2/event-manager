@@ -13,6 +13,7 @@ import type { RegistrationOutput } from "@/types/registration";
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string, values?: { name?: string }) =>
     values?.name ? `${key} ${values.name}` : key,
+  useLocale: () => "cs",
 }));
 
 function makeRegistration(overrides: Partial<RegistrationOutput> = {}): RegistrationOutput {
@@ -70,6 +71,17 @@ describe("RegistrationTable", () => {
     expect(screen.getByText("enums.status.CONFIRMED")).toBeDefined();
     // - adults count rendered
     expect(screen.getByText("2")).toBeDefined();
+  });
+
+  it("should format created dates in the active locale", () => {
+    const createdAt = new Date("2026-07-10T12:00:00.000Z");
+    render(<RegistrationTable {...defaultProps} registrations={[makeRegistration({ createdAt })]} />);
+
+    expect(screen.getByText(createdAt.toLocaleDateString("cs", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }))).toBeDefined();
   });
 
   it("should show edit, cancel, and resend buttons for confirmed registration", () => {

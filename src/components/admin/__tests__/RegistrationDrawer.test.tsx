@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi } from "vitest";
+import { beforeEach, describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { RegistrationDrawer } from "../RegistrationDrawer";
 import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
@@ -9,8 +9,10 @@ import type { RegistrationOutput } from "@/types/registration";
 
 // Mock next-intl: every translator resolves a key to itself, so assertions
 // read against canonical keys rather than a specific locale's copy.
+const localeState = vi.hoisted(() => ({ value: "en" }));
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => localeState.value,
 }));
 
 const mockReg: RegistrationOutput = {
@@ -37,6 +39,10 @@ const noopHandlers = {
 };
 
 describe("RegistrationDrawer", () => {
+  beforeEach(() => {
+    localeState.value = "en";
+  });
+
   it("should render nothing when no registration is selected", () => {
     // given / when
     const { container } = render(
@@ -89,6 +95,31 @@ describe("RegistrationDrawer", () => {
     // then
     // - a one-day range reads as a single date, not a repeated one
     expect(screen.getByText("Jul 10, 2026")).toBeDefined();
+  });
+
+  it("should format calendar and timestamp dates in the active locale", () => {
+    localeState.value = "cs";
+    const customReg: RegistrationOutput = {
+      ...mockReg,
+      stayStartDate: "2026-07-10",
+      stayEndDate: "2026-07-10",
+    };
+
+    render(<RegistrationDrawer registration={customReg} {...noopHandlers} />);
+
+    expect(screen.getByText(new Date("2026-07-10T00:00:00.000Z").toLocaleDateString("cs", {
+      timeZone: "UTC",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }))).toBeDefined();
+    expect(screen.getByText(new Date(mockReg.createdAt).toLocaleString("cs", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }))).toBeDefined();
   });
 
   it("should keep showing the stay option alongside a custom range", () => {
