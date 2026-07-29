@@ -7,6 +7,7 @@ import {
   useCallback,
   useSyncExternalStore,
 } from "react";
+import { useTranslations } from "next-intl";
 import { locales, defaultLocale } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
 import { LOCALE_COOKIE } from "@/i18n/get-locale";
@@ -37,6 +38,7 @@ function getLocaleFromCookie(): Locale {
 }
 
 export function LanguageSwitcher(): React.ReactElement {
+  const t = useTranslations("common");
   // Read the cookie via useSyncExternalStore so SSR gets the default locale
   // and the client gets the real cookie-backed value without triggering a
   // "setState in effect" lint warning.
@@ -69,7 +71,7 @@ export function LanguageSwitcher(): React.ReactElement {
     <div ref={containerRef} className="relative inline-block">
       <button
         type="button"
-        aria-label="Select language"
+        aria-label={t("selectLanguage")}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -95,7 +97,7 @@ export function LanguageSwitcher(): React.ReactElement {
       {isOpen && (
         <ul
           role="listbox"
-          aria-label="Available languages"
+          aria-label={t("availableLanguages")}
           className="absolute right-0 z-50 mt-1 w-40 overflow-hidden rounded-md border border-border-default bg-surface-overlay py-1 shadow-pop admin-pop-in"
         >
           {LANGUAGES.map((lang) => (

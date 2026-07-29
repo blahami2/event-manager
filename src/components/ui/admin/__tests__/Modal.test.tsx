@@ -5,6 +5,10 @@ import { describe, test, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Modal } from "../Modal";
 
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
 describe("admin Modal", () => {
   test("should render nothing when open is false", () => {
     // when

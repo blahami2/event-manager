@@ -11,6 +11,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 
 /**
  * Returns `false` on the server and during the very first client render,
@@ -146,6 +147,7 @@ function ToastViewport({
   readonly toasts: ReadonlyArray<Toast>;
   readonly onDismiss: (id: string) => void;
 }): React.ReactElement | null {
+  const tCommon = useTranslations("common");
   const mounted = useIsMounted();
   if (!mounted) return null;
   return createPortal(
@@ -166,7 +168,7 @@ function ToastViewport({
           <button
             type="button"
             onClick={() => onDismiss(t.id)}
-            aria-label="Dismiss"
+            aria-label={tCommon("dismiss")}
             className="shrink-0 rounded-sm p-0.5 text-text-tertiary transition-colors duration-150 hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-ring"
           >
             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

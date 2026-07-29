@@ -10,7 +10,10 @@
     "confirm": "Confirm",
     "close": "Close",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "dismiss": "Dismiss",
+    "selectLanguage": "Select language",
+    "availableLanguages": "Available languages"
   },
   "nav": {
     "home": "Home",
@@ -166,7 +169,8 @@
       "logout": "Logout",
       "openMenu": "Open admin menu",
       "closeMenu": "Close admin menu",
-      "settings": "Settings"
+      "settings": "Settings",
+      "navigationLabel": "Admin navigation"
     },
     "login": {
       "title": "Admin Login",

@@ -8,17 +8,21 @@ import { LanguageSwitcher } from "../LanguageSwitcher";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
-  useLocale: () => "en",
+  useTranslations: () => (key: string) => ({
+    selectLanguage: "Vybrat jazyk",
+    availableLanguages: "Dostupné jazyky",
+  })[key] ?? key,
 }));
 
 describe("LanguageSwitcher", () => {
   it("should render language select with all locale options when mounted", async () => {
     render(<LanguageSwitcher />);
-    const button = screen.getByLabelText("Select language");
+    const button = screen.getByLabelText("Vybrat jazyk");
     expect(button).toBeDefined();
 
     // Open dropdown
     await userEvent.click(button);
+    expect(screen.getByRole("listbox", { name: "Dostupné jazyky" })).toBeDefined();
 
     const options = screen.getAllByRole("option");
     expect(options).toHaveLength(3);
@@ -29,7 +33,7 @@ describe("LanguageSwitcher", () => {
 
   it("should have current locale selected when mounted", () => {
     render(<LanguageSwitcher />);
-    const button = screen.getByLabelText("Select language");
+    const button = screen.getByLabelText("Vybrat jazyk");
     // Default locale is "en", button should show the English flag/label
     expect(button.textContent).toContain("🇬🇧");
   });

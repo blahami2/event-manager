@@ -10,7 +10,8 @@ import type { RegistrationOutput } from "@/types/registration";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: (namespace?: string) => (key: string) =>
+    namespace === "common" && key === "close" ? "Close" : key,
 }));
 
 const mockReg: RegistrationOutput = {

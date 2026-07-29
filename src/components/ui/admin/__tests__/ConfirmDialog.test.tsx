@@ -5,6 +5,10 @@ import { describe, test, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ConfirmDialog } from "../ConfirmDialog";
 
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key === "close" ? "Close" : key,
+}));
+
 describe("admin ConfirmDialog", () => {
   test("should render title, message, confirm and dismiss buttons when open", () => {
     // when
