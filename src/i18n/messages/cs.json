@@ -248,6 +248,7 @@
         "status": "Stav",
         "created": "Vytvořeno",
         "actions": "Akce",
+        "viewDetails": "Zobrazit podrobnosti pro {name}",
         "edit": "Upravit",
         "cancel": "Zrušit",
         "confirmCancel": "Zrušit tuto registraci?",

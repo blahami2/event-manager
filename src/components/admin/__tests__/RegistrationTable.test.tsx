@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { RegistrationTable } from "../RegistrationTable";
 import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
@@ -10,7 +11,8 @@ import type { RegistrationOutput } from "@/types/registration";
 // Mock next-intl: passthrough keys so we can assert on canonical enum keys
 // such as `enums.stay.FRI_SUN`.
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => (key: string, values?: { name?: string }) =>
+    values?.name ? `${key} ${values.name}` : key,
 }));
 
 function makeRegistration(overrides: Partial<RegistrationOutput> = {}): RegistrationOutput {
@@ -91,6 +93,30 @@ describe("RegistrationTable", () => {
     render(<RegistrationTable registrations={[reg]} onEdit={onEdit} onCancel={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "edit" }));
     expect(onEdit).toHaveBeenCalledWith(reg);
+  });
+
+  it("should expose a keyboard-accessible details control instead of an interactive row", async () => {
+    const user = userEvent.setup();
+    const onViewDetails = vi.fn();
+    const reg = makeRegistration();
+    render(
+      <RegistrationTable
+        registrations={[reg]}
+        onEdit={vi.fn()}
+        onCancel={vi.fn()}
+        onViewDetails={onViewDetails}
+      />,
+    );
+
+    const details = screen.getByRole("button", {
+      name: "viewDetails John Doe",
+    });
+    details.focus();
+    await user.keyboard("{Enter}");
+
+    expect(onViewDetails).toHaveBeenCalledWith(reg);
+    expect(screen.getByRole("row", { name: /John Doe/ }).getAttribute("tabindex"))
+      .toBeNull();
   });
 
   it("should show confirmation dialog when cancel is clicked", () => {
