@@ -4,7 +4,7 @@ for (const width of [320, 375]) {
   test(`real Czech admin components do not overflow at ${width}px`, async ({ context, page }) => {
     await context.addCookies([{ name: "NEXT_LOCALE", value: "cs", domain: "127.0.0.1", path: "/" }]);
     await page.setViewportSize({ width, height: 800 });
-    await page.goto("/__e2e/admin-responsive");
+    await page.goto("/e2e/admin-responsive");
     await page.getByRole("button", { name: "Otevřít nabídku administrace" }).click();
 
     await expect(page.getByRole("link", { name: "Registrace" }).last()).toBeVisible();
