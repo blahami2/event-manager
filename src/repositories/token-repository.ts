@@ -82,6 +82,25 @@ export async function revokeAllTokensForRegistration(
   return result.count;
 }
 
+/**
+ * Revoke every token for a registration except one. Returns count of revoked rows.
+ *
+ * This is the shape token rotation actually needs: the replacement token is
+ * created *before* the email that carries it is sent, so that a failed send
+ * leaves the guest's existing link working. Revocation is then the last step,
+ * and it must spare the token just issued.
+ */
+export async function revokeAllTokensForRegistrationExcept(
+  registrationId: string,
+  exceptTokenId: string,
+): Promise<number> {
+  const result = await prisma.registrationToken.updateMany({
+    where: { registrationId, id: { not: exceptTokenId } },
+    data: { isRevoked: true },
+  });
+  return result.count;
+}
+
 /** Delete tokens that are both expired and revoked. Returns count of deleted rows. */
 export async function deleteExpiredRevokedTokens(): Promise<number> {
   const result = await prisma.registrationToken.deleteMany({

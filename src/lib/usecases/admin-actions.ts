@@ -5,15 +5,20 @@ import {
   reconfirmRegistration,
   updateRegistration,
 } from "@/repositories/registration-repository";
-import { revokeAllTokensForRegistration, createToken } from "@/repositories/token-repository";
+import {
+  revokeAllTokensForRegistrationExcept,
+  createToken,
+} from "@/repositories/token-repository";
+import { discardUndeliveredToken } from "@/lib/usecases/token-rotation";
 import { generateToken } from "@/lib/token/capability-token";
 import { sendManageLink } from "@/lib/email/send-manage-link";
 import { logger, maskEmail } from "@/lib/logger";
-import { NotFoundError, InvalidStatusError } from "@/lib/errors/app-errors";
+import { NotFoundError, InvalidStatusError, ValidationError } from "@/lib/errors/app-errors";
+import { stayDateRangeSchema } from "@/lib/validation/registration";
 import { purgeExpiredTokens, purgeCancelledRegistrations } from "@/lib/usecases/data-retention";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
 import type { RegistrationFilters, RegistrationOutput, PaginatedResult, RegistrationInput } from "@/types/registration";
-import { RegistrationStatus, StayOption } from "@/types/registration";
+import { RegistrationStatus } from "@/types/registration";
 
 /** Registration statistics summary. */
 export interface RegistrationStats {
@@ -115,9 +120,48 @@ export async function adminReconfirmRegistration(
 }
 
 /**
+ * Validate the optional custom stay date range carried by an admin edit.
+ *
+ * Returns a fragment to merge into the repository payload: empty when the
+ * caller sent no range fields at all (so the stored range is left alone), or
+ * the normalized `{ stayStartDate, stayEndDate }` pair otherwise.
+ *
+ * @throws {ValidationError} when the range is incomplete, inverted, or not a
+ *   pair of real calendar dates
+ */
+function validateStayDateRange(data: RegistrationInput): {
+  stayStartDate?: string | null;
+  stayEndDate?: string | null;
+} {
+  if (data.stayStartDate === undefined && data.stayEndDate === undefined) {
+    return {};
+  }
+
+  const parsed = stayDateRangeSchema.safeParse({
+    stayStartDate: data.stayStartDate,
+    stayEndDate: data.stayEndDate,
+  });
+
+  if (!parsed.success) {
+    const fields: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      fields[issue.path.join(".")] = issue.message;
+    }
+    throw new ValidationError("Validation failed", fields);
+  }
+
+  return parsed.data;
+}
+
+/**
  * Admin-edit a registration. Logs the admin action.
  *
+ * Administrators may pin an arbitrary custom stay date range here (issue #101);
+ * it overrides the calendar dates implied by the `stay` option without
+ * replacing the option itself.
+ *
  * @throws {NotFoundError} when registration doesn't exist
+ * @throws {ValidationError} when the custom stay date range is invalid
  */
 export async function adminEditRegistration(
   registrationId: string,
@@ -130,7 +174,10 @@ export async function adminEditRegistration(
     throw new NotFoundError("Registration");
   }
 
-  const result = await updateRegistration(registrationId, data);
+  const result = await updateRegistration(registrationId, {
+    ...data,
+    ...validateStayDateRange(data),
+  });
 
   logger.info("Admin edited registration", {
     adminUserId: adminId,
@@ -141,8 +188,16 @@ export async function adminEditRegistration(
   return result;
 }
 
-/** CSV column headers. */
-const CSV_COLUMNS = ["name", "email", "stay", "accommodation", "adultsCount", "childrenCount", "notes", "status", "createdAt"] as const;
+/**
+ * CSV column headers.
+ *
+ * `stayStartDate` / `stayEndDate` are appended rather than grouped next to
+ * `stay`: inserting a column mid-row silently shifts every later field for any
+ * consumer that reads by position (spreadsheet formulas, scripts). Appending is
+ * backwards compatible. Both are empty for registrations that use their stay
+ * option's predefined dates.
+ */
+const CSV_COLUMNS = ["name", "email", "stay", "accommodation", "adultsCount", "childrenCount", "notes", "status", "createdAt", "stayStartDate", "stayEndDate"] as const;
 
 /**
  * Escape a CSV field: quote it if it contains commas, quotes, or newlines.
@@ -190,11 +245,16 @@ interface AdminResendEmailResult {
  * Workflow:
  * 1. Find registration by ID
  * 2. Validate it is CONFIRMED (not CANCELLED)
- * 3. Revoke all existing tokens for the registration
- * 4. Generate a new capability token
- * 5. Store the new token hash
- * 6. Construct manage URL and send email
- * 7. Log admin action with masked email
+ * 3. Generate a new capability token and store its hash
+ * 4. Construct manage URL and send email
+ * 5. Only on a delivered email, revoke every *other* token (T4 rotation)
+ * 6. Log admin action with masked email
+ *
+ * The ordering is deliberate. Revoking first — as this originally did — meant
+ * an email provider outage destroyed the guest's working manage link and put
+ * nothing in its place: the action that was supposed to deliver access removed
+ * it instead, irreversibly. Rotation is now the consequence of a *delivered*
+ * email, and a failed send revokes only the token that was never delivered.
  *
  * @throws {NotFoundError} when registration does not exist
  * @throws {InvalidStatusError} when registration is not CONFIRMED
@@ -213,28 +273,51 @@ export async function adminResendEmail(
     throw new InvalidStatusError("Cannot resend email for a cancelled registration");
   }
 
-  // Revoke all existing tokens
-  await revokeAllTokensForRegistration(registrationId);
-
-  // Generate new token
+  // Generate and store the replacement token. Existing tokens stay valid until
+  // the email carrying this one has actually been accepted.
   const { raw, hash } = generateToken();
   const expiresAt = new Date(
     Date.now() + TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
   );
-  await createToken(registrationId, hash, expiresAt);
+  const newToken = await createToken(registrationId, hash, expiresAt);
 
   // Build manage URL and send email
   const baseUrl = process.env.BASE_URL ?? "http://localhost:3000";
   const manageUrl = `${baseUrl}/manage/${raw}`;
 
-  const emailResult = await sendManageLink({
-    to: registration.email,
-    manageUrl,
-    guestName: registration.name,
-    registrationId: registration.id,
-    emailType: "manage-link",
-    stay: registration.stay as StayOption,
-  });
+  let emailResult: { readonly success: boolean; readonly error?: string };
+  try {
+    emailResult = await sendManageLink({
+      to: registration.email,
+      manageUrl,
+      guestName: registration.name,
+      registrationId: registration.id,
+      emailType: "manage-link",
+      stayDates: registration,
+    });
+  } catch (error: unknown) {
+    // An unexpected failure on the send path must not leave an undelivered
+    // token live, and must not touch the tokens the guest may still hold.
+    await discardUndeliveredToken(newToken.id, registrationId);
+    throw error;
+  }
+
+  if (!emailResult.success) {
+    await discardUndeliveredToken(newToken.id, registrationId);
+
+    logger.error("Admin resend email failed", {
+      adminUserId: adminId,
+      action: "resend_email",
+      targetId: registrationId,
+      email: maskEmail(registration.email),
+      error: emailResult.error,
+    });
+
+    return { success: false, ...(emailResult.error !== undefined ? { error: emailResult.error } : {}) };
+  }
+
+  // The new link is in the guest's inbox, so every earlier one is superseded (T4).
+  await revokeAllTokensForRegistrationExcept(registrationId, newToken.id);
 
   // Log admin action with masked email (LOG3, LOG4, LOG5)
   logger.info("Admin resent registration email", {
@@ -243,10 +326,6 @@ export async function adminResendEmail(
     targetId: registrationId,
     email: maskEmail(registration.email),
   });
-
-  if (!emailResult.success) {
-    return { success: false, error: emailResult.error };
-  }
 
   return { success: true };
 }

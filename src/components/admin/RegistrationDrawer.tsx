@@ -8,6 +8,7 @@ import {
   stayLabel,
   statusLabel,
 } from "@/i18n/labels";
+import { parseIsoDate } from "@/lib/date/iso-date";
 import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 import { Badge, Button, ConfirmDialog } from "@/components/ui/admin";
@@ -20,6 +21,33 @@ export interface RegistrationDrawerProps {
   readonly onResendEmail: (registrationId: string) => void;
   readonly onReconfirm?: (registrationId: string) => void;
   readonly resendingId?: string | null;
+}
+
+/**
+ * Render a stored `YYYY-MM-DD` calendar date in the same style as the other
+ * dates in this panel.
+ *
+ * Formatted in UTC because the value is a calendar date anchored to UTC
+ * midnight — rendering it in the viewer's local zone would show the previous
+ * day for anyone west of Greenwich. Falls back to the raw value if it is not
+ * parseable, so bad data is visible rather than silently blank.
+ */
+function formatCalendarDate(isoDate: string): string {
+  const parsed = parseIsoDate(isoDate);
+  if (!parsed) return isoDate;
+  return parsed.toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+/** Render an admin-set custom stay range; a single-day range collapses to one date. */
+function formatDateRange(start: string, end: string): string {
+  return start === end
+    ? formatCalendarDate(start)
+    : `${formatCalendarDate(start)} – ${formatCalendarDate(end)}`;
 }
 
 function formatDate(date: Date): string {
@@ -151,6 +179,17 @@ export function RegistrationDrawer({
               <span className="text-sm text-text-primary">
                 {stayLabel(registration.stay, tEnums)}
               </span>
+            </Field>
+            <Field label={tTable("dateRange")}>
+              {registration.stayStartDate && registration.stayEndDate ? (
+                <span className="text-sm text-text-primary">
+                  {formatDateRange(registration.stayStartDate, registration.stayEndDate)}
+                </span>
+              ) : (
+                <span className="text-sm text-text-tertiary">
+                  {tTable("dateRangeDefault")}
+                </span>
+              )}
             </Field>
             <Field label={tTable("accommodation")}>
               <span className="text-sm text-text-primary">

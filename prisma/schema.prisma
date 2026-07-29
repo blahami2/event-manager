@@ -46,6 +46,15 @@ model Registration {
   accommodation AccommodationOption @default(ANYWHERE)
   notes         String?            @db.VarChar(500)
   status        RegistrationStatus @default(CONFIRMED)
+  /// Optional admin-set custom stay range, overriding the dates implied by
+  /// `stay`. Date-only columns: these are calendar dates, not instants.
+  /// Both are set together or both are null, and the end never precedes the
+  /// start. Enforced in the application layer by `stayDateRangeSchema`, and in
+  /// migrated databases by the `Registration_stayDates_*_check` constraints —
+  /// which live in migration SQL because Prisma's schema language cannot
+  /// express CHECK constraints (so `prisma db push` does not create them).
+  stayStartDate DateTime?          @db.Date
+  stayEndDate   DateTime?          @db.Date
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 

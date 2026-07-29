@@ -48,7 +48,7 @@ describe("sendManageLink", () => {
     guestName: "Alice Johnson",
     registrationId: TEST_REGISTRATION_ID,
     emailType: "manage-link" as const,
-    stay: StayOption.FRI_SUN,
+    stayDates: { stay: StayOption.FRI_SUN },
   } as const;
 
   const mockTranslator = vi.fn((key: string) => {

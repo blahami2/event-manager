@@ -2450,4 +2450,358 @@ visual design system — that's Tier B.
 
 ---
 
+## T-101: Arbitrary Stay Date Range on Admin Registration Edit
+
+**Status:** DONE
+**Issue:** #101
+
+### Description
+
+Administrators could only express a registration's dates by picking one
+of the four predefined `StayOption` values. Real bookings do not always
+fit that grid: a guest arriving on the Thursday, staying the following
+week, or visiting for one day outside the weekend had no representation.
+The admin's only options were to pick the closest stay option (wrong
+dates in the calendar invite) or to write the real dates into the free
+text notes (invisible to every other surface).
+
+This ticket lets an administrator pin an **arbitrary** date range on a
+registration while keeping every existing convenience intact:
+
+- `stay` remains required and unchanged. It is still what tables,
+  filters and the CSV `stay` column show. The custom range overrides the
+  **calendar dates only**.
+- The stay dropdown in the edit modal still offers all four predefined
+  options, and enabling the custom range seeds the date inputs from the
+  selected option — the predefined dates are the starting point, not a
+  cage.
+- Public behaviour is untouched. The registration form and the guest
+  manage form neither show nor send the new fields, and a guest editing
+  their own registration cannot clear a range an admin set for them
+  (omitted fields mean "leave alone", not "clear").
+
+### Domain Rules
+
+Any range is accepted, including ranges far outside the event weekend.
+The only constraints are:
+
+| Rule | Behaviour |
+|------|-----------|
+| Completeness | Both endpoints or neither; one alone is a `400` |
+| Calendar validity | Strict `YYYY-MM-DD`; `2026-02-30` and `2027-02-29` are rejected |
+| Ordering | End must not precede start |
+| Single day | Start equal to end is valid and means a day visit (14:00–22:00 local in the invite) |
+| Clearing | Explicit `null` on both fields restores the stay-option dates |
+
+### Files Added
+
+- `src/lib/date/iso-date.ts` — strict calendar-date parse/format
+  helpers. Anchors to UTC midnight so "arrives 10 July" cannot drift a
+  day with the reader's timezone, and rejects the rollover that
+  `new Date()` would silently perform on `2026-04-31`.
+- `src/lib/date/timezone.ts` — IANA-zone conversions between
+  venue-local wall time and instants (`Intl`-based, no dependency).
+  Resolves the offset in force *on the date being converted*, so a
+  winter range is not built with the summer offset.
+- `src/lib/event/stay-dates.ts` — `resolveEventDates` (custom range wins
+  over `EVENT_DATES_BY_STAY`, with fallback on partial/malformed data)
+  and `defaultDateRangeForStay` (prefill source for the admin form).
+- `prisma/migrations/20260727090000_add_custom_stay_dates/migration.sql`
+  — two nullable `DATE` columns; every existing row is unaffected.
+- `src/components/admin/__tests__/RegistrationDrawer.test.tsx` — first
+  test coverage for the drawer, added with the range display.
+- `tests/unit/lib/date/iso-date.test.ts`,
+  `tests/unit/lib/date/timezone.test.ts`,
+  `tests/unit/lib/event/stay-dates.test.ts`,
+  `tests/unit/lib/validation/stay-date-range.test.ts`.
+
+### Files Changed
+
+- `prisma/schema.prisma` — `stayStartDate` / `stayEndDate` (`@db.Date`).
+- `src/types/registration.ts` — the two optional fields on
+  `RegistrationInput` / `RegistrationOutput`, with the three-state
+  (`undefined` / `null` / date pair) contract documented.
+- `src/lib/validation/registration.ts` — `stayDateRangeSchema`.
+- `src/repositories/registration-repository.ts` — `toStayDateRangeData`
+  maps the three states onto Prisma; `toOutput` maps the columns back to
+  `YYYY-MM-DD`.
+- `src/lib/usecases/admin-actions.ts` — `adminEditRegistration` validates
+  the range (throws `ValidationError` with field details); CSV export
+  gains appended `stayStartDate` / `stayEndDate` columns.
+- `src/lib/email/send-manage-link.ts` — resolves the ICS window through
+  `resolveEventDates`, and now takes a single `stayDates: StayDatesSource`
+  object instead of a loose `stay` field.
+- `src/lib/usecases/{register,resend-link,manage-registration}.ts` and
+  `adminResendEmail` — all four `sendManageLink` call sites pass the
+  registration itself, so every email path carries the custom range.
+- `src/config/event.ts` — `EVENT_TIMEZONE` (IANA) replaces the fixed
+  offset; only the two day-visit time constants remain.
+- `src/app/admin/registrations/page.tsx` — routes a `400`'s `fields` map
+  back into the edit modal and keeps the modal open.
+- `src/app/api/admin/registrations/route.ts` — `PUT` forwards the two
+  fields verbatim, preserving absent-vs-null (L3: validation stays in
+  the use case).
+- `src/components/admin/EditRegistrationModal.tsx` — "Custom date range"
+  toggle with arrival/departure date inputs, prefill from the selected
+  stay option (tracking it until the admin types), inline field-level
+  errors, and a `serverFieldErrors` channel for server rejections.
+- `src/components/admin/RegistrationDrawer.tsx` — read-only range field.
+- `src/i18n/messages/{en,cs,sk}.json` — six new edit keys and two new
+  table keys per locale.
+- `docs/ARCHITECTURE.md` — Section 8.1.1 (domain rules), 12.3
+  (`PUT /api/admin/registrations` contract + example), 14.3 (event
+  window resolution).
+
+### Design Decisions
+
+- **Calendar dates, not instants.** The range is stored in `DATE`
+  columns and travels as `YYYY-MM-DD` strings. A `DateTime` would have
+  made "arrives on the 10th" timezone-dependent for no benefit, since
+  no time of day is ever captured.
+- **Three-state input contract.** `undefined` (leave alone) is
+  deliberately distinct from `null` (clear). Without it, the public
+  manage form — which sends a full `RegistrationInput` without the range
+  fields — would silently wipe an admin's range on every guest edit.
+- **`stay` kept required.** Making it nullable would have rippled through
+  filters, stats, the CSV export and every fixture for no gain; the
+  range is an override, not a replacement.
+- **Invite times come from the stay option, not constants.** Only dates
+  are captured, so the times of day are derived from
+  `EVENT_DATES_BY_STAY`. A fixed 20:00 → 12:00 pair looked simpler but
+  silently shortened a `FRI_SAT` invite by 8 hours when an admin ticked
+  the toggle (prefilled) and saved without changing anything, because
+  `FRI_SAT` departs at 20:00, not noon. Deriving the times makes the
+  prefill → save round-trip lossless for all four options, which the
+  test suite now asserts per option. The single-day case still falls
+  back to day-visit times, since an overnight option's 20:00 → 12:00
+  would invert on one date.
+- **IANA zone, not a fixed UTC offset.** Arbitrary ranges are allowed
+  anywhere in the calendar, so a hardcoded `+02:00` would put every
+  winter range an hour out. `EVENT_TIMEZONE` plus `Intl` resolves the
+  offset per date, including on DST-transition days.
+- **Toggle instead of always-visible date inputs.** An empty pair of
+  date fields cannot distinguish "no custom range" from "not filled in
+  yet". The checkbox makes the state explicit, and enabling it prefills
+  from the current stay option so the predefined dates stay one click
+  away.
+- **`sendManageLink` takes an object, not loose fields.** The first
+  implementation added optional `stayStartDate` / `stayEndDate`
+  parameters alongside `stay`, and three of four call sites were
+  updated — the public resend-link path was missed, so a guest who
+  asked for a new link received an invite for the predefined weekend,
+  overwriting the correct entry in their calendar. Collapsing the
+  parameters into one `stayDates: StayDatesSource` object (which a
+  `RegistrationOutput` satisfies structurally) turns that class of
+  omission into a compile error.
+- **CSV columns appended, not grouped.** Placing them next to `stay`
+  read better but shifted every later column, silently breaking any
+  position-keyed consumer of the export. Appending is backwards
+  compatible.
+
+### Verification (initial implementation)
+
+- `npx vitest run` — **637 passed** (+106 over the 531 baseline).
+- `npx vitest run --coverage` — 92.23% statements / 87.86% branches,
+  above the 80% / 75% gates. New modules: `iso-date.ts` 100%,
+  `stay-dates.ts` 100%, `timezone.ts` 93.93%, validation 100%.
+- `npx tsc --noEmit` — passes (0 errors).
+- `npm run lint` — passes (0 errors; the same 1 pre-existing warning in
+  `src/app/layout.tsx`).
+- `npx prisma validate` — passes (with placeholder env vars).
+- `npm run build` — passes.
+
+### Security Review Remediation
+
+Three findings from the security review of the work above, all sharing a root
+cause: an unbounded input met a partial function on a code path that had already
+destroyed state it could not restore.
+
+**S1 — An out-of-window date destroyed the guest's manage link.**
+The range accepted any calendar date ("Bounds: None"), and `zoneOffsetMinutes`
+parsed `Intl`'s `longOffset` with `/^GMT([+-])(\d{2}):(\d{2})$/`. For any date
+before 1891 the tz database reports `Europe/Bratislava` as `GMT+00:57:44`, which
+that pattern cannot read, so the function threw. It is called from
+`resolveEventDates`, which is called from `sendManageLink`, which both resend
+paths reach *after* revoking the guest's tokens and issuing a replacement. An
+admin typing `1850-01-01` therefore left the guest with a dead link, no email,
+and a `500` — irrecoverable without an admin noticing. Fixed in three
+independent layers:
+
+- **Bounded input.** `SUPPORTED_STAY_DATE_MIN`/`_MAX` (`2000-01-01`…
+  `2100-12-31`) — the window in which every date has a whole-minute UTC offset —
+  enforced by `stayDateRangeSchema` and mirrored as `min`/`max` on the form's
+  date inputs, with a matching client-side check for typed input.
+- **Total conversion.** Every function in `src/lib/date/timezone.ts` now returns
+  `null` instead of throwing (unknown zone, invalid instant, sub-minute offset),
+  and `resolveEventDates` is documented and tested as total: any failure falls
+  back to the stay-option dates. `instantFromZonedDateTime` also builds its
+  instant from validated components rather than parsing `${date}T${time}Z`,
+  which silently rolled `2026-02-30` over to 2 March.
+- **Ordered rotation** (below), so even a throw cannot cost a guest their link.
+
+**S2 — Rotation preceded delivery.** `adminResendEmail` and `resendManageLink`
+revoked every existing token, issued a new one, then sent the email. Any send
+failure — a Resend outage, a conversion throw — left the guest locked out with
+nothing to show for it. `resendManageLink` additionally discarded the send
+result entirely and logged "Manage link resent" regardless, so the failure was
+invisible to operators too. Both now create the replacement first, send, and
+revoke earlier tokens *only* on an accepted send
+(`revokeAllTokensForRegistrationExcept`); a failure revokes just the undelivered
+token and is logged as a failure. `resendManageLink` still returns an identical
+`{ success: true }` in every case (S5/API4) — the outcome reaches the operator,
+never the caller.
+
+**S2b — the same rotation defect survived on the third call site.** The first
+pass fixed the two resend use cases and consciously left
+`updateRegistrationByToken` (the guest manage-form edit) alone, reasoning that
+it returns `newManageUrl` directly to the guest so a failed send could not lock
+anyone out. That reasoning was wrong: a repo-wide search shows **no client reads
+`newManageUrl`** — `ManageForm` only parses the response body on the error path
+— so the replacement link exists solely in the email. The highest-volume manage
+path therefore still revoked the guest's live token before sending, discarded
+the send result, and logged success unconditionally. It now follows the same
+create → send → revoke order. Two further points specific to it: the
+registration edit is already persisted when the send fails, so only the rotation
+is rolled back, never the edit; and the function returns the URL the caller came
+in with, so the response always names a link that actually works. Found by an
+adversarial review pass, not by the original findings list.
+
+**S2c — an out-of-enum `stay` produced a wall-clock invite.**
+`EVENT_DATES_BY_STAY[stay]` was an unguarded object index, so `"__proto__"`,
+`"constructor"` and `"toString"` resolved to `Object.prototype`, whose `.start`
+is `undefined` — and formatting `undefined` as a date yields *the current time*.
+The result was a plausible-looking window derived from the wall clock rather
+than a detectable failure; any other unknown key threw instead. Unreachable
+through a Postgres enum column, but it sat on the post-rotation path and
+falsified the module's totality claim. `predefinedDates` now guards with
+`Object.hasOwn` and falls back to the day-visit option.
+
+**S3 — `PUT /api/admin/registrations` trusted its payload.** The handler cast
+every field (`name as string`, `adultsCount as number`, `registrationId as
+string`) straight into a `RegistrationInput`, so an authenticated admin session
+could send a non-UUID id, a number for a name, or 501-character notes and get an
+opaque `500` from the driver — a violation of S10 with no field-level detail.
+`adminEditRegistrationSchema` now validates the entire body, reporting every
+invalid field at once and stripping unknown keys so `status` / `id` cannot be
+smuggled in. Admin capabilities are unchanged: any stay option, any
+accommodation, and an arbitrary in-window range — the same constraints
+admin-initiated *creation* already enforced through `registerGuest`.
+
+### Design Decisions (remediation)
+
+- **Bound the input rather than only harden the conversion.** Either alone would
+  stop the crash. Both are kept because they answer different questions: the
+  bound tells an admin what is allowed *before* they submit, and the totality
+  guarantees no stored row can ever break the email path. A rejection an admin
+  can read beats a silent fallback to dates nobody chose.
+- **`2000`–`2100`.** Wide enough for historical record-keeping and a multi-decade
+  horizon, narrow enough that every date in it has a whole-minute offset in the
+  tz database. The lower bound is far above the 1891 local-mean-time boundary
+  that caused the defect, so the rule stays true if the venue's zone changes.
+- **Nullable returns over exceptions in `timezone.ts`.** The alternative — a
+  `try`/`catch` at the call site — leaves the next caller free to forget. A
+  `Date | null` return makes the compiler ask the question at every call site.
+- **One conversion function, not a strict and a `try` variant.** A strict
+  variant would have had no production caller left, leaving dead code whose
+  tests still passed.
+- **Enum schemas built from the domain enums.** `z.enum(StayOption)` instead of a
+  duplicated literal list makes parsed payloads typed as `StayOption`, so the
+  route builds a `RegistrationInput` with no casts at all. The casts were not
+  incidental to the vulnerability — they were the mechanism by which unvalidated
+  values became typed ones.
+- **Validation at the route *and* the use case.** Not redundancy for its own
+  sake: `adminEditRegistration` is reachable from other callers, and the
+  invariant it protects (never write a half-defined range) deserves enforcement
+  at its own boundary.
+- **`400`-only field errors in the UI.** Reading a `fields`-shaped body from any
+  failing status meant an expired session left the modal open and silent, with
+  the admin re-submitting a request that could never succeed.
+- **DB CHECK constraints as a backstop, not the guard.** `Registration_stayDates_pair_check`
+  and `_order_check` make "both or neither, in order" true of the table. Safe to
+  add to this migration because both columns are introduced by it, so every
+  existing row already satisfies them. Documented caveat: local dev provisions
+  via `prisma db push`, which cannot create CHECK constraints (Prisma's schema
+  language has no syntax for them), so they exist in migrated environments only.
+- **Rotation rollback does not roll back the action.** On `updateRegistrationByToken`
+  the registration edit is committed before the email is attempted. Undoing it
+  on a send failure would tell the guest their change was lost when it was not;
+  only the token rotation is reverted.
+- **A rolled-back rotation still returns a working URL.** The alternative — an
+  optional `newManageUrl` — would have given the endpoint two response shapes
+  for one status code (API5). The raw token the caller supplied is already in
+  memory for this request, so returning it introduces no new exposure (T1) and
+  keeps the contract "this is the link that is live now" true in both cases.
+- **Not rotating on a failed send is the right trade against T4.** A token that
+  has been used once staying valid slightly longer is a far smaller harm than a
+  guest permanently locked out of their registration, and it is the same trade
+  the resend paths make.
+- **`discardUndeliveredToken` swallows its own failure.** It runs when something
+  is already broken, often the same outage; letting it throw would replace the
+  error the caller is about to report with a misleading one. An undelivered
+  token that survives is unreachable — its raw value was never sent anywhere.
+- **The modal owns the list of fields it can display.** The page filters server
+  field errors against `EDITABLE_FIELDS` rather than guessing, so a `400` naming
+  only `body` or `registrationId` falls through to the generic toast instead of
+  leaving Save looking dead.
+
+### Files Added (remediation)
+
+- `src/lib/validation/field-errors.ts` — `toFieldErrors`, the single Zod-issues →
+  `fields` map translation, replacing three hand-rolled copies.
+- `src/lib/usecases/token-rotation.ts` — `discardUndeliveredToken`, the shared
+  non-throwing compensation used by all three rotation paths.
+- `tests/unit/lib/validation/admin-edit-registration.test.ts`.
+
+### Files Changed (remediation)
+
+- `src/config/event.ts` — `SUPPORTED_STAY_DATE_MIN` / `_MAX`.
+- `src/lib/date/timezone.ts` — total conversions; seconds-aware offset parsing;
+  component-built instants.
+- `src/lib/event/stay-dates.ts` — `resolveEventDates` total, with day-visit and
+  predefined fallbacks and a guarded stay-option lookup.
+- `src/lib/usecases/manage-registration.ts` — delivery-then-rotation on the guest
+  edit path, with the rotation (not the edit) rolled back on a failed send.
+- `src/lib/validation/registration.ts` — window bounds, shared range refinement,
+  `adminEditRegistrationSchema`, enum schemas from the domain enums.
+- `src/app/api/admin/registrations/route.ts` — full-payload validation, no casts,
+  `400` for malformed JSON.
+- `src/lib/usecases/{admin-actions,resend-link}.ts` — delivery-then-rotation.
+- `src/repositories/token-repository.ts` — `revokeAllTokensForRegistrationExcept`.
+- `src/components/admin/EditRegistrationModal.tsx` — `min`/`max` on both date
+  inputs, bounds validation, server errors on every editable field.
+- `src/app/admin/registrations/page.tsx` — field errors read from `400` only.
+- `prisma/migrations/20260727090000_add_custom_stay_dates/migration.sql`,
+  `prisma/schema.prisma` — pair and order CHECK constraints.
+- `src/i18n/messages/{en,cs,sk}.json` — `errorDateRangeBounds`.
+- `docs/ARCHITECTURE.md` — 7.2 (rotation ordering), 8.1.1 (bounds, data
+  integrity, error surfacing), 12.3 (payload contract), 14.3 (totality).
+
+### Verification (remediation)
+
+- `npx vitest run` — **78 files, 750 passed** (+113 over 637).
+- `npx vitest run --coverage` — 92.94% statements / 88.28% branches, above the
+  80% / 75% gates and above the pre-remediation 92.23% / 87.86%. New and changed
+  modules: `stay-dates.ts`, `field-errors.ts`, `token-rotation.ts` and
+  `validation/registration.ts` at 100%, `resend-link.ts` 100% statements,
+  `manage-registration.ts` 97.72%, `timezone.ts` 92.85% (the remainder are
+  unreachable defensive branches).
+- The migration's CHECK constraints were **not executed against a live
+  database** — no Postgres was reachable in the working environment. They are
+  covered by `npx prisma validate` and review only.
+- `npx tsc --noEmit` — passes (0 errors).
+- `npm run lint` — passes (0 errors; the same 1 pre-existing warning in
+  `src/app/layout.tsx`).
+- `npx prisma validate` — passes.
+- `npm run build` — passes.
+
+### Known follow-ups (not in this change)
+
+- Admin auto-provisioning guard — explicitly out of scope for this change.
+- `POST /api/admin/registrations` returns `200` with `{ success: false }` when a
+  resend fails, and the admin UI keys its success toast off `res.ok` alone, so a
+  failed resend still shows as sent. Pre-existing, outside the reviewed
+  findings, and a response-contract change rather than a security fix.
+
+---
+
 End of Execution Backlog.

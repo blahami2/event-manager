@@ -138,7 +138,7 @@ describe("registerGuest", () => {
         guestName: "Alice Johnson",
         registrationId: "reg-1",
         emailType: "manage-link",
-        stay: "FRI_SUN",
+        stayDates: expect.objectContaining({ stay: "FRI_SUN" }),
       }),
     );
     // eventName and eventDate should NOT be passed - they are resolved from i18n

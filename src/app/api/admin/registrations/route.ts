@@ -10,6 +10,8 @@ import {
 } from "@/lib/usecases/admin-actions";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { ValidationError } from "@/lib/errors/app-errors";
+import { toFieldErrors } from "@/lib/validation/field-errors";
+import { adminEditRegistrationSchema } from "@/lib/validation/registration";
 import type { RegistrationFilters, RegistrationInput } from "@/types/registration";
 import { RegistrationStatus } from "@/types/registration";
 
@@ -17,6 +19,23 @@ import { RegistrationStatus } from "@/types/registration";
 const resendEmailSchema = z.object({
   registrationId: z.string().uuid("registrationId must be a valid UUID"),
 });
+
+/**
+ * Read a JSON request body without letting a malformed one escape as a `500`.
+ *
+ * A body that is not valid JSON is a client error, so it is surfaced as the
+ * same structured `400` as any other invalid payload (E5) rather than as an
+ * unexpected internal error.
+ */
+async function readJsonBody(request: NextRequest): Promise<unknown> {
+  try {
+    return (await request.json()) as unknown;
+  } catch {
+    throw new ValidationError("Validation failed", {
+      body: "Request body must be valid JSON",
+    });
+  }
+}
 
 /**
  * GET /api/admin/registrations
@@ -48,30 +67,43 @@ export async function GET(request: NextRequest): Promise<Response> {
  * PUT /api/admin/registrations
  *
  * Admin edit a registration.
- * Body: { registrationId, name, email, stay, adultsCount, childrenCount, notes? }
+ * Body: { registrationId, name, email, stay, accommodation, adultsCount,
+ *         childrenCount, notes?, stayStartDate?, stayEndDate? }
+ *
+ * The entire body is validated against `adminEditRegistrationSchema` before
+ * anything is forwarded, so an invalid payload becomes a structured `400`
+ * naming the offending fields (E5, API2) instead of reaching the repository as
+ * a database error. The schema also strips unknown keys, so server-owned fields
+ * cannot be smuggled into an update.
+ *
+ * `stayStartDate` / `stayEndDate` are optional `YYYY-MM-DD` calendar dates that
+ * pin an arbitrary stay range; send `null` for both to clear it, omit both to
+ * leave the stored range untouched. The use case validates the range again —
+ * it is reachable from other callers, and the invariant it protects (never
+ * write a half-defined range) is worth enforcing at its own boundary too.
  */
 export async function PUT(request: NextRequest): Promise<Response> {
   try {
     const { adminId } = await verifyAdmin(request);
 
-    const body = (await request.json()) as Record<string, unknown>;
-    const { registrationId, name, email, stay, accommodation, adultsCount, childrenCount, notes } = body;
+    const parsed = adminEditRegistrationSchema.safeParse(await readJsonBody(request));
+
+    if (!parsed.success) {
+      throw new ValidationError("Validation failed", toFieldErrors(parsed.error));
+    }
+
+    const { registrationId, notes, stayStartDate, stayEndDate, ...fields } = parsed.data;
 
     const data: RegistrationInput = {
-      name: name as string,
-      email: email as string,
-      stay: stay as RegistrationInput["stay"],
-      accommodation: accommodation as RegistrationInput["accommodation"],
-      adultsCount: adultsCount as number,
-      childrenCount: childrenCount as number,
-      ...(notes !== undefined ? { notes: notes as string } : {}),
+      ...fields,
+      ...(notes !== undefined ? { notes } : {}),
+      // Absent keys must stay absent: omitting them means "leave the stored
+      // range alone", which is not the same as clearing it with null.
+      ...(stayStartDate !== undefined ? { stayStartDate } : {}),
+      ...(stayEndDate !== undefined ? { stayEndDate } : {}),
     };
 
-    const result = await adminEditRegistration(
-      registrationId as string,
-      data,
-      adminId,
-    );
+    const result = await adminEditRegistration(registrationId, data, adminId);
 
     return successResponse(result, "Registration updated");
   } catch (error: unknown) {
@@ -113,16 +145,10 @@ export async function POST(request: NextRequest): Promise<Response> {
   try {
     const { adminId } = await verifyAdmin(request);
 
-    const body: unknown = await request.json();
-    const parsed = resendEmailSchema.safeParse(body);
+    const parsed = resendEmailSchema.safeParse(await readJsonBody(request));
 
     if (!parsed.success) {
-      const fields: Record<string, string> = {};
-      for (const issue of parsed.error.issues) {
-        const fieldName = issue.path.join(".");
-        fields[fieldName] = issue.message;
-      }
-      throw new ValidationError("Validation failed", fields);
+      throw new ValidationError("Validation failed", toFieldErrors(parsed.error));
     }
 
     const result = await adminResendEmail(parsed.data.registrationId, adminId);

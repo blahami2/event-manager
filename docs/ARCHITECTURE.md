@@ -21,7 +21,7 @@
 | Auth           | Supabase Auth (admins only)    | Latest SDK          |
 | Email          | Resend                         | Latest SDK          |
 | Styling        | Tailwind CSS                   | 3.x+               |
-| Validation     | Zod                            | 3.x+               |
+| Validation     | Zod                            | 4.x (pinned 4.3.6) |
 | Hosting        | Vercel                         | —                   |
 | Testing        | Vitest + Testing Library       | Latest              |
 
@@ -324,6 +324,28 @@ export class AuthorizationError extends AppError {
 5. After 10 failed token lookups per IP per hour, return `429`
 6. Token rotation: on every successful manage action, invalidate old token and issue new one
 7. Manage link URL format: `{BASE_URL}/manage/{raw_token}`
+8. On **every** path that mails a new link — `resendManageLink`,
+   `adminResendEmail` and `updateRegistrationByToken` — rotation follows
+   delivery: the replacement token is created first, the email is sent, and only
+   an accepted send revokes what it supersedes
+   (`revokeAllTokensForRegistrationExcept`, or `revokeToken` on the used token
+   for the guest edit). A failed or throwing send revokes only the token that
+   was never delivered, leaving whatever the guest already holds usable.
+   Revoking first meant an email provider outage destroyed a guest's working
+   link and put nothing in its place — worst of all on `POST /api/resend-link`,
+   the one path a locked-out guest can trigger themselves, where the request
+   meant to restore access removed it instead.
+9. A failed send is recorded as a failure (`logger.error`), never logged as a
+   delivered link. The public response is unchanged either way, so the outcome
+   is visible to operators without becoming visible to callers (S5, API4).
+10. Rolling back a rotation never rolls back the action that triggered it. A
+    guest edit that was persisted stays persisted; only the token change is
+    undone, and `PUT /api/manage` then reports the link the guest arrived with,
+    so the response always names a manage URL that works.
+11. The compensating revoke (`discardUndeliveredToken`) never throws. It runs
+    inside a failure path — often the same outage that caused the send to fail —
+    and must not replace the error the caller is about to report. An undelivered
+    token that survives is unreachable anyway: its raw value was never sent.
 
 ---
 
@@ -343,8 +365,31 @@ export class AuthorizationError extends AppError {
 | childrenCount  | Int         | Required, 0-10                    |
 | notes          | String?     | Optional, max 500 chars           |
 | status         | Enum        | CONFIRMED, CANCELLED              |
+| stayStartDate  | Date?       | Optional, admin-only custom range start (see 8.1.1) |
+| stayEndDate    | Date?       | Optional, admin-only custom range end (see 8.1.1)   |
 | createdAt      | DateTime    | Auto-set                          |
 | updatedAt      | DateTime    | Auto-updated                      |
+
+### 8.1.1 Custom Stay Date Range (admin only)
+
+Administrators may pin an arbitrary date range on a registration instead of
+accepting the dates implied by its `stay` option. `stay` remains required and
+unchanged — it is still the value shown in tables, filters and the CSV export —
+so the custom range is an *override of the calendar dates only*.
+
+| Aspect | Rule |
+|--------|------|
+| Storage | Two nullable `DATE` columns (calendar dates, not instants) |
+| Wire format | `YYYY-MM-DD` strings on every layer above the repository |
+| Completeness | Both columns are set together or both are `null` |
+| Ordering | `stayEndDate` must not precede `stayStartDate`; equal dates mean a day visit |
+| Bounds | `2000-01-01`…`2100-12-31` (`SUPPORTED_STAY_DATE_MIN`/`_MAX`, `src/config/event.ts`). Any range inside that window is valid, including ranges far outside the event weekend. The window is not a policy preference: outside it the venue-local conversion in Section 14.3 has no faithful answer — before 1891 `Europe/Bratislava` ran on a `GMT+00:57:44` local mean time offset. It is mirrored as `min`/`max` on the admin form's date inputs |
+| Validation | `stayDateRangeSchema` (`src/lib/validation/registration.ts`), applied by `adminEditRegistrationSchema` at the route and again by `adminEditRegistration` in the use case |
+| Data integrity | `Registration_stayDates_pair_check` / `_order_check` CHECK constraints hold "both or neither, in order" in migrated databases. Prisma's schema language cannot express CHECK constraints, so they live in migration SQL and `prisma db push` (local dev) does not create them |
+| Who can set it | Admin edit only (`PUT /api/admin/registrations`). Public registration and the guest manage form never send these fields |
+| Omission semantics | Fields omitted from a payload leave the stored range untouched; explicit `null` clears it |
+| Effect | `resolveEventDates` (`src/lib/event/stay-dates.ts`) uses the range for the `.ics` invite; with no range the predefined `EVENT_DATES_BY_STAY` mapping applies |
+| Error surfacing | The admin edit modal renders the `400` response's `fields` map against the offending input (every editable field, not only the dates); local validation takes precedence while the admin is editing. Only a `400` is read as field-level detail — a `401`/`403`/`500` falls through to the generic error path |
 
 ## 8.2 RegistrationToken
 
@@ -508,6 +553,48 @@ All API endpoints return consistent response shapes.
 - **Unauthenticated (401):** `{ "error": { "code": "UNAUTHENTICATED", "message": "Authentication required" } }`
 - **Not admin (403):** `{ "error": { "code": "UNAUTHORIZED", "message": "Insufficient permissions" } }`
 
+#### PUT /api/admin/registrations
+
+Body: `{ registrationId, name, email, stay, accommodation, adultsCount, childrenCount, notes?, stayStartDate?, stayEndDate? }`
+
+The whole body is validated against `adminEditRegistrationSchema` before
+anything is forwarded (S10). `registrationId` must be a UUID; the remaining
+fields are held to the same domain constraints as every other write path
+(`registrationSchema`), which is also what admin-initiated creation enforces.
+Unknown keys are stripped, so server-owned fields (`status`, `id`) cannot be
+smuggled into an update.
+
+`stayStartDate` / `stayEndDate` are optional `YYYY-MM-DD` calendar dates forming
+a custom stay range within the supported window (Section 8.1.1). Send both to
+pin a range, send both as `null` to clear it, omit both to leave the stored
+range untouched.
+
+- **Success (200):** `{ "data": { ...registration }, "message": "Registration updated" }`
+- **Invalid range (400):** `{ "error": { "code": "VALIDATION_ERROR", "message": "Validation failed", "fields": { "stayEndDate": "End date must not be before the start date" } } }`
+- **Invalid identifier (400):** `{ "error": { "code": "VALIDATION_ERROR", "message": "Validation failed", "fields": { "registrationId": "registrationId must be a valid UUID" } } }`
+- **Invalid field (400):** `{ "error": { "code": "VALIDATION_ERROR", "message": "Validation failed", "fields": { "email": "Invalid email format", "adultsCount": "Maximum 10 adults allowed" } } }`
+
+Every invalid field is reported in one response, so the admin sees all
+corrections in a single round trip. A body that is not valid JSON is reported
+the same way, under the `body` key.
+
+Example — pin an arbitrary week-long stay:
+
+```jsonc
+// PUT /api/admin/registrations
+{
+  "registrationId": "3f1c…",
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "stay": "SAT_SUN",           // still required; drives table/filter/CSV display
+  "accommodation": "ANYWHERE",
+  "adultsCount": 2,
+  "childrenCount": 0,
+  "stayStartDate": "2026-07-10",
+  "stayEndDate": "2026-07-17"
+}
+```
+
 ### GET /api/health
 - **Healthy (200):** `{ "status": "ok", "timestamp": "ISO8601", "version": "1.0.0" }`
 - **Unhealthy (503):** `{ "status": "error", "timestamp": "ISO8601" }`
@@ -566,12 +653,56 @@ Registration confirmation emails include an iCalendar (.ics) attachment per [RFC
 | Filename       | `event.ics`                                |
 | Method         | `REQUEST` (treated as invitation by clients) |
 | Event data     | From `src/config/event.ts`                 |
+| Event window   | From `resolveEventDates` (`src/lib/event/stay-dates.ts`) |
 | UID            | Unique per generation (UUID + domain)      |
 | Compatibility  | Gmail, Outlook, Apple Mail, Thunderbird    |
 
-## 14.3 Scope
+## 14.3 Event Window Resolution
 
-- Attached to registration confirmation email only (not resend-link emails)
+The `DTSTART` / `DTEND` of the invite come from `resolveEventDates`:
+
+1. If the registration carries a complete, well-formed custom range
+   (Section 8.1.1), that range wins.
+2. Otherwise the predefined `EVENT_DATES_BY_STAY[stay]` mapping applies.
+
+A custom range captures calendar dates only, so its times of day are taken from
+the registration's stay option — derived from `EVENT_DATES_BY_STAY` rather than
+duplicated as constants, so a range that equals the stay option's own dates
+round-trips to exactly the predefined instants. When those times would produce
+an empty or inverted window (an overnight option's 20:00 → 12:00 applied to a
+single date), the range is treated as a day visit and uses the
+`CUSTOM_RANGE_DAY_VISIT_*` times instead. A partial or malformed range falls
+back to the stay-option dates rather than producing a half-defined invite.
+
+Conversions between venue-local wall time and instants resolve the UTC offset in
+force on the date being converted, via the IANA zone `EVENT_TIMEZONE`
+(`src/lib/date/timezone.ts`). A fixed offset would be an hour wrong for any
+range outside daylight saving time, and arbitrary ranges are explicitly allowed
+anywhere in the supported window.
+
+`resolveEventDates` is **total: no input can make it throw, and no output
+depends on the current time.** It runs inside the outgoing email path,
+downstream of capability-token rotation, so an exception there would cost the
+guest their only working manage link. A `stay` outside the enum falls back to a
+defined window rather than being looked up unguarded — an object index would
+otherwise resolve `"__proto__"` to `Object.prototype` and derive the invite's
+times of day from the wall clock. Every conversion in
+`src/lib/date/timezone.ts` therefore reports failure as `null` — an unknown zone,
+a date that is not real, or a date whose offset carries a seconds component (the
+venue's pre-1891 local mean time) — and `resolveEventDates` falls back to the
+stay-option dates. Stored ranges are bounds-checked on the way in (Section
+8.1.1); this is the backstop for rows that predate a bounds change or arrive by
+any future path that skips validation.
+
+## 14.4 Scope
+
+- Attached to every manage-link email: registration confirmation, guest
+  self-service edit, guest resend-link, and admin resend. All four resolve the
+  window through `resolveEventDates`, so an admin-set custom range is never
+  lost on any path.
+- `sendManageLink` takes a single `stayDates: StayDatesSource` object rather
+  than loose fields, so a call site cannot forward the stay option while
+  forgetting the custom range.
 - No calendar update/cancellation emails (future enhancement)
 - No external library dependency (format generated directly)
 

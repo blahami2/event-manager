@@ -3,9 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { logger, maskEmail } from "@/lib/logger";
 import { generateIcsEvent } from "@/lib/email/ics-generator";
 import { renderManageLinkEmail } from "@/lib/email/templates/manage-link-template";
-import { EVENT_DATES_BY_STAY } from "@/config/event";
+import { resolveEventDates, type StayDatesSource } from "@/lib/event/stay-dates";
 import { defaultLocale, type Locale } from "@/i18n/config";
-import type { StayOption } from "@/types/registration";
 
 interface SendManageLinkParams {
   /** Recipient email address. */
@@ -18,8 +17,16 @@ interface SendManageLinkParams {
   readonly registrationId: string;
   /** Email type identifier for structured logging. */
   readonly emailType: "manage-link";
-  /** Guest's selected stay option, determines ICS calendar dates. */
-  readonly stay: StayOption;
+  /**
+   * Everything that determines the ICS calendar window: the guest's stay
+   * option plus any admin-set custom date range that overrides it.
+   *
+   * Deliberately a single object rather than loose fields — a `RegistrationOutput`
+   * satisfies it structurally, so call sites pass the registration they already
+   * have and cannot forget to forward the range (which is exactly how the
+   * resend-link path once shipped stale invite dates).
+   */
+  readonly stayDates: StayDatesSource;
   /** Locale for email content. Defaults to 'en'. */
   readonly locale?: Locale;
 }
@@ -50,7 +57,7 @@ export async function sendManageLink(
   }
 
   const resend = new Resend(apiKey);
-  const { to, manageUrl, guestName, registrationId, emailType, stay, locale } = params;
+  const { to, manageUrl, guestName, registrationId, emailType, stayDates, locale } = params;
 
   const logContext = {
     registrationId,
@@ -61,7 +68,7 @@ export async function sendManageLink(
   const resolvedLocale = locale ?? defaultLocale;
   const t = await getTranslations({ locale: resolvedLocale, namespace: "email" });
 
-  const { start: eventStart, end: eventEnd } = EVENT_DATES_BY_STAY[stay];
+  const { start: eventStart, end: eventEnd } = resolveEventDates(stayDates);
   const icsContent = generateIcsEvent({
     eventName: t("eventName"),
     eventDate: eventStart,

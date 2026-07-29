@@ -260,7 +260,9 @@
         "resendingEmail": "Resending…",
         "confirmResend": "Resend registration email?",
         "resendSuccess": "Registration email resent successfully.",
-        "resendError": "Failed to resend registration email."
+        "resendError": "Failed to resend registration email.",
+        "dateRange": "Date range",
+        "dateRangeDefault": "From stay option"
       },
       "pagination": {
         "rowsPerPage": "Rows per page"
@@ -278,7 +280,14 @@
         "notes": "Notes",
         "cancelledStatus": "Cancelled",
         "cancelledNotice": "This registration is currently cancelled.",
-        "reactivate": "Reactivate"
+        "reactivate": "Reactivate",
+        "customDates": "Custom date range",
+        "customDatesHelp": "Overrides the arrival and departure dates implied by the stay option. Leave off to use the stay option dates.",
+        "arrivalDate": "Arrival date",
+        "departureDate": "Departure date",
+        "errorDateRangeIncomplete": "Enter both an arrival and a departure date.",
+        "errorDateRangeOrder": "The departure date cannot be before the arrival date.",
+        "errorDateRangeBounds": "Dates must be between {min} and {max}."
       },
       "add": {
         "title": "Add reservation",

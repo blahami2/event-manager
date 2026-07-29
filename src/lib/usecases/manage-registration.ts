@@ -5,6 +5,7 @@ import { sendManageLink } from "@/lib/email/send-manage-link";
 import { logger, maskEmail } from "@/lib/logger";
 import { NotFoundError, ValidationError } from "@/lib/errors/app-errors";
 import { registrationSchema } from "@/lib/validation/registration";
+import { discardUndeliveredToken } from "@/lib/usecases/token-rotation";
 import { StayOption, AccommodationOption } from "@/types/registration";
 import { TOKEN_EXPIRY_DAYS } from "@/config/limits";
 import { REGISTRATION_DEADLINE } from "@/config/event";
@@ -74,9 +75,14 @@ export async function getRegistrationByToken(
 /**
  * Update a registration by its capability token.
  *
- * Validates the input, updates the registration, rotates the token
- * (revokes old, generates new), sends email with new manage URL.
+ * Validates the input, updates the registration, then rotates the token:
+ * creates the replacement, mails it, and revokes the token the guest used only
+ * once that email has been accepted (T4). A failed send rolls the rotation back
+ * instead of the edit, leaving the guest's current link valid.
  *
+ * @returns The manage URL that is live after the call: the replacement when the
+ *   email went out, otherwise the one the caller passed in — which is still the
+ *   guest's working link.
  * @throws {NotFoundError} when token or registration is not found
  * @throws {ValidationError} when update data fails Zod validation
  */
@@ -116,26 +122,53 @@ export async function updateRegistrationByToken(
     notes,
   });
 
-  // Token rotation: revoke old, generate new
-  await revokeToken(tokenData.id);
-
+  // Token rotation: create the replacement first. The token the guest arrived
+  // with stays valid until the email carrying its replacement is accepted —
+  // nothing in the browser reads the URL this function returns, so the new link
+  // exists only in that email. Revoking first meant an email provider outage
+  // locked the guest out of their own registration: the token they came with
+  // dead, the replacement never delivered, and the API still answering 200.
   const { raw: newRaw, hash: newHash } = generateToken();
   const newExpiresAt = new Date(Date.now() + TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
-  await createToken(tokenData.registrationId, newHash, newExpiresAt);
+  const newToken = await createToken(tokenData.registrationId, newHash, newExpiresAt);
 
   // Build new manage URL
   const baseUrl = process.env.BASE_URL ?? "http://localhost:3000";
   const newManageUrl = `${baseUrl}/manage/${newRaw}`;
 
   // Send email with new manage URL
-  await sendManageLink({
-    to: updatedRegistration.email,
-    manageUrl: newManageUrl,
-    guestName: updatedRegistration.name,
-    registrationId: updatedRegistration.id,
-    emailType: "manage-link",
-    stay: updatedRegistration.stay as StayOption,
-  });
+  let sendResult: { readonly success: boolean; readonly error?: string };
+  try {
+    sendResult = await sendManageLink({
+      to: updatedRegistration.email,
+      manageUrl: newManageUrl,
+      guestName: updatedRegistration.name,
+      registrationId: updatedRegistration.id,
+      emailType: "manage-link",
+      stayDates: updatedRegistration,
+    });
+  } catch (error: unknown) {
+    await discardUndeliveredToken(newToken.id, tokenData.registrationId);
+    throw error;
+  }
+
+  if (!sendResult.success) {
+    await discardUndeliveredToken(newToken.id, tokenData.registrationId);
+
+    // The edit itself was persisted and must not be undone; only the rotation
+    // is rolled back. The guest keeps the link they arrived with, which is the
+    // one reported back so the response always names a link that works.
+    logger.error("Registration update email failed", {
+      registrationId: updatedRegistration.id,
+      email: maskEmail(updatedRegistration.email),
+      error: sendResult.error,
+    });
+
+    return { newManageUrl: `${baseUrl}/manage/${rawToken}` };
+  }
+
+  // The replacement is in the guest's inbox, so the token they used is spent (T4).
+  await revokeToken(tokenData.id);
 
   logger.info("Registration updated", {
     registrationId: updatedRegistration.id,

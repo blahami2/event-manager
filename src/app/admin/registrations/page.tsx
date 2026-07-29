@@ -7,7 +7,10 @@ import {
   type RegistrationFiltersValue,
 } from "@/components/admin/RegistrationFilters";
 import { RegistrationTable } from "@/components/admin/RegistrationTable";
-import { EditRegistrationModal } from "@/components/admin/EditRegistrationModal";
+import {
+  EDITABLE_FIELDS,
+  EditRegistrationModal,
+} from "@/components/admin/EditRegistrationModal";
 import type { EditRegistrationPayload } from "@/components/admin/EditRegistrationModal";
 import { AddRegistrationModal } from "@/components/admin/AddRegistrationModal";
 import { Pagination } from "@/components/admin/Pagination";
@@ -49,6 +52,51 @@ async function fetchRegistrations(
   return json.data;
 }
 
+/**
+ * Extract the correctable field errors from a rejected API response, or `null`
+ * when there is nothing the admin can act on in the form.
+ *
+ * Two filters, each closing a way for a rejected save to fail silently:
+ *
+ * - Only a `400` is a validation failure. An auth failure or a server fault
+ *   must fall through to the generic error path even if its body happens to
+ *   carry a `fields`-shaped object; keeping the modal open and silent on an
+ *   expired session would leave the admin re-submitting a request that can
+ *   never succeed.
+ * - Only fields the modal can render count. A `400` naming just `body`
+ *   (malformed JSON) or `registrationId` has no input to attach to, so routing
+ *   it into the modal would show nothing at all.
+ */
+async function readFieldErrors(
+  response: Response,
+): Promise<Readonly<Record<string, string>> | null> {
+  if (response.status !== 400) {
+    return null;
+  }
+
+  try {
+    const body = (await response.json()) as {
+      error?: { fields?: Record<string, string> };
+    };
+    const fields = body.error?.fields;
+    if (!fields) {
+      return null;
+    }
+
+    const displayable = Object.fromEntries(
+      Object.entries(fields).filter(([field]) =>
+        (EDITABLE_FIELDS as ReadonlyArray<string>).includes(field),
+      ),
+    );
+
+    return Object.keys(displayable).length > 0 ? displayable : null;
+  } catch {
+    // A non-JSON error body is not a validation failure; fall back to the
+    // generic error path rather than swallowing the problem.
+    return null;
+  }
+}
+
 async function fetchStats(): Promise<RegistrationStats> {
   const res = await fetch("/api/admin/registrations/stats");
   if (!res.ok) throw new Error("Failed to fetch stats");
@@ -84,6 +132,9 @@ export default function AdminRegistrationsPage(): React.ReactElement {
   const [state, setState] = useState<FetchState>({ data: null, loading: true });
   const [stats, setStats] = useState<RegistrationStats | null>(null);
   const [editing, setEditing] = useState<RegistrationOutput | null>(null);
+  const [editFieldErrors, setEditFieldErrors] = useState<Readonly<
+    Record<string, string>
+  > | null>(null);
   const [drawer, setDrawer] = useState<RegistrationOutput | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [resendingId, setResendingId] = useState<string | null>(null);
@@ -208,6 +259,9 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   const handleEdit = useCallback((registration: RegistrationOutput) => {
     setDrawer(null);
+    // Errors from a previous attempt describe a payload that is no longer on
+    // screen; carrying them into a freshly opened form would be misleading.
+    setEditFieldErrors(null);
     setEditing(registration);
   }, []);
 
@@ -222,13 +276,26 @@ export default function AdminRegistrationsPage(): React.ReactElement {
 
   const handleSave = useCallback(
     async (id: string, data: EditRegistrationPayload) => {
+      setEditFieldErrors(null);
       try {
         const res = await fetch("/api/admin/registrations", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ registrationId: id, ...data }),
         });
-        if (!res.ok) throw new Error("Failed to update registration");
+
+        if (!res.ok) {
+          // A validation failure names the offending fields (API2). Hand them
+          // back to the modal and leave it open so the admin can correct the
+          // exact field instead of losing their edits to a generic toast.
+          const fields = await readFieldErrors(res);
+          if (fields) {
+            setEditFieldErrors(fields);
+            return;
+          }
+          throw new Error("Failed to update registration");
+        }
+
         setEditing(null);
         toast.success(t("updateSuccess"));
         await refreshAll();
@@ -402,7 +469,11 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           registration={editing}
           onSave={handleSave}
           onReconfirm={handleReconfirm}
-          onClose={() => setEditing(null)}
+          onClose={() => {
+            setEditFieldErrors(null);
+            setEditing(null);
+          }}
+          {...(editFieldErrors ? { serverFieldErrors: editFieldErrors } : {})}
         />
       )}
       {isAdding && (
