@@ -46,7 +46,8 @@
       "FRI_SAT": "Friday – Saturday",
       "SAT_SUN": "Saturday – Sunday",
       "FRI_SUN": "Friday – Sunday",
-      "SAT_ONLY": "Saturday only"
+      "SAT_ONLY": "Saturday only",
+      "CUSTOM": "Custom"
     },
     "status": {
       "CONFIRMED": "Confirmed",

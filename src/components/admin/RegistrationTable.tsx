@@ -6,7 +6,7 @@ import { RegistrationStatus } from "@/types/registration";
 import type { RegistrationOutput } from "@/types/registration";
 import {
   accommodationLabel,
-  stayLabel,
+  staySummaryLabel,
   statusLabel,
 } from "@/i18n/labels";
 import { Badge, Button, ConfirmDialog } from "@/components/ui/admin";
@@ -293,7 +293,12 @@ export function RegistrationTable({
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 align-top text-sm text-text-secondary">
-                      {stayLabel(reg.stay, tEnums)}
+                      {staySummaryLabel(
+                        reg.stay,
+                        reg.stayStartDate,
+                        reg.stayEndDate,
+                        tEnums,
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-right align-top font-mono text-sm tabular-nums text-text-primary">
                       {reg.adultsCount}

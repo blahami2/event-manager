@@ -61,6 +61,23 @@ export function stayLabel(option: StayOption, t: Translator): string {
   return t(stayEnumKey(option));
 }
 
+/**
+ * Resolve the stay label used by registration summaries.
+ *
+ * A persisted stay option remains useful for editing and filtering when an
+ * admin overrides its dates, but it no longer describes the actual stay.
+ */
+export function staySummaryLabel(
+  option: StayOption,
+  stayStartDate: string | null,
+  stayEndDate: string | null,
+  t: Translator,
+): string {
+  return stayStartDate && stayEndDate
+    ? t("enums.stay.CUSTOM")
+    : stayLabel(option, t);
+}
+
 /** Resolve the localized display label for a registration status. */
 export function statusLabel(
   status: RegistrationStatus,

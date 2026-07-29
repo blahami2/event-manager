@@ -46,7 +46,8 @@
       "FRI_SAT": "Pátek – Sobota",
       "SAT_SUN": "Sobota – Neděle",
       "FRI_SUN": "Pátek – Neděle",
-      "SAT_ONLY": "Pouze sobota"
+      "SAT_ONLY": "Pouze sobota",
+      "CUSTOM": "Vlastní"
     },
     "status": {
       "CONFIRMED": "Potvrzeno",

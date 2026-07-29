@@ -46,7 +46,8 @@
       "FRI_SAT": "Piatok – Sobota",
       "SAT_SUN": "Sobota – Nedeľa",
       "FRI_SUN": "Piatok – Nedeľa",
-      "SAT_ONLY": "Iba sobota"
+      "SAT_ONLY": "Iba sobota",
+      "CUSTOM": "Vlastné"
     },
     "status": {
       "CONFIRMED": "Potvrdené",

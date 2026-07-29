@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 import {
   accommodationLabel,
-  stayLabel,
+  staySummaryLabel,
   statusLabel,
 } from "@/i18n/labels";
 import { parseIsoDate } from "@/lib/date/iso-date";
@@ -220,7 +220,12 @@ export function RegistrationDrawer({
 
             <Field label={tTable("stay")}>
               <span className="text-sm text-text-primary">
-                {stayLabel(registration.stay, tEnums)}
+                {staySummaryLabel(
+                  registration.stay,
+                  registration.stayStartDate,
+                  registration.stayEndDate,
+                  tEnums,
+                )}
               </span>
             </Field>
             <Field label={tTable("dateRange")}>
