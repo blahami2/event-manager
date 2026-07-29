@@ -205,6 +205,8 @@
       "updateSuccess": "Registrace aktualizována.",
       "reconfirmSuccess": "Registrace obnovena.",
       "reconfirmError": "Nepodařilo se obnovit registraci.",
+    "deleteSuccess": "Registrace byla trvale smazána.",
+    "errorDelete": "Nepodařilo se smazat registraci",
       "drawer": {
         "eyebrow": "Rezervace"
       },
@@ -287,7 +289,12 @@
         "departureDate": "Datum odjezdu",
         "errorDateRangeIncomplete": "Zadejte datum příjezdu i odjezdu.",
         "errorDateRangeOrder": "Datum odjezdu nesmí předcházet datu příjezdu.",
-        "errorDateRangeBounds": "Data musí být mezi {min} a {max}."
+        "errorDateRangeBounds": "Data musí být mezi {min} a {max}.",
+      "delete": "Trvale smazat",
+      "confirmDeleteTitle": "Trvale smazat tuto registraci?",
+      "confirmDeleteMessage": "Trvale odstraní {name} ({email}) a zneplatní jejich odkaz pro správu. Akci nelze vrátit zpět — pokud chcete záznam zachovat, registraci raději zrušte.",
+      "confirmDeleteConfirm": "Trvale smazat",
+      "confirmDeleteDismiss": "Ponechat registraci"
       },
       "add": {
         "title": "Přidat rezervaci",

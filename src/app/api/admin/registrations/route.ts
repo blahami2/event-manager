@@ -9,6 +9,7 @@ import {
   adminResendEmail,
 } from "@/lib/usecases/admin-actions";
 import { successResponse, handleApiError } from "@/lib/api-response";
+import { readJsonBody } from "@/lib/api-request";
 import { ValidationError } from "@/lib/errors/app-errors";
 import { toFieldErrors } from "@/lib/validation/field-errors";
 import { adminEditRegistrationSchema } from "@/lib/validation/registration";
@@ -19,23 +20,6 @@ import { RegistrationStatus } from "@/types/registration";
 const resendEmailSchema = z.object({
   registrationId: z.string().uuid("registrationId must be a valid UUID"),
 });
-
-/**
- * Read a JSON request body without letting a malformed one escape as a `500`.
- *
- * A body that is not valid JSON is a client error, so it is surfaced as the
- * same structured `400` as any other invalid payload (E5) rather than as an
- * unexpected internal error.
- */
-async function readJsonBody(request: NextRequest): Promise<unknown> {
-  try {
-    return (await request.json()) as unknown;
-  } catch {
-    throw new ValidationError("Validation failed", {
-      body: "Request body must be valid JSON",
-    });
-  }
-}
 
 /**
  * GET /api/admin/registrations

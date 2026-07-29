@@ -2804,4 +2804,139 @@ admin-initiated *creation* already enforced through `registerGuest`.
 
 ---
 
+## T-102: Permanent Admin Deletion of a Registration
+
+**Status:** DONE
+**Issue:** #102
+
+### Description
+
+The admin surface could only ever *cancel* a registration. Cancelling is the
+right tool for a guest who is not coming — the record stays on the list under
+the Cancelled filter, it can be reactivated, and it remains in the history. But
+it is the wrong tool for a record that should not exist at all: a duplicate
+submission, a test entry made while checking the form, or a guest asking to have
+their data removed. Those accumulated permanently, with no way for an
+administrator to remove them short of waiting out the 180-day retention purge
+(which only reaches cancelled records) or reaching into the database by hand.
+
+This ticket adds a deliberate, admin-only permanent delete, without weakening
+any existing guarantee: cancel keeps its endpoint, its verb and its exact
+behaviour, and every caller of it is untouched.
+
+### Semantics
+
+| Rule | Behaviour |
+|------|-----------|
+| Scope | One registration by id, plus its dependent `RegistrationToken` rows |
+| Dependent data | Removed by the `ON DELETE CASCADE` foreign key, in the same statement — never a second, non-atomic delete |
+| Status precondition | None. Unlike cancel/reconfirm, a registration in any status may be deleted; purging a cancelled one is the main use |
+| Reversibility | None. This is why the UI gates it behind a named confirmation |
+| Unknown id | `404` |
+| Lost race | `404` — a concurrent delete means the caller deleted nothing, and is told so |
+| Persistence failure | Propagates to a generic `500`; never reported as success, never logged as one |
+| Audit | `LOG5` context with the registration ID and no guest email, written on success only |
+
+### Design Decisions
+
+**A dedicated endpoint, not the collection's `DELETE` verb.** In this API
+`DELETE /api/admin/registrations` already means *cancel*. Overloading it would
+have made the irreversible action indistinguishable from the reversible one in
+access logs, and — worse — would have silently converted every existing cancel
+call site into a hard delete. `POST /api/admin/registrations/delete` follows the
+`reconfirm` precedent: a dedicated path so the action is explicit, `POST` to
+match its sibling action routes.
+
+**`deleteMany`, not `delete`.** `delete` throws an opaque Prisma error when the
+row is absent; a returned count lets the use case answer "did it exist?" without
+pattern-matching driver error codes, and closes the check-then-delete race
+honestly rather than reporting a deletion that another admin performed.
+
+**The cascade does the dependent work.** Deleting tokens explicitly as well
+would duplicate a guarantee the schema already makes and would open a window in
+which a registration exists with its manage links already gone. The integration
+test asserts a single parent-level statement, so if that ever changes to an
+explicit two-step delete, the requirement to make it atomic surfaces there.
+
+**Delete lives in the edit modal only.** Not on table rows and not in the
+read-only drawer, where the neighbouring click merely cancels. Reaching it takes
+a deliberate step, it sits at the opposite end of the footer from Save so a
+mis-aimed click lands on empty space, and the confirmation names the guest and
+states that cancelling is the reversible alternative. Every way out of the
+confirmation except the confirm button — dismiss, Escape, backdrop — is the safe
+one. The handler prop is optional, so any caller that must not offer deletion
+gets exactly the previous modal.
+
+### Files Added
+
+- `src/app/api/admin/registrations/delete/route.ts` — the endpoint.
+- `src/lib/api-request.ts` — `readJsonBody`, extracted from the collection route
+  so both mutation paths share one malformed-payload contract (`400` under
+  `body`, never a `500`) instead of two copies that can drift.
+- `src/app/api/admin/registrations/delete/route.test.ts`.
+- `tests/integration/admin-delete-registration.test.ts`.
+
+### Files Changed
+
+- `src/repositories/registration-repository.ts` — `deleteRegistrationById`.
+- `src/lib/usecases/admin-actions.ts` — `adminDeleteRegistration`.
+- `src/app/api/admin/registrations/route.ts` — uses the shared `readJsonBody`
+  (behaviour unchanged; the existing malformed-body tests cover the swap).
+- `src/components/admin/EditRegistrationModal.tsx` — optional `onDelete`,
+  destructive footer control, confirmation dialog.
+- `src/app/admin/registrations/page.tsx` — `handleDelete`; closes the modal and
+  drawer, drops the deleted id from any pending bulk selection, refreshes.
+- `src/i18n/messages/{en,cs,sk}.json` — `edit.delete`,
+  `edit.confirmDelete{Title,Message,Confirm,Dismiss}`,
+  `deleteSuccess`, `errorDelete`.
+- `docs/ARCHITECTURE.md` — 8.1.2 (cancel vs delete), 8.2 (cascade rationale),
+  12.3 (endpoint contract).
+- `docs/VERIFICATION_RULES.md` — 9.4 manual check row.
+
+### Tests Added (33 net new)
+
+Written before the implementation; the suite was confirmed red (13 failures
+across the four touched files) before any production file was edited.
+
+- Repository (3) — delete by id, `false` for no matching row, failure propagates.
+- Use case (6) — deletes and logs; deletes a cancelled registration; masked
+  no guest email in the audit entry; `NotFoundError` with no persistence call when
+  absent; `NotFoundError` when the row vanishes mid-operation; failure
+  propagates without a success log.
+- Route (10) — success payload; `401`; `403`; auth precedes body reading;
+  three invalid-identifier shapes; malformed JSON; `404`; generic `500`.
+- Integration (9) — route → validation → use case → repository → Prisma wired
+  end to end, plus cascade-is-a-single-statement, the real logger's audit entry,
+  no full email in output, and the race and failure paths.
+- Component (5) — control absent without a handler; confirmation required;
+  confirm deletes; dismiss deletes nothing; the control never submits the form.
+
+The race-condition guard was mutation-checked: removing it turns both the unit
+and the integration race tests red.
+
+### Verification
+
+- `npx vitest run` — **80 files, 783 passed** (+33 over 750, 0 failures).
+- `npx vitest run --coverage` — 93.11% statements / 88.84% branches, above the
+  80% / 75% gates and above the previous 92.94% / 88.28%. `api-request.ts` at
+  100%.
+- `npx tsc --noEmit` — passes (0 errors).
+- `npm run lint` — passes (0 errors; the same 1 pre-existing warning in
+  `src/app/layout.tsx`).
+- `npx prisma validate` — passes. No schema change was needed: the cascade this
+  feature relies on was already declared in `schema.prisma` and created by the
+  `20260211_init` migration.
+- `npm run build` — passes; `/api/admin/registrations/delete` present in the
+  route manifest.
+- Not executed against a live database — no Postgres was reachable in the
+  working environment, so the cascade is verified by schema, migration SQL and
+  review rather than by an end-to-end delete.
+
+### Known follow-ups (not in this change)
+
+- Bulk delete is not offered. Deleting many records at once wants a different
+  confirmation design than one guest's name, and was not part of this issue.
+
+---
+
 End of Execution Backlog.

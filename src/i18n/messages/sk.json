@@ -205,6 +205,8 @@
       "updateSuccess": "Registrácia aktualizovaná.",
       "reconfirmSuccess": "Registrácia obnovená.",
       "reconfirmError": "Nepodarilo sa obnoviť registráciu.",
+    "deleteSuccess": "Registrácia bola trvalo zmazaná.",
+    "errorDelete": "Nepodarilo sa zmazať registráciu",
       "drawer": {
         "eyebrow": "Rezervácia"
       },
@@ -287,7 +289,12 @@
         "departureDate": "Dátum odchodu",
         "errorDateRangeIncomplete": "Zadajte dátum príchodu aj odchodu.",
         "errorDateRangeOrder": "Dátum odchodu nesmie predchádzať dátumu príchodu.",
-        "errorDateRangeBounds": "Dátumy musia byť medzi {min} a {max}."
+        "errorDateRangeBounds": "Dátumy musia byť medzi {min} a {max}.",
+      "delete": "Trvalo zmazať",
+      "confirmDeleteTitle": "Trvalo zmazať túto registráciu?",
+      "confirmDeleteMessage": "Trvalo odstráni {name} ({email}) a zneplatní ich odkaz na správu. Akciu nemožno vrátiť späť — ak chcete záznam zachovať, registráciu radšej zrušte.",
+      "confirmDeleteConfirm": "Trvalo zmazať",
+      "confirmDeleteDismiss": "Ponechať registráciu"
       },
       "add": {
         "title": "Pridať rezerváciu",

@@ -16,7 +16,15 @@ import {
 } from "@/i18n/labels";
 import { SUPPORTED_STAY_DATE_MAX, SUPPORTED_STAY_DATE_MIN } from "@/config/event";
 import { defaultDateRangeForStay } from "@/lib/event/stay-dates";
-import { Badge, Button, Input, Modal, Select, Textarea } from "@/components/ui/admin";
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  Input,
+  Modal,
+  Select,
+  Textarea,
+} from "@/components/ui/admin";
 
 /** Maximum allowed length for the notes field. Matches server-side validation. */
 const NOTES_MAX_LENGTH = 500;
@@ -123,6 +131,16 @@ export interface EditRegistrationModalProps {
    */
   readonly onReconfirm?: (id: string) => void;
   /**
+   * Optional permanent-delete handler (issue #102). When provided, the modal
+   * renders a destructive control that removes the registration outright,
+   * gated behind an explicit confirmation.
+   *
+   * Optional rather than always-on so that callers which must not offer
+   * deletion — a future read-mostly surface, a narrower role — simply do not
+   * pass it and get exactly the previous modal.
+   */
+  readonly onDelete?: (id: string) => void | Promise<void>;
+  /**
    * Field-level errors returned by the server (the `fields` map of a `400`
    * response), keyed by field name.
    *
@@ -139,6 +157,7 @@ export function EditRegistrationModal({
   onSave,
   onClose,
   onReconfirm,
+  onDelete,
   serverFieldErrors,
 }: EditRegistrationModalProps): React.ReactElement {
   const t = useTranslations("admin.registrations.edit");
@@ -175,6 +194,17 @@ export function EditRegistrationModal({
    * overwritten.
    */
   const [rangeIsPrefilled, setRangeIsPrefilled] = useState(false);
+
+  /**
+   * Whether the permanent-delete confirmation is showing.
+   *
+   * Deletion is never a single click: the control only opens this dialog, and
+   * only the dialog's confirm button calls `onDelete`. Dismissing it — button,
+   * Escape, or backdrop — leaves the registration untouched, so every escape
+   * route from the dialog is the safe one.
+   */
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   /** Seed both date inputs from a stay option and mark them machine-generated. */
   const prefillRangeFrom = useCallback((option: StayOption) => {
@@ -304,7 +334,16 @@ export function EditRegistrationModal({
   const serverError = (field: string): string | undefined => serverFieldErrors?.[field];
 
   return (
-    <Modal open onClose={onClose} title={t("title")} size="md">
+    <Modal
+      open
+      onClose={() => {
+        if (!confirmingDelete) onClose();
+      }}
+      title={t("title")}
+      size="md"
+      disableEscapeClose={confirmingDelete}
+      disableBackdropClose={confirmingDelete}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {isCancelled ? (
           <div className="flex items-start gap-3 rounded-md border border-border-subtle bg-surface-sunken/60 px-4 py-3">
@@ -440,15 +479,60 @@ export function EditRegistrationModal({
           maxLength={NOTES_MAX_LENGTH}
           {...(serverError("notes") ? { error: serverError("notes") } : {})}
         />
-        <div className="-mx-6 -mb-5 mt-2 flex items-center justify-end gap-3 border-t border-border-subtle bg-surface-base/40 px-6 py-4">
-          <Button variant="secondary" onClick={onClose}>
-            {t("cancel")}
-          </Button>
-          <Button variant="primary" type="submit">
-            {t("save")}
-          </Button>
+        <div className="-mx-6 -mb-5 mt-2 flex items-center justify-between gap-3 border-t border-border-subtle bg-surface-base/40 px-6 py-4">
+          {/* Destructive action kept at the opposite end of the footer from
+              Save, so a mis-aimed click lands on empty space rather than on
+              the irreversible option. */}
+          {onDelete ? (
+            <Button
+              variant="ghost"
+              onClick={() => setConfirmingDelete(true)}
+              className="text-danger hover:bg-danger-muted hover:text-danger"
+            >
+              {t("delete")}
+            </Button>
+          ) : (
+            <span />
+          )}
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" onClick={onClose}>
+              {t("cancel")}
+            </Button>
+            <Button variant="primary" type="submit">
+              {t("save")}
+            </Button>
+          </div>
         </div>
       </form>
+      {onDelete ? (
+        <ConfirmDialog
+          open={confirmingDelete}
+          title={t("confirmDeleteTitle")}
+          message={t("confirmDeleteMessage", {
+            name: registration.name,
+            email: registration.email,
+          })}
+          confirmLabel={t("confirmDeleteConfirm")}
+          dismissLabel={t("confirmDeleteDismiss")}
+          variant="danger"
+          loading={deleting}
+          onConfirm={() => {
+            if (deleting) return;
+            setDeleting(true);
+            void Promise.resolve()
+              .then(() => onDelete(registration.id))
+              // The owner surfaces operational failures (for example, a
+              // toast). Keep a thrown callback from escaping as an unhandled
+              // rejection while still releasing the single-flight guard.
+              .catch(() => undefined)
+              .finally(() => {
+                setDeleting(false);
+                setConfirmingDelete(false);
+              });
+          }}
+          onDismiss={() => setConfirmingDelete(false)}
+        />
+      ) : null}
     </Modal>
   );
 }

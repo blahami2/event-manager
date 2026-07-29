@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { EditRegistrationModal } from "../EditRegistrationModal";
 import { SUPPORTED_STAY_DATE_MAX, SUPPORTED_STAY_DATE_MIN } from "@/config/event";
 import { AccommodationOption, RegistrationStatus, StayOption } from "@/types/registration";
@@ -559,6 +559,221 @@ describe("EditRegistrationModal supported date window", () => {
     // then
     expect(onSave).not.toHaveBeenCalled();
     expect(screen.getByRole("alert").textContent).toBe("errorDateRangeBounds");
+  });
+
+  /**
+   * Irreversible admin delete (issue #102).
+   *
+   * The action lives behind the edit modal rather than in the list or the
+   * read-only drawer: reaching it already takes a deliberate step, and it keeps
+   * a one-click destructive control out of the row-level surfaces where the
+   * neighbouring click merely cancels.
+   */
+  describe("delete action", () => {
+    it("should not render the delete control when no handler is supplied", () => {
+      // given
+      // - callers that do not grant delete get exactly the previous modal
+      render(
+        <EditRegistrationModal registration={mockReg} onSave={vi.fn()} onClose={vi.fn()} />,
+      );
+
+      // then
+      expect(screen.queryByText("delete")).toBeNull();
+    });
+
+    it("should require confirmation before deleting", () => {
+      // given
+      const onDelete = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+
+      // when
+      fireEvent.click(screen.getByText("delete"));
+
+      // then
+      // - the confirmation is shown and nothing has been deleted yet
+      expect(screen.getByText("confirmDeleteMessage")).toBeTruthy();
+      expect(onDelete).not.toHaveBeenCalled();
+    });
+
+    it("should delete the registration when the confirmation is accepted", async () => {
+      // given
+      const onDelete = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      // when
+      fireEvent.click(screen.getByText("confirmDeleteConfirm"));
+
+      // then
+      await waitFor(() => {
+        expect(onDelete).toHaveBeenCalledWith("reg-1");
+      });
+    });
+
+    it("should disable confirmation while deletion is in flight", async () => {
+      let resolveDelete: (() => void) | undefined;
+      const onDelete = vi.fn(
+        () => new Promise<void>((resolve) => {
+          resolveDelete = resolve;
+        }),
+      );
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      const confirm = screen.getByText("confirmDeleteConfirm");
+      fireEvent.click(confirm);
+      fireEvent.click(confirm);
+
+      await waitFor(() => {
+        expect(onDelete).toHaveBeenCalledOnce();
+      });
+      expect((confirm as HTMLButtonElement).disabled).toBe(true);
+
+      resolveDelete?.();
+      await waitFor(() => {
+        expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+      });
+    });
+
+    it("should keep both dialogs locked while deletion is in flight", async () => {
+      let resolveDelete: (() => void) | undefined;
+      const onClose = vi.fn();
+      const onDelete = vi.fn(
+        () => new Promise<void>((resolve) => {
+          resolveDelete = resolve;
+        }),
+      );
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={onClose}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+      fireEvent.click(screen.getByText("confirmDeleteConfirm"));
+      await waitFor(() => expect(onDelete).toHaveBeenCalledOnce());
+
+      const backdrops = screen.getAllByTestId("modal-backdrop");
+      const closeButtons = screen.getAllByRole("button", { name: "Close" });
+      fireEvent.keyDown(document, { key: "Escape" });
+      backdrops.forEach((backdrop) => fireEvent.click(backdrop));
+      closeButtons.forEach((button) => fireEvent.click(button));
+
+      expect(screen.getAllByRole("dialog")).toHaveLength(2);
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onDelete).toHaveBeenCalledOnce();
+
+      resolveDelete?.();
+      await waitFor(() => {
+        expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+      });
+    });
+
+    it("should release the guard when the delete callback throws synchronously", async () => {
+      const onDelete = vi.fn(() => {
+        throw new Error("callback failed");
+      });
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      expect(() => {
+        fireEvent.click(screen.getByText("confirmDeleteConfirm"));
+      }).not.toThrow();
+      await waitFor(() => {
+        expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+      });
+      expect(onDelete).toHaveBeenCalledOnce();
+    });
+
+    it("should let Escape dismiss only the nested confirmation", () => {
+      const onClose = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={onClose}
+          onDelete={vi.fn()}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      fireEvent.keyDown(document, { key: "Escape" });
+
+      expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByLabelText("name")).toBeDefined();
+    });
+
+    it("should delete nothing when the confirmation is dismissed", () => {
+      // given
+      const onDelete = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={vi.fn()}
+          onClose={vi.fn()}
+          onDelete={onDelete}
+        />,
+      );
+      fireEvent.click(screen.getByText("delete"));
+
+      // when
+      fireEvent.click(screen.getByText("confirmDeleteDismiss"));
+
+      // then
+      expect(onDelete).not.toHaveBeenCalled();
+      expect(screen.queryByText("confirmDeleteMessage")).toBeNull();
+    });
+
+    it("should not save the form when the delete control is used", () => {
+      // given
+      // - the control sits in the footer next to Save; it must not submit
+      const onSave = vi.fn();
+      render(
+        <EditRegistrationModal
+          registration={mockReg}
+          onSave={onSave}
+          onClose={vi.fn()}
+          onDelete={vi.fn()}
+        />,
+      );
+
+      // when
+      fireEvent.click(screen.getByText("delete"));
+
+      // then
+      expect(onSave).not.toHaveBeenCalled();
+    });
   });
 
   it("should accept the exact edges of the supported window", () => {

@@ -413,6 +413,7 @@ For each feature ticket, the following manual checks apply:
 | Admin login         | Login → dashboard loads → stats correct                    |
 | Admin list          | Filter, paginate, search → correct results                 |
 | Admin actions       | Cancel registration → status updated → logged              |
+| Admin delete        | Edit → Delete permanently → dismiss confirm → record intact; confirm → row and its manage link gone, not in list/stats/CSV, action logged |
 | CSV export          | Download → file opens in Excel → data correct              |
 | Rate limiting       | Exceed limit → 429 shown → resets after window             |
 | Error states        | Invalid input → field errors shown → no crash              |

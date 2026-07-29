@@ -4,6 +4,7 @@ import {
   cancelRegistration,
   reconfirmRegistration,
   updateRegistration,
+  deleteRegistrationById,
 } from "@/repositories/registration-repository";
 import {
   revokeAllTokensForRegistrationExcept,
@@ -117,6 +118,60 @@ export async function adminReconfirmRegistration(
   });
 
   return result;
+}
+
+/** Identifier of the registration removed by {@link adminDeleteRegistration}. */
+export interface AdminDeleteRegistrationResult {
+  readonly id: string;
+}
+
+/**
+ * Permanently delete a registration and its dependent data. Logs the action.
+ *
+ * This is the irreversible sibling of {@link adminCancelRegistration}, which
+ * only flips status and leaves the record on the guest list. Delete is for
+ * records that should not exist at all — a duplicate, a test entry, or an
+ * erasure request — so the row goes, and the database cascade takes its
+ * capability tokens with it (see `deleteRegistrationById`). Any manage link the
+ * guest still holds therefore stops working, which is the intended effect: a
+ * live link to a deleted registration would be a dangling capability.
+ *
+ * Unlike cancel and reconfirm, no starting status is required. Purging an
+ * already-cancelled registration is the most common reason to reach for this,
+ * and refusing it would make the action useless where it is needed most.
+ *
+ * The returned id is all that survives, so the audit entry carries the masked
+ * email as well (LOG4): once the row is gone, the log is the only record that
+ * the registration ever existed.
+ *
+ * @throws {NotFoundError} when the registration does not exist, or when a
+ *   concurrent delete removed it between the lookup and the delete — the loser
+ *   of that race must not be told it deleted something.
+ */
+export async function adminDeleteRegistration(
+  registrationId: string,
+  adminId: string,
+): Promise<AdminDeleteRegistrationResult> {
+  const existing = await findRegistrationById(registrationId);
+
+  if (!existing) {
+    throw new NotFoundError("Registration");
+  }
+
+  const deleted = await deleteRegistrationById(registrationId);
+
+  if (!deleted) {
+    throw new NotFoundError("Registration");
+  }
+
+  logger.info("Admin deleted registration", {
+    adminUserId: adminId,
+    action: "delete_registration",
+    targetId: registrationId,
+    status: existing.status,
+  });
+
+  return { id: registrationId };
 }
 
 /**

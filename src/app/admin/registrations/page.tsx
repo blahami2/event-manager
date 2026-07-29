@@ -29,6 +29,11 @@ const EMPTY_FILTERS: RegistrationFiltersValue = {
   search: "",
 };
 
+/** Keep pagination valid after removing the current page's final row. */
+export function pageAfterDeletion(page: number, itemCount: number): number {
+  return page > 1 && itemCount === 1 ? page - 1 : page;
+}
+
 interface FetchState {
   readonly data: PaginatedResult<RegistrationOutput> | null;
   readonly loading: boolean;
@@ -235,6 +240,49 @@ export default function AdminRegistrationsPage(): React.ReactElement {
       }
     },
     [refreshAll, t, toast],
+  );
+
+  /**
+   * Permanently delete a registration (issue #102).
+   *
+   * Separate from `handleCancel`, which flips status via the collection's
+   * `DELETE`. Confirmation is owned by the edit modal, so by the time this
+   * runs the admin has already made the deliberate choice; all that is left is
+   * to close the surfaces showing a record that no longer exists and reload.
+   */
+  const handleDelete = useCallback(
+    async (registrationId: string) => {
+      try {
+        const res = await fetch("/api/admin/registrations/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ registrationId }),
+        });
+        if (!res.ok) throw new Error("Failed to delete registration");
+        setEditing(null);
+        setDrawer(null);
+        // The row is gone, so any pending selection of it is stale.
+        setSelectedIds((prev) => {
+          if (!prev.has(registrationId)) return prev;
+          const next = new Set(prev);
+          next.delete(registrationId);
+          return next;
+        });
+        toast.success(t("deleteSuccess"));
+        // Deleting the sole row on a later page makes that page cease to
+        // exist. Move back first; the page effect will fetch the valid page.
+        const nextPage = pageAfterDeletion(page, state.data?.items.length ?? 0);
+        if (nextPage !== page) {
+          setPage(nextPage);
+          await loadStats();
+        } else {
+          await refreshAll();
+        }
+      } catch {
+        toast.error(t("errorDelete"));
+      }
+    },
+    [loadStats, page, refreshAll, state.data?.items.length, t, toast],
   );
 
   const handleResendEmail = useCallback(
@@ -469,6 +517,7 @@ export default function AdminRegistrationsPage(): React.ReactElement {
           registration={editing}
           onSave={handleSave}
           onReconfirm={handleReconfirm}
+          onDelete={handleDelete}
           onClose={() => {
             setEditFieldErrors(null);
             setEditing(null);

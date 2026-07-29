@@ -391,6 +391,42 @@ so the custom range is an *override of the calendar dates only*.
 | Effect | `resolveEventDates` (`src/lib/event/stay-dates.ts`) uses the range for the `.ics` invite; with no range the predefined `EVENT_DATES_BY_STAY` mapping applies |
 | Error surfacing | The admin edit modal renders the `400` response's `fields` map against the offending input (every editable field, not only the dates); local validation takes precedence while the admin is editing. Only a `400` is read as field-level detail — a `401`/`403`/`500` falls through to the generic error path |
 
+### 8.1.2 Permanent Deletion (admin only)
+
+A registration can leave the system in two different ways, and they are not
+interchangeable:
+
+| | Cancel | Delete |
+|---|---|---|
+| Endpoint | `DELETE /api/admin/registrations` | `POST /api/admin/registrations/delete` |
+| Effect | `status` → `CANCELLED`; row and history retained | Row removed; dependent tokens removed by cascade |
+| Reversible | Yes, via `POST /api/admin/registrations/reconfirm` | **No** |
+| Visible in admin list | Yes, under the *Cancelled* filter | No |
+| Counted in stats / CSV export | Yes (as cancelled) | No |
+| Intended for | A guest who is not coming | A record that should never have existed — duplicate, test entry, erasure request |
+
+Design notes:
+
+- **Cancel stays the default.** Delete is reachable only from inside the edit
+  modal and only behind an explicit confirmation naming the guest; it is
+  deliberately not offered on table rows or in the read-only drawer, where the
+  adjacent action is the reversible cancel.
+- **No status precondition.** Unlike cancel and reconfirm, delete accepts a
+  registration in any status — purging an already-cancelled record is its most
+  common use.
+- **Dependent data is the database's job.** The `RegistrationToken` cascade
+  (Section 8.2) removes the guest's manage links in the same statement, so
+  there is no window in which one exists without the other.
+- **A concurrent delete is a 404, not a success.** The use case re-checks the
+  affected-row count and reports `NOT_FOUND` if another admin won the race,
+  rather than confirming a deletion it did not perform.
+- **The audit log outlives the row.** `LOG5` context identifies the deleted
+  registration by ID without retaining the guest's email, and is written on
+  success only.
+- Deletion is distinct from the scheduled retention purge (Section 8.1 /
+  `data-retention.ts`), which removes *old cancelled* registrations in bulk on a
+  time policy rather than one record on an administrator's instruction.
+
 ## 8.2 RegistrationToken
 
 | Field          | Type        | Constraints                       |
@@ -401,6 +437,11 @@ so the custom range is an *override of the calendar dates only*.
 | expiresAt      | DateTime    | Default: createdAt + 90 days      |
 | isRevoked      | Boolean     | Default: false                    |
 | createdAt      | DateTime    | Auto-set                          |
+
+The foreign key is declared `ON DELETE CASCADE`. This is what makes permanent
+deletion of a registration (Section 8.1.2) safe: the guest's capability tokens
+cannot outlive the record they grant access to, so no manage link is ever left
+pointing at a registration that no longer exists.
 
 ## 8.3 AdminUser
 
@@ -593,6 +634,33 @@ Example — pin an arbitrary week-long stay:
   "stayStartDate": "2026-07-10",
   "stayEndDate": "2026-07-17"
 }
+```
+
+#### POST /api/admin/registrations/delete
+
+Body: `{ registrationId }` (UUID)
+
+Permanently deletes the registration and, by the `RegistrationToken` foreign-key
+cascade, every capability token issued for it (Section 8.1.2). Irreversible.
+
+A dedicated path rather than the collection's `DELETE` verb, which in this API
+already means the *reversible* cancel: overloading it would make the destructive
+action indistinguishable from the reversible one in access logs, and would turn
+every existing cancel call site into a hard delete. Authorization runs before
+the body is read, so an unauthenticated caller cannot probe payload validity.
+
+- **Success (200):** `{ "data": { "id": "uuid" }, "message": "Registration deleted" }`
+- **Invalid identifier (400):** `{ "error": { "code": "VALIDATION_ERROR", "message": "Validation failed", "fields": { "registrationId": "registrationId must be a valid UUID" } } }`
+- **Malformed JSON body (400):** as above, under the `body` key
+- **Unknown registration (404):** `{ "error": { "code": "NOT_FOUND", "message": "Registration not found" } }`
+- **Lost a concurrent delete (404):** identical to the unknown case — the loser of the race is never told it deleted something
+- **Persistence failure (500):** `{ "error": { "code": "INTERNAL_ERROR", "message": "An unexpected error occurred" } }` (S9 — no driver detail is exposed)
+
+Example:
+
+```jsonc
+// POST /api/admin/registrations/delete
+{ "registrationId": "3f1c2d4e-5a6b-4c7d-8e9f-0a1b2c3d4e5f" }
 ```
 
 ### GET /api/health

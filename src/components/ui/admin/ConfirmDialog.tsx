@@ -42,14 +42,25 @@ export function ConfirmDialog({
   variant = "info",
   loading = false,
 }: ConfirmDialogProps): React.ReactElement {
+  const handleDismiss = (): void => {
+    if (!loading) onDismiss();
+  };
+
   return (
-    <Modal open={open} onClose={onDismiss} title={title} size="sm">
+    <Modal
+      open={open}
+      onClose={handleDismiss}
+      title={title}
+      size="sm"
+      disableEscapeClose={loading}
+      disableBackdropClose={loading}
+    >
       <p className="mb-6 text-sm text-text-secondary">{message}</p>
       <div className="flex justify-end gap-3">
         <Button
           variant="secondary"
           size="md"
-          onClick={onDismiss}
+          onClick={handleDismiss}
           disabled={loading}
         >
           {dismissLabel}
