@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { containTabFocus, getFocusableElements } from "./focus-scope";
 
 export interface ModalProps {
   /** Whether the modal is open. When false, nothing renders. */
@@ -33,26 +34,6 @@ const SIZE_CLASSES = {
   md: "max-w-md",
   lg: "max-w-2xl",
 } as const;
-
-/**
- * Selector for elements that can receive focus within a container. Covers
- * standard interactive elements plus anything with `tabindex="0"` (but not
- * elements explicitly marked `tabindex="-1"`).
- */
-const FOCUSABLE_SELECTOR = [
-  "a[href]",
-  "button:not([disabled])",
-  "input:not([disabled])",
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  '[tabindex]:not([tabindex="-1"])',
-].join(",");
-
-function getFocusableElements(root: HTMLElement): HTMLElement[] {
-  return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
-    .filter((el) => !el.hasAttribute("disabled"))
-    .filter((el) => el.getAttribute("aria-hidden") !== "true");
-}
 
 /**
  * Admin Modal — the single dialog primitive for admin surfaces.
@@ -132,27 +113,7 @@ export function Modal({
       if (event.key === "Tab") {
         const panel = panelRef.current;
         if (!panel) return;
-        const focusables = getFocusableElements(panel);
-        if (focusables.length === 0) {
-          event.preventDefault();
-          return;
-        }
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (!first || !last) return;
-        const active = document.activeElement as HTMLElement | null;
-
-        if (event.shiftKey) {
-          if (active === first || !panel.contains(active)) {
-            event.preventDefault();
-            last.focus();
-          }
-        } else {
-          if (active === last) {
-            event.preventDefault();
-            first.focus();
-          }
-        }
+        containTabFocus(event, panel);
       }
     },
     [open, onClose, disableEscapeClose],
